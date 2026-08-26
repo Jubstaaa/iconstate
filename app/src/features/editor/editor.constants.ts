@@ -1,5 +1,8 @@
 import type { Limits } from './editor.types'
 
+/** iOS keeps roughly this much clear on the left and right of the icon grid. */
+const EDGE_SHARE = 0.061
+
 export const DEFAULT_LIMITS: Limits = {
     dock: 4,
     page: 24,
@@ -9,9 +12,13 @@ export const DEFAULT_LIMITS: Limits = {
     rows: 6,
     folderColumns: 3,
     folderRows: 3,
+    iconShare: 68 / 440,
+    gapShare: (1 - 2 * EDGE_SHARE - 4 * (68 / 440)) / 3,
+    edgeShare: EDGE_SHARE,
 }
 
 export interface Metrics {
+    homeScreenIconWidth?: number
     homeScreenIconDockMaxCount?: number
     homeScreenIconMaxPages?: number
     homeScreenIconFolderMaxPages?: number
@@ -34,6 +41,14 @@ export const limitsFrom = (metrics: Metrics | null): Limits => {
     const folderRows = pick(metrics.homeScreenIconFolderRows, DEFAULT_LIMITS.folderRows)
     const folderColumns = pick(metrics.homeScreenIconFolderColumns, DEFAULT_LIMITS.folderColumns)
 
+    // The device reports the real icon width and screen width, so the grid is
+    // measured rather than guessed: icons come out the size they are on the phone
+    // and the gap is whatever is left over.
+    const screenWidth = metrics.homeScreenWidth ?? 440
+    const iconWidth = pick(metrics.homeScreenIconWidth, 68)
+    const iconShare = iconWidth / screenWidth
+    const gapShare = columns > 1 ? (1 - 2 * EDGE_SHARE - columns * iconShare) / (columns - 1) : 0
+
     return {
         dock: pick(metrics.homeScreenIconDockMaxCount, DEFAULT_LIMITS.dock),
         page: rows * columns,
@@ -43,6 +58,9 @@ export const limitsFrom = (metrics: Metrics | null): Limits => {
         columns,
         folderRows,
         folderColumns,
+        iconShare,
+        gapShare: Math.max(gapShare, 0.02),
+        edgeShare: EDGE_SHARE,
     }
 }
 

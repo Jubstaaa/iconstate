@@ -19,8 +19,11 @@ export default function DockRow({ slots, limits, selection, hint, onSelect, onCo
     return (
         <div className='rounded-[30px] bg-white/[0.16] p-[3%]'>
             <div
-                className='grid gap-x-[4%]'
-                style={{ gridTemplateColumns: `repeat(${limits.dock}, minmax(0, 1fr))` }}
+                className='grid'
+                style={{
+                    gridTemplateColumns: `repeat(${limits.dock}, minmax(0, 1fr))`,
+                    columnGap: `${limits.gapShare * 100}%`,
+                }}
             >
                 {slots.map(slot => (
                     <SlotTile

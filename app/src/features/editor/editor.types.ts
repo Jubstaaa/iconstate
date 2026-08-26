@@ -29,6 +29,11 @@ export interface Limits {
     rows: number
     folderColumns: number
     folderRows: number
+    /** Icon width as a share of screen width, straight from the device. */
+    iconShare: number
+    /** Gap between columns, derived so the row adds up to the screen. */
+    gapShare: number
+    edgeShare: number
 }
 
 export type Zone = { kind: 'page'; page: number } | { kind: 'dock' } | { kind: 'folder'; id: string }

@@ -8,6 +8,6 @@ export interface FolderSheetProps {
     hint?: Hint | null
     onSelect: (id: string, additive: boolean) => void
     onRename: (name: string) => void
-    onDissolve: () => void
     onClose: () => void
+    onContextMenu: (event: React.MouseEvent, id?: string) => void
 }

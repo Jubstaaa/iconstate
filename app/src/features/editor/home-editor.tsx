@@ -287,11 +287,8 @@ export default function HomeEditor({
                                 hint={hint}
                                 onSelect={handleSelect}
                                 onRename={name => dispatch({ type: 'rename', id: openFolder.id, name })}
-                                onDissolve={() => {
-                                    dispatch({ type: 'dissolve', id: openFolder.id })
-                                    setOpenFolderId(null)
-                                }}
                                 onClose={() => setOpenFolderId(null)}
+                                onContextMenu={openMenu}
                             />
                         ) : null}
                     </AnimatePresence>

@@ -29,8 +29,11 @@ export default function HomePage({
 
     return (
         <div
-            className='grid h-full w-full content-between gap-x-[4%]'
-            style={{ gridTemplateColumns: `repeat(${limits.columns}, minmax(0, 1fr))` }}
+            className='grid h-full w-full content-between'
+            style={{
+                gridTemplateColumns: `repeat(${limits.columns}, minmax(0, 1fr))`,
+                columnGap: `${limits.gapShare * 100}%`,
+            }}
         >
             {slots.map(slot => (
                 <SlotTile
