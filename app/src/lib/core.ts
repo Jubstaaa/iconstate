@@ -1,7 +1,8 @@
-import { invoke } from '@tauri-apps/api/core'
+import { convertFileSrc, invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
 
-import type { Assignments, CoreFailure, Device, DiffSummary, IconState, ProgressEvent } from './core.types'
+import type { Assignments } from './categorise.types'
+import type { CoreFailure, Device, DiffSummary, IconManifest, IconState, ProgressEvent } from './core.types'
 
 export const PROGRESS_EVENT = 'iconstate://progress'
 
@@ -33,3 +34,8 @@ export const listBackups = () => invoke<string[]>('list_backups')
 
 export const restoreBackup = (file?: string, serial?: string) =>
     invoke<void>('restore_backup', { serial, file })
+
+export const fetchIcons = async (serial?: string): Promise<IconManifest> => {
+    const manifest = await invoke<IconManifest>('fetch_icons', { serial })
+    return Object.fromEntries(Object.entries(manifest).map(([key, path]) => [key, convertFileSrc(path)]))
+}

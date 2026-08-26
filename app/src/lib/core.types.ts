@@ -52,4 +52,4 @@ export interface DiffSummary {
     removedApps: { key: string; displayName: string }[]
 }
 
-export type Assignments = Record<string, string>
+export type IconManifest = Record<string, string>

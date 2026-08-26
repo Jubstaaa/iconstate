@@ -17,7 +17,11 @@ body {
     margin: 0;
     background: var(--bg);
     color: var(--text);
-    font: 14px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font:
+        14px/1.5 -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        sans-serif;
 }
 
 main {
@@ -137,7 +141,13 @@ button:disabled {
     font-weight: 600;
     height: 56px;
     justify-content: center;
+    object-fit: cover;
+    overflow: hidden;
     width: 56px;
+}
+
+img.tile-glyph {
+    border: 0;
 }
 
 .tile-glyph-folder {
@@ -155,6 +165,9 @@ button:disabled {
     border-radius: 3px;
     display: flex;
     justify-content: center;
+    object-fit: cover;
+    overflow: hidden;
+    width: 100%;
 }
 
 .tile-label {
@@ -228,4 +241,30 @@ button.primary {
 
 .move-add {
     color: var(--accent);
+}
+
+.key-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.key-row input {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--text);
+    flex: 1;
+    font: inherit;
+    padding: 8px 12px;
+}
+
+.key-row input:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+
+.muted {
+    color: var(--muted);
+    font-weight: 400;
 }

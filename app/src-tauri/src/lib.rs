@@ -180,6 +180,19 @@ async fn apply_layout(
 }
 
 #[tauri::command]
+async fn fetch_icons(
+    app: AppHandle,
+    serial: Option<String>,
+) -> Result<serde_json::Value, CoreFailure> {
+    let mut args = vec!["icons".to_string()];
+    if let Some(serial) = serial {
+        args.push("--serial".into());
+        args.push(serial);
+    }
+    run_core_json(&app, args).await
+}
+
+#[tauri::command]
 async fn list_backups(app: AppHandle) -> Result<serde_json::Value, CoreFailure> {
     run_core_json(&app, vec!["backups".into(), "--json".into()]).await
 }
@@ -223,6 +236,7 @@ pub fn run() {
             plan_layout,
             diff_layout,
             apply_layout,
+            fetch_icons,
             list_backups,
             restore_backup
         ])

@@ -35,6 +35,7 @@ uv pip install -e . --group dev
 .venv/bin/iconstate show             # the home screen as a tree
 .venv/bin/iconstate dump -o now.json # the raw icon state
 .venv/bin/iconstate apps -o apps.json
+.venv/bin/iconstate icons              # cache every icon as a PNG
 
 .venv/bin/iconstate plan                 # the folder layout the rules propose
 .venv/bin/iconstate diff                 # what applying it would change
@@ -80,10 +81,16 @@ looks: two apps on this phone are both called "the same name", and WhatsApp ship
 with an invisible character in its name.
 
 Apps the table does not know go into an `Unsorted` folder and are reported on
-stderr as an `unassigned` event. That is the seam the LLM categoriser plugs
-into — pass its decisions back as `--assign decisions.json`, a plain
-`{"com.example.app": "Games"}` map, and the plan is rebuilt with them layered
-on the offline table.
+stderr as an `unassigned` event. Pass decisions back as `--assign
+decisions.json`, a plain `{"com.example.app": "Games"}` map, and the plan is
+rebuilt with them layered on the offline table.
+
+That is the seam the LLM categoriser plugs into. It lives in the frontend
+(`app/src/lib/categorise.ts`), calls Claude with a tool schema so the answer
+comes back as data rather than prose, and drops the result straight into
+`--assign`. The API key is the user's, stored in the webview and never seen by
+the core — which is the point of keeping the call on that side: the Python
+package stays offline and dependency-free.
 
 ## Tests
 
