@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import CategorisePanel from './features/categorise/categorise-panel'
 import DiffReview from './features/diff-review/diff-review'
 import HomeScreen from './features/home-screen/home-screen'
+import UnsortedPanel from './features/unsorted/unsorted-panel'
 import {
     applyLayout,
     coreVersion,
@@ -15,11 +15,16 @@ import {
     readIconState,
     restoreBackup,
 } from './lib/core'
-import { categorise } from './lib/categorise'
 import { checkForUpdate } from './lib/update'
 
-import type { Assignments, UnsortedApp } from './lib/categorise.types'
-import type { Device, DiffSummary, IconManifest, IconState, ProgressEvent } from './lib/core.types'
+import type {
+    Device,
+    DiffSummary,
+    IconManifest,
+    IconState,
+    ProgressEvent,
+    UnsortedApp,
+} from './lib/core.types'
 import type { UpdateInfo } from './lib/update'
 
 import { isFolder } from './lib/core.types'
@@ -40,13 +45,6 @@ const unsortedApps = (state: IconState | null): UnsortedApp[] => {
     }))
 }
 
-const folderNames = (state: IconState | null): string[] =>
-    (state ?? [])
-        .flat()
-        .filter(isFolder)
-        .map(item => item.displayName)
-        .filter(name => name !== UNSORTED)
-
 export default function App() {
     const [version, setVersion] = useState('')
     const [devices, setDevices] = useState<Device[]>([])
@@ -54,7 +52,6 @@ export default function App() {
     const [plan, setPlan] = useState<IconState | null>(null)
     const [change, setChange] = useState<DiffSummary | null>(null)
     const [icons, setIcons] = useState<IconManifest>({})
-    const [assignments, setAssignments] = useState<Assignments>({})
     const [view, setView] = useState<View>('current')
     const [status, setStatus] = useState('')
     const [error, setError] = useState('')
@@ -67,6 +64,9 @@ export default function App() {
         if (event.event === 'connected') return `connected to ${event.name} · iOS ${event.ios}`
         if (event.event === 'icon-state-read') return 'read the home screen'
         if (event.event === 'icon') return `icon ${event.done} of ${event.total}`
+        if (event.event === 'looking-up') return `asking the App Store about ${event.count} apps`
+        if (event.event === 'looked-up') return `looked up ${event.done} of ${event.total}`
+        if (event.event === 'looked-up-done') return `the App Store placed ${event.resolved} apps`
         if (event.event === 'unassigned') return `${event.count} apps had no rule and went to Unsorted`
         if (event.event === 'backed-up') return `backed up to ${event.path}`
         if (event.event === 'writing') return 'writing to the device'
@@ -103,7 +103,6 @@ export default function App() {
                 setCurrent(await readIconState(serial))
                 setPlan(null)
                 setChange(null)
-                setAssignments({})
                 setView('current')
                 setIcons(await fetchIcons(serial))
             }),
@@ -111,36 +110,18 @@ export default function App() {
     )
 
     const propose = useCallback(
-        async (decisions: Assignments) => {
-            const wanted = Object.keys(decisions).length ? decisions : undefined
-            const proposed = await planLayout(serial, wanted)
+        async (lookup: boolean) => {
+            const proposed = await planLayout(serial, { lookup })
             setPlan(proposed)
             setChange(await diffLayout(proposed, serial))
             setView('plan')
-            return proposed
         },
         [serial]
     )
 
-    const handlePlan = useCallback(
-        () => guard(async () => void (await propose(assignments))),
-        [assignments, guard, propose]
-    )
+    const handlePlan = useCallback(() => guard(() => propose(false)), [guard, propose])
 
-    const handleCategorise = useCallback(
-        (apiKey: string) =>
-            guard(async () => {
-                const apps = unsortedApps(plan)
-                if (!apps.length) return
-                setStatus(`asking Claude about ${apps.length} apps`)
-                const decided = await categorise({ apiKey, apps, folders: folderNames(plan) })
-                const merged = { ...assignments, ...decided }
-                setAssignments(merged)
-                setStatus(`Claude placed ${Object.keys(decided).length} apps`)
-                await propose(merged)
-            }),
-        [assignments, guard, plan, propose]
-    )
+    const handleLookUp = useCallback(() => guard(() => propose(true)), [guard, propose])
 
     const handleApply = useCallback(
         () =>
@@ -215,9 +196,7 @@ export default function App() {
 
             <p className={error ? 'status status-error' : 'status'}>{error || status}</p>
 
-            {pending.length ? (
-                <CategorisePanel busy={busy} apps={pending} onCategorise={handleCategorise} />
-            ) : null}
+            {pending.length ? <UnsortedPanel busy={busy} apps={pending} onLookUp={handleLookUp} /> : null}
 
             {change && plan ? (
                 <DiffReview busy={busy} change={change} onApply={handleApply} onCancel={handleCancel} />

@@ -125,11 +125,18 @@ async fn plan_layout(
     app: AppHandle,
     serial: Option<String>,
     assignments: Option<serde_json::Value>,
+    lookup: Option<bool>,
+    country: Option<String>,
 ) -> Result<serde_json::Value, CoreFailure> {
     let mut args = vec!["plan".to_string(), "--json".to_string()];
     if let Some(serial) = serial {
         args.push("--serial".into());
         args.push(serial);
+    }
+    if lookup.unwrap_or(false) {
+        args.push("--lookup".into());
+        args.push("--country".into());
+        args.push(country.unwrap_or_else(|| "us".into()));
     }
     if let Some(assignments) = assignments {
         let path = write_temp("assignments", &assignments)?;

@@ -53,3 +53,10 @@ export interface DiffSummary {
 }
 
 export type IconManifest = Record<string, string>
+
+export type Assignments = Record<string, string>
+
+export interface UnsortedApp {
+    key: string
+    displayName: string
+}

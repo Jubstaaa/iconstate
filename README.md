@@ -85,12 +85,17 @@ stderr as an `unassigned` event. Pass decisions back as `--assign
 decisions.json`, a plain `{"com.example.app": "Games"}` map, and the plan is
 rebuilt with them layered on the offline table.
 
-That is the seam the LLM categoriser plugs into. It lives in the frontend
-(`app/src/lib/categorise.ts`), calls Claude with a tool schema so the answer
-comes back as data rather than prose, and drops the result straight into
-`--assign`. The API key is the user's, stored in the webview and never seen by
-the core — which is the point of keeping the call on that side: the Python
-package stays offline and dependency-free.
+`--lookup` fills those in from the App Store's own category, through the public
+iTunes lookup endpoint. No account, no API key, no model — every user gets the
+same answer, and answers are cached in `~/.iconstate/genres.json` so a bundle
+identifier is only ever asked about once.
+
+`core/src/iconstate/core/genres.py` maps a store genre to a folder. The table is
+ordered from specific to generic and that order *is* the algorithm: an app lists
+several genres and the one the store calls primary is regularly the vaguer of
+them — Instagram leads with Photo & Video, a dating app with Lifestyle. Reading the
+table in order rather than trusting the app's own ordering puts both under
+Social, which is where a person would look for them.
 
 ## Tests
 
