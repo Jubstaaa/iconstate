@@ -67,7 +67,7 @@ export default function SlotTile({
             ) : null}
             {isFolderSlot(slot) ? (
                 <div
-                    className={`grid aspect-square w-full gap-[4%] overflow-hidden rounded-[22%] bg-white/20 p-[7%] backdrop-blur-md ${ring}`}
+                    className={`grid aspect-square w-full gap-[5%] overflow-hidden rounded-[23%] bg-white/[0.18] p-[9%] ${ring}`}
                     style={{
                         gridTemplateColumns: `repeat(${limits.folderColumns}, minmax(0, 1fr))`,
                         gridTemplateRows: `repeat(${limits.folderRows}, minmax(0, 1fr))`,
@@ -82,10 +82,10 @@ export default function SlotTile({
                     ))}
                 </div>
             ) : (
-                <AppGlyph app={slot.app} className={`aspect-square w-full rounded-[22%] ${ring}`} />
+                <AppGlyph app={slot.app} className={`aspect-square w-full rounded-[23%] ${ring}`} />
             )}
             {labelled ? (
-                <span className='w-full truncate text-center text-[10px] leading-none text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.95)]'>
+                <span className='w-full truncate text-center text-[11px] leading-none font-normal text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]'>
                     {isFolderSlot(slot) ? slot.name : slot.app.displayName}
                 </span>
             ) : null}

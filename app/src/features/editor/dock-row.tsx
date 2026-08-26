@@ -17,7 +17,7 @@ export default function DockRow({ slots, limits, selection, hint, onSelect, onCo
     const blanks = Math.max(0, limits.dock - slots.length)
 
     return (
-        <div className='rounded-[13%] bg-white/15 p-[3%] backdrop-blur-xl'>
+        <div className='rounded-[30px] bg-white/[0.16] p-[3%]'>
             <div
                 className='grid gap-x-[4%]'
                 style={{ gridTemplateColumns: `repeat(${limits.dock}, minmax(0, 1fr))` }}

@@ -28,7 +28,7 @@ export default function FolderSheet({
     return (
         <motion.div
             initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
-            animate={{ opacity: 1, backdropFilter: 'blur(28px)' }}
+            animate={{ opacity: 1, backdropFilter: 'blur(24px)' }}
             exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
             transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
             className='absolute inset-0 z-20 flex flex-col justify-center gap-[4%] bg-black/45 px-[8%]'

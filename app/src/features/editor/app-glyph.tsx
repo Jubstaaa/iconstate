@@ -18,7 +18,7 @@ export default function AppGlyph({ app, className = '', style }: AppGlyphProps) 
     if (!src || broken) {
         return (
             <span
-                className={`grid place-items-center bg-white/15 text-[9px] font-semibold text-white/70 ${className}`}
+                className={`grid place-items-center rounded-[23%] bg-white/15 text-[9px] font-semibold text-white/70 ${className}`}
                 style={style}
             >
                 {app.displayName.slice(0, 2)}

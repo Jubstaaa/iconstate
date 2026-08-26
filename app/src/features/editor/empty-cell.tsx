@@ -6,7 +6,7 @@ export default function EmptyCell({ id }: { id: string }) {
     return (
         <div
             ref={setNodeRef}
-            className={`aspect-square w-full self-start rounded-[22%] transition ${
+            className={`aspect-square w-full self-start rounded-[23%] transition ${
                 isOver ? 'bg-white/25 ring-2 ring-white/70' : 'bg-transparent'
             }`}
         />
