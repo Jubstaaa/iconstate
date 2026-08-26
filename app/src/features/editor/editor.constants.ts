@@ -46,8 +46,13 @@ export const limitsFrom = (metrics: Metrics | null): Limits => {
     }
 }
 
-export const screenAspect = (metrics: Metrics | null): number => {
-    const width = metrics?.homeScreenWidth ?? 440
-    const height = metrics?.homeScreenHeight ?? 956
-    return width / height
+export const CHROME_HEIGHT = 52
+export const BEZEL = 24
+
+/** Window size that gives the device's own screen its real proportions. */
+export const windowSizeFor = (metrics: Metrics | null, width: number) => {
+    const screenWidth = metrics?.homeScreenWidth ?? 440
+    const screenHeight = metrics?.homeScreenHeight ?? 956
+    const inner = width - BEZEL
+    return { width, height: Math.round((inner * screenHeight) / screenWidth) + BEZEL + CHROME_HEIGHT }
 }

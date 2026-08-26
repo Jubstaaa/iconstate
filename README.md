@@ -70,8 +70,18 @@ SpringBoard command never followed; `getWallpaperInfo` is worse, it closes the
 connection for every name. So the device's answer is only a starting point and
 you can drop in your own image instead.
 
-The window is the phone and nothing else — no toolbar, no sidebar. Every command
-lives in the right-click menu, the way it does in a simulator.
+The window *is* the phone. It has no decorations of its own: the app draws the
+title bar (device name, iOS version, three actions) and the bezel runs to the
+window edge, so there is no page around the device and no gap between the two.
+Everything else lives in the right-click menu, the way it does in a simulator.
+
+Drawing the frame by hand was a choice, not a gap. `devices.css` has a good
+iPhone 14 Pro, but it resets `.device *` to `display: block`, which flattens
+every grid and flex box on the screen, and its frame is a fixed 428x868 that
+cannot take the grid dimensions the device reports. MagicUI's iPhone is an SVG
+that accepts an image or a video, not a live surface to drag icons around in.
+Apple's Design Resources are Sketch and Figma files, and shipping Apple's device
+art in an open source repo is a licensing problem.
 
 Press and hold to drag; a quick click opens a folder. Drop an icon on the middle
 of another to make a folder, on its edge to slot in beside it, on a folder to

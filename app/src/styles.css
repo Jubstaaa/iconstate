@@ -20,12 +20,20 @@
     }
 
     body {
-        background:
-            radial-gradient(120% 90% at 50% -10%, #1a2030 0%, transparent 60%),
-            radial-gradient(90% 70% at 50% 110%, #141a26 0%, transparent 55%), var(--color-ink);
+        background: transparent;
         color: var(--color-chalk);
         font-family: var(--font-sans);
         overflow: hidden;
+    }
+
+    /* The window is transparent and undecorated, so only the device shows. */
+    #root {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        overflow: hidden;
+        border-radius: 12px 12px 50px 50px;
+        background: #0e1116;
     }
 
     ::selection {

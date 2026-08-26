@@ -49,7 +49,7 @@ export default function PagesStrip({
             className='flex min-h-0 flex-1 snap-x snap-mandatory overflow-x-auto overflow-y-hidden overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
         >
             {pages.map((slots, index) => (
-                <div key={index} className='w-full shrink-0 snap-center px-[6%] pb-[1%] pt-[3%]'>
+                <div key={index} className='w-full shrink-0 snap-center px-[6%] pb-[1%] pt-[7%]'>
                     <HomePage
                         page={index}
                         slots={slots}

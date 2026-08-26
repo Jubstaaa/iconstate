@@ -40,7 +40,7 @@ export default function SlotTile({
 
     return (
         <motion.div
-            layout
+            layout='position'
             transition={{ type: 'spring', stiffness: 520, damping: 42, mass: 0.6 }}
             ref={node => {
                 setNodeRef(node)

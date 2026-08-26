@@ -1,8 +1,10 @@
+import { LogicalSize, getCurrentWindow } from '@tauri-apps/api/window'
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 
-import { limitsFrom, screenAspect } from './features/editor/editor.constants'
+import { limitsFrom, windowSizeFor } from './features/editor/editor.constants'
 import { editorReducer, initialEditorState, toIconState } from './features/editor/editor.reducer'
 import HomeEditor from './features/editor/home-editor'
+import SimulatorChrome from './features/editor/simulator-chrome'
 import DiffReview from './features/diff-review/diff-review'
 import {
     applyLayout,
@@ -62,11 +64,12 @@ export default function App() {
     const [busy, setBusy] = useState(false)
     const [state, dispatch] = useReducer(editorReducer, initialEditorState)
     const [selection, setSelection] = useState<Set<string>>(new Set())
+    const [device, setDevice] = useState('')
+    const [system, setSystem] = useState('not connected')
     const picker = useRef<HTMLInputElement>(null)
 
     const serial = devices[0]?.serial
     const limits = useMemo(() => limitsFrom(metrics), [metrics])
-    const aspect = useMemo(() => screenAspect(metrics), [metrics])
     const edited = useMemo(() => toIconState(state.layout, limits), [state.layout, limits])
     const dirty = useMemo(
         () => (baseline ? JSON.stringify(edited) !== JSON.stringify(baseline) : false),
@@ -153,7 +156,13 @@ export default function App() {
     )
 
     useEffect(() => {
-        const unlisten = onProgress(event => setStatus(describe(event)))
+        const unlisten = onProgress(event => {
+            if (event.event === 'connected') {
+                setDevice(String(event.name))
+                setSystem(`iOS ${event.ios}`)
+            }
+            setStatus(describe(event))
+        })
         guard(async () => {
             const found = await listDevices()
             setDevices(found)
@@ -168,15 +177,36 @@ export default function App() {
         if (serial && !baseline) load(serial)
     }, [baseline, load, serial])
 
+    useEffect(() => {
+        if (!metrics) return
+        const window_ = getCurrentWindow()
+        window_.innerSize().then(async size => {
+            const factor = await window_.scaleFactor()
+            const logical = size.toLogical(factor)
+            const wanted = windowSizeFor(metrics, Math.round(logical.width))
+            if (Math.abs(wanted.height - Math.round(logical.height)) > 2) {
+                await window_.setSize(new LogicalSize(wanted.width, wanted.height))
+            }
+        })
+    }, [metrics])
+
     return (
-        <div className='grid h-full place-items-center p-3 pt-7'>
+        <>
+            <SimulatorChrome
+                device={device}
+                system={system}
+                actions={[
+                    { label: 'Sort into folders', icon: 'sort', onPick: () => commands.onPropose(false) },
+                    { label: 'Read from iPhone again', icon: 'reload', onPick: handleReload },
+                    { label: 'Review changes', icon: 'review', disabled: !dirty, onPick: commands.onReview },
+                ]}
+            />
             {baseline ? (
                 <HomeEditor
                     state={state}
                     limits={limits}
                     icons={icons}
                     wallpaper={ownWallpaper ?? wallpaper}
-                    aspect={aspect}
                     selection={selection}
                     status={status}
                     commands={commands}
@@ -184,7 +214,9 @@ export default function App() {
                     onSelectionChange={setSelection}
                 />
             ) : (
-                <p className='max-w-64 text-center text-[13px] leading-relaxed text-dim'>{status}</p>
+                <div className='grid min-h-0 flex-1 place-items-center'>
+                    <p className='max-w-64 text-center text-[13px] leading-relaxed text-dim'>{status}</p>
+                </div>
             )}
 
             <input
@@ -207,6 +239,6 @@ export default function App() {
                     onCancel={() => setChange(null)}
                 />
             ) : null}
-        </div>
+        </>
     )
 }

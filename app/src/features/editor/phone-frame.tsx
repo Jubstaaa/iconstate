@@ -2,18 +2,23 @@ import StatusBar from './status-bar'
 
 import type { PhoneFrameProps } from './phone-frame.types'
 
-const SIDE_BUTTON = 'absolute w-[3px] rounded-full bg-white/25'
+const SIDE = 'pointer-events-none absolute w-[3px] rounded-full bg-white/20'
 
-export default function PhoneFrame({ wallpaper, aspect, children }: PhoneFrameProps) {
+/**
+ * The device is the window. The bezel is drawn right up to the window edge, so
+ * there is no page around it and no gap between the two — the window is
+ * transparent and undecorated, and this is the only thing in it.
+ */
+export default function PhoneFrame({ wallpaper, children }: PhoneFrameProps) {
     return (
-        <div className='relative h-full max-w-full' style={{ aspectRatio: aspect }}>
-            <span className={`${SIDE_BUTTON} -left-[3px] top-[16%] h-[3.5%]`} />
-            <span className={`${SIDE_BUTTON} -left-[3px] top-[23%] h-[6.5%]`} />
-            <span className={`${SIDE_BUTTON} -left-[3px] top-[31%] h-[6.5%]`} />
-            <span className={`${SIDE_BUTTON} -right-[3px] top-[24%] h-[9%]`} />
+        <div className='relative min-h-0 flex-1 px-[7px] pt-[7px] pb-[7px]'>
+            <span className={`${SIDE} left-[1px] top-[14%] h-[3.5%]`} />
+            <span className={`${SIDE} left-[1px] top-[21%] h-[6.5%]`} />
+            <span className={`${SIDE} left-[1px] top-[29%] h-[6.5%]`} />
+            <span className={`${SIDE} right-[1px] top-[22%] h-[9%]`} />
 
-            <div className='size-full overflow-hidden rounded-[13%/6.2%] bg-[#0a0c10] p-[3px] shadow-[0_40px_90px_-24px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.16)]'>
-                <div className='relative size-full overflow-hidden rounded-[12.4%/5.9%] bg-ink'>
+            <div className='size-full rounded-[46px] bg-[#0e1116] p-[5px] shadow-[inset_0_0_3px_1px_rgba(255,255,255,0.18)]'>
+                <div className='relative size-full overflow-hidden rounded-[41px] bg-ink'>
                     {wallpaper ? (
                         <img
                             src={wallpaper}
@@ -26,7 +31,7 @@ export default function PhoneFrame({ wallpaper, aspect, children }: PhoneFramePr
                     )}
                     <div className='absolute inset-0 bg-black/10' />
 
-                    <div className='absolute left-1/2 top-[1.4%] z-10 h-[3.4%] w-[30%] -translate-x-1/2 rounded-full bg-black' />
+                    <div className='absolute left-1/2 top-[1.3%] z-10 h-[3.3%] w-[29%] -translate-x-1/2 rounded-full bg-black' />
 
                     <div className='relative flex h-full flex-col'>
                         <StatusBar />

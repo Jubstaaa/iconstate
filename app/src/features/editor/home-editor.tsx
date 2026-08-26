@@ -24,7 +24,6 @@ export default function HomeEditor({
     limits,
     icons,
     wallpaper,
-    aspect,
     selection,
     status,
     commands,
@@ -259,7 +258,7 @@ export default function HomeEditor({
                     setHint(null)
                 }}
             >
-                <PhoneFrame wallpaper={wallpaper} aspect={aspect}>
+                <PhoneFrame wallpaper={wallpaper}>
                     <PagesStrip
                         pages={layout.pages}
                         limits={limits}

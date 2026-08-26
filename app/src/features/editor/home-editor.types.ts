@@ -21,7 +21,6 @@ export interface HomeEditorProps {
     limits: Limits
     icons: IconManifest
     wallpaper: string | null
-    aspect: number
     selection: Set<string>
     status: string
     commands: EditorCommands

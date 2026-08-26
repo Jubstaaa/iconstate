@@ -14,12 +14,13 @@
             {
                 "title": "IconState",
                 "width": 452,
-                "height": 940,
-                "minWidth": 380,
-                "minHeight": 720,
-                "titleBarStyle": "Overlay",
-                "hiddenTitle": true,
-                "backgroundColor": "#0b0d11"
+                "height": 944,
+                "minWidth": 340,
+                "minHeight": 700,
+                "decorations": false,
+                "transparent": true,
+                "shadow": true,
+                "backgroundColor": "#00000000"
             }
         ],
         "security": {
