@@ -4,26 +4,26 @@
     "version": "0.0.0",
     "identifier": "com.ilkerbalcilar.iconstate",
     "build": {
-        "beforeDevCommand": "../scripts/build-sidecar.sh && npm run dev",
+        "beforeDevCommand": "../scripts/build-sidecar.sh && bun run dev",
         "devUrl": "http://localhost:1420",
-        "beforeBuildCommand": "npm run build && ../scripts/build-sidecar.sh",
+        "beforeBuildCommand": "bun run build && ../scripts/build-sidecar.sh",
         "frontendDist": "../dist"
     },
     "app": {
         "windows": [
             {
                 "title": "IconState",
-                "width": 1100,
-                "height": 760,
-                "minWidth": 880,
-                "minHeight": 600
+                "width": 1240,
+                "height": 940,
+                "minWidth": 980,
+                "minHeight": 760
             }
         ],
         "security": {
             "csp": null,
             "assetProtocol": {
                 "enable": true,
-                "scope": ["$HOME/.iconstate/icons/**"]
+                "scope": ["$HOME/.iconstate/icons/**", "$HOME/.iconstate/wallpaper/**"]
             }
         }
     },

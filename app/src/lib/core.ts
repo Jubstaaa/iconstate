@@ -52,3 +52,10 @@ export const fetchIcons = async (serial?: string): Promise<IconManifest> => {
     const manifest = await invoke<IconManifest>('fetch_icons', { serial })
     return Object.fromEntries(Object.entries(manifest).map(([key, path]) => [key, convertFileSrc(path)]))
 }
+
+export const fetchWallpaper = async (serial?: string): Promise<string | null> => {
+    const result = await invoke<{ path: string }>('fetch_wallpaper', { serial })
+    return result.path ? convertFileSrc(result.path) : null
+}
+
+export const fetchMetrics = (serial?: string) => invoke<Record<string, number>>('fetch_metrics', { serial })

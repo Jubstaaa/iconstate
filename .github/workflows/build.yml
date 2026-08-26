@@ -15,11 +15,9 @@ jobs:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: app/package-lock.json
+          bun-version: latest
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
@@ -28,12 +26,12 @@ jobs:
         with:
           enable-cache: true
           cache-dependency-glob: core/pyproject.toml
-      - run: npm ci
+      - run: bun install --frozen-lockfile
         working-directory: app
       - name: Build the sidecar
         run: ./scripts/build-sidecar.sh
       - name: Build the app
-        run: npm run tauri build -- --bundles app,dmg
+        run: bun run tauri build --bundles app,dmg
         working-directory: app
       - name: Run the packaged sidecar
         run: ./scripts/verify-bundle.sh

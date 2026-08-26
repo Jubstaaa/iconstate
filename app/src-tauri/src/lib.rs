@@ -200,6 +200,32 @@ async fn fetch_icons(
 }
 
 #[tauri::command]
+async fn fetch_wallpaper(
+    app: AppHandle,
+    serial: Option<String>,
+) -> Result<serde_json::Value, CoreFailure> {
+    let mut args = vec!["wallpaper".to_string()];
+    if let Some(serial) = serial {
+        args.push("--serial".into());
+        args.push(serial);
+    }
+    run_core_json(&app, args).await
+}
+
+#[tauri::command]
+async fn fetch_metrics(
+    app: AppHandle,
+    serial: Option<String>,
+) -> Result<serde_json::Value, CoreFailure> {
+    let mut args = vec!["metrics".to_string()];
+    if let Some(serial) = serial {
+        args.push("--serial".into());
+        args.push(serial);
+    }
+    run_core_json(&app, args).await
+}
+
+#[tauri::command]
 async fn list_backups(app: AppHandle) -> Result<serde_json::Value, CoreFailure> {
     run_core_json(&app, vec!["backups".into(), "--json".into()]).await
 }
@@ -244,6 +270,8 @@ pub fn run() {
             diff_layout,
             apply_layout,
             fetch_icons,
+            fetch_wallpaper,
+            fetch_metrics,
             list_backups,
             restore_backup
         ])

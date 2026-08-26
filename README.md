@@ -36,6 +36,8 @@ uv pip install -e . --group dev
 .venv/bin/iconstate dump -o now.json # the raw icon state
 .venv/bin/iconstate apps -o apps.json
 .venv/bin/iconstate icons              # cache every icon as a PNG
+.venv/bin/iconstate wallpaper          # save the home screen wallpaper
+.venv/bin/iconstate metrics            # the device's own grid dimensions
 
 .venv/bin/iconstate plan                 # the folder layout the rules propose
 .venv/bin/iconstate diff                 # what applying it would change
@@ -57,9 +59,21 @@ a server, a port, or a lifecycle to manage.
 
 ## The desktop app
 
+The app is the point: a real iPhone home screen you can rearrange with a mouse.
+The wallpaper comes off the device, the icons are the device's own PNGs, and the
+grid is the size SpringBoard says it is — four columns by six rows on this
+phone, not a number someone typed in.
+
+Drag an icon onto another to make a folder, onto a folder to file it there, onto
+an empty cell to move it. Click to select, ⌘-click or shift-click to select
+several, ⌘G to fold the selection into one folder. Double-click a folder to open
+it, rename it in place, or tip it back out onto the page. Arrow keys turn pages,
+⌘Z undoes. Nothing is written until Review changes, and that shows the same diff
+the CLI prints.
+
 ```bash
 ./scripts/build-sidecar.sh      # freezes the CLI next to the Tauri shell
-cd app && npm install && npm run tauri dev
+cd app && bun install && bun run tauri dev
 ```
 
 `scripts/build-sidecar.sh` names the binary after the Rust host triple

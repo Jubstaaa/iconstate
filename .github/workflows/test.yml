@@ -33,11 +33,9 @@ jobs:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: app/package-lock.json
+          bun-version: latest
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy, rustfmt
@@ -48,11 +46,11 @@ jobs:
         with:
           enable-cache: true
           cache-dependency-glob: core/pyproject.toml
-      - run: npm ci
+      - run: bun install --frozen-lockfile
         working-directory: app
-      - run: npm run lint
+      - run: bun run lint
         working-directory: app
-      - run: npm run build
+      - run: bun run build
         working-directory: app
       - name: Build the sidecar
         run: ./scripts/build-sidecar.sh

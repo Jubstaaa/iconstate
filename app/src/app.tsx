@@ -1,13 +1,16 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useReducer, useState } from 'react'
 
+import EditorToolbar from './features/editor/editor-toolbar'
+import { limitsFrom, screenAspect } from './features/editor/editor.constants'
+import { editorReducer, initialEditorState, toIconState } from './features/editor/editor.reducer'
+import HomeEditor from './features/editor/home-editor'
 import DiffReview from './features/diff-review/diff-review'
-import HomeScreen from './features/home-screen/home-screen'
-import UnsortedPanel from './features/unsorted/unsorted-panel'
 import {
     applyLayout,
-    coreVersion,
     diffLayout,
     fetchIcons,
+    fetchMetrics,
+    fetchWallpaper,
     getErrorMessage,
     listDevices,
     onProgress,
@@ -17,63 +20,59 @@ import {
 } from './lib/core'
 import { checkForUpdate } from './lib/update'
 
-import type {
-    Device,
-    DiffSummary,
-    IconManifest,
-    IconState,
-    ProgressEvent,
-    UnsortedApp,
-} from './lib/core.types'
+import type { Metrics } from './features/editor/editor.constants'
+import type { Device, DiffSummary, IconManifest, IconState, ProgressEvent } from './lib/core.types'
 import type { UpdateInfo } from './lib/update'
 
-import { isFolder } from './lib/core.types'
-
-type View = 'current' | 'plan'
-
-const UNSORTED = 'Unsorted'
-
-const unsortedApps = (state: IconState | null): UnsortedApp[] => {
-    if (!state) return []
-    const folder = state
-        .flat()
-        .filter(isFolder)
-        .find(item => item.displayName === UNSORTED)
-    return (folder?.iconLists.flat() ?? []).map(app => ({
-        key: app.bundleIdentifier ?? app.displayIdentifier,
-        displayName: app.displayName,
-    }))
+const describe = (event: ProgressEvent): string => {
+    switch (event.event) {
+        case 'connected':
+            return `${event.name} · iOS ${event.ios}`
+        case 'icon-state-read':
+            return 'read the home screen'
+        case 'icon':
+            return `icon ${event.done} of ${event.total}`
+        case 'looking-up':
+            return `asking the App Store about ${event.count} apps`
+        case 'looked-up-done':
+            return `the App Store placed ${event.resolved} apps`
+        case 'unassigned':
+            return `${event.count} apps had no rule`
+        case 'backed-up':
+            return 'backed up'
+        case 'writing':
+            return 'writing to the device'
+        case 'written':
+            return 'written'
+        case 'error':
+            return String(event.message)
+        default:
+            return event.event
+    }
 }
 
 export default function App() {
-    const [version, setVersion] = useState('')
     const [devices, setDevices] = useState<Device[]>([])
-    const [current, setCurrent] = useState<IconState | null>(null)
-    const [plan, setPlan] = useState<IconState | null>(null)
-    const [change, setChange] = useState<DiffSummary | null>(null)
+    const [baseline, setBaseline] = useState<IconState | null>(null)
+    const [metrics, setMetrics] = useState<Metrics | null>(null)
     const [icons, setIcons] = useState<IconManifest>({})
-    const [view, setView] = useState<View>('current')
+    const [wallpaper, setWallpaper] = useState<string | null>(null)
+    const [change, setChange] = useState<DiffSummary | null>(null)
     const [status, setStatus] = useState('')
     const [error, setError] = useState('')
     const [busy, setBusy] = useState(false)
     const [update, setUpdate] = useState<UpdateInfo | null>(null)
+    const [state, dispatch] = useReducer(editorReducer, initialEditorState)
+    const [selection, setSelection] = useState<Set<string>>(new Set())
 
     const serial = devices[0]?.serial
-
-    const describe = useCallback((event: ProgressEvent) => {
-        if (event.event === 'connected') return `connected to ${event.name} · iOS ${event.ios}`
-        if (event.event === 'icon-state-read') return 'read the home screen'
-        if (event.event === 'icon') return `icon ${event.done} of ${event.total}`
-        if (event.event === 'looking-up') return `asking the App Store about ${event.count} apps`
-        if (event.event === 'looked-up') return `looked up ${event.done} of ${event.total}`
-        if (event.event === 'looked-up-done') return `the App Store placed ${event.resolved} apps`
-        if (event.event === 'unassigned') return `${event.count} apps had no rule and went to Unsorted`
-        if (event.event === 'backed-up') return `backed up to ${event.path}`
-        if (event.event === 'writing') return 'writing to the device'
-        if (event.event === 'written') return 'written'
-        if (event.event === 'error') return String(event.message)
-        return event.event
-    }, [])
+    const limits = useMemo(() => limitsFrom(metrics), [metrics])
+    const aspect = useMemo(() => screenAspect(metrics), [metrics])
+    const edited = useMemo(() => toIconState(state.layout, limits), [state.layout, limits])
+    const dirty = useMemo(
+        () => (baseline ? JSON.stringify(edited) !== JSON.stringify(baseline) : false),
+        [baseline, edited]
+    )
 
     const guard = useCallback(async (work: () => Promise<void>) => {
         setBusy(true)
@@ -87,6 +86,19 @@ export default function App() {
         }
     }, [])
 
+    const load = useCallback(
+        (target?: string) =>
+            guard(async () => {
+                const [read, grid] = await Promise.all([readIconState(target), fetchMetrics(target)])
+                setBaseline(read)
+                setMetrics(grid)
+                dispatch({ type: 'load', state: read })
+                setIcons(await fetchIcons(target))
+                setWallpaper(await fetchWallpaper(target).catch(() => null))
+            }),
+        [guard]
+    )
+
     const handleRefresh = useCallback(
         () =>
             guard(async () => {
@@ -97,68 +109,46 @@ export default function App() {
         [guard]
     )
 
-    const handleRead = useCallback(
-        () =>
+    const handlePropose = useCallback(
+        (lookup: boolean) =>
             guard(async () => {
-                setCurrent(await readIconState(serial))
-                setPlan(null)
-                setChange(null)
-                setView('current')
-                setIcons(await fetchIcons(serial))
+                dispatch({ type: 'load', state: await planLayout(serial, { lookup }) })
             }),
         [guard, serial]
     )
 
-    const propose = useCallback(
-        async (lookup: boolean) => {
-            const proposed = await planLayout(serial, { lookup })
-            setPlan(proposed)
-            setChange(await diffLayout(proposed, serial))
-            setView('plan')
-        },
-        [serial]
+    const handleGroup = useCallback(() => {
+        if (selection.size < 2) return
+        dispatch({ type: 'group', ids: [...selection], name: 'New Folder' })
+        setSelection(new Set())
+    }, [selection])
+
+    const handleReview = useCallback(
+        () => guard(async () => setChange(await diffLayout(edited, serial))),
+        [edited, guard, serial]
     )
-
-    const handlePlan = useCallback(() => guard(() => propose(false)), [guard, propose])
-
-    const handleLookUp = useCallback(() => guard(() => propose(true)), [guard, propose])
 
     const handleApply = useCallback(
         () =>
             guard(async () => {
-                if (!plan) return
-                await applyLayout(plan, serial)
-                setCurrent(await readIconState(serial))
-                setPlan(null)
+                await applyLayout(edited, serial)
                 setChange(null)
-                setView('current')
+                await load(serial)
             }),
-        [guard, plan, serial]
+        [edited, guard, load, serial]
     )
 
     const handleRestore = useCallback(
         () =>
             guard(async () => {
                 await restoreBackup(undefined, serial)
-                setCurrent(await readIconState(serial))
-                setPlan(null)
-                setChange(null)
-                setView('current')
+                await load(serial)
             }),
-        [guard, serial]
+        [guard, load, serial]
     )
-
-    const handleCancel = useCallback(() => {
-        setPlan(null)
-        setChange(null)
-        setView('current')
-    }, [])
 
     useEffect(() => {
         const unlisten = onProgress(event => setStatus(describe(event)))
-        coreVersion()
-            .then(setVersion)
-            .catch(cause => setError(getErrorMessage(cause)))
         handleRefresh()
         checkForUpdate()
             .then(setUpdate)
@@ -166,53 +156,91 @@ export default function App() {
         return () => {
             unlisten.then(stop => stop())
         }
-    }, [describe, handleRefresh])
+    }, [handleRefresh])
 
-    const shown = view === 'plan' ? plan : current
-    const pending = useMemo(() => unsortedApps(plan), [plan])
+    useEffect(() => {
+        if (serial && !baseline) load(serial)
+    }, [baseline, load, serial])
 
     return (
-        <main>
-            <header>
-                <div>
-                    <h1>IconState</h1>
-                    <p>{serial ?? 'no device'}</p>
+        <div className='flex h-full flex-col gap-3 p-4'>
+            <header className='flex shrink-0 items-center justify-between gap-4'>
+                <div className='flex items-baseline gap-3'>
+                    <h1 className='text-base font-semibold tracking-tight'>IconState</h1>
+                    <span className='text-xs text-dim'>{status || serial || 'no device'}</span>
+                    {error ? <span className='text-xs text-alarm'>{error}</span> : null}
                 </div>
-                <div className='actions'>
-                    <button onClick={handleRefresh} disabled={busy}>
-                        Refresh
-                    </button>
-                    <button onClick={handleRead} disabled={busy || !serial}>
-                        Read home screen
-                    </button>
-                    <button onClick={handlePlan} disabled={busy || !current}>
-                        Propose folders
-                    </button>
-                    <button onClick={handleRestore} disabled={busy || !serial}>
-                        Undo last apply
-                    </button>
-                </div>
+                <EditorToolbar
+                    busy={busy}
+                    dirty={dirty}
+                    selectionCount={selection.size}
+                    canUndo={state.past.length > 0}
+                    canRedo={state.future.length > 0}
+                    onGroup={handleGroup}
+                    onUndo={() => dispatch({ type: 'undo' })}
+                    onRedo={() => dispatch({ type: 'redo' })}
+                    onReset={() => baseline && dispatch({ type: 'load', state: baseline })}
+                    onReview={handleReview}
+                />
             </header>
 
-            <p className={error ? 'status status-error' : 'status'}>{error || status}</p>
+            <main className='min-h-0 flex-1'>
+                {baseline ? (
+                    <HomeEditor
+                        state={state}
+                        limits={limits}
+                        icons={icons}
+                        wallpaper={wallpaper}
+                        aspect={aspect}
+                        selection={selection}
+                        dispatch={dispatch}
+                        onSelectionChange={setSelection}
+                    />
+                ) : (
+                    <div className='grid h-full place-items-center text-sm text-dim'>
+                        {busy ? 'reading the iPhone…' : 'plug the iPhone in over USB and trust this Mac'}
+                    </div>
+                )}
+            </main>
 
-            {pending.length ? <UnsortedPanel busy={busy} apps={pending} onLookUp={handleLookUp} /> : null}
-
-            {change && plan ? (
-                <DiffReview busy={busy} change={change} onApply={handleApply} onCancel={handleCancel} />
-            ) : null}
-
-            {shown ? <HomeScreen state={shown} icons={icons} /> : <p className='empty'>Nothing read yet.</p>}
-
-            <footer>
-                core {version || '—'}
+            <footer className='flex shrink-0 items-center justify-between text-xs text-dim'>
+                <div className='flex gap-2'>
+                    <button className='hover:text-chalk' onClick={handleRefresh} disabled={busy}>
+                        Refresh device
+                    </button>
+                    <button
+                        className='hover:text-chalk'
+                        onClick={() => handlePropose(false)}
+                        disabled={busy || !baseline}
+                    >
+                        Propose folders
+                    </button>
+                    <button
+                        className='hover:text-chalk'
+                        onClick={() => handlePropose(true)}
+                        disabled={busy || !baseline}
+                    >
+                        Propose + look up unknown apps
+                    </button>
+                    <button className='hover:text-chalk' onClick={handleRestore} disabled={busy || !serial}>
+                        Undo last write
+                    </button>
+                </div>
                 {update ? (
-                    <a href={update.url} target='_blank' rel='noreferrer'>
-                        {' '}
-                        · version {update.version} is available
+                    <a className='text-glow' href={update.url} target='_blank' rel='noreferrer'>
+                        version {update.version} is available
                     </a>
                 ) : null}
             </footer>
-        </main>
+
+            {change ? (
+                <DiffReview
+                    busy={busy}
+                    change={change}
+                    onApply={handleApply}
+                    onCancel={() => setChange(null)}
+                />
+            ) : null}
+        </div>
     )
 }

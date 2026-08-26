@@ -1,0 +1,41 @@
+@import 'tailwindcss';
+
+@theme {
+    --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+
+    --color-ink: #0b0d11;
+    --color-panel: #14171d;
+    --color-hairline: #262c36;
+    --color-chalk: #e9edf3;
+    --color-dim: #8b94a4;
+    --color-glow: #5b8cff;
+    --color-alarm: #ff6b6b;
+}
+
+@layer base {
+    html,
+    body,
+    #root {
+        height: 100%;
+    }
+
+    body {
+        background: var(--color-ink);
+        color: var(--color-chalk);
+        font-family: var(--font-sans);
+        overflow: hidden;
+    }
+
+    button {
+        cursor: pointer;
+    }
+
+    button:disabled {
+        cursor: default;
+    }
+}
+
+@utility no-drag {
+    -webkit-user-drag: none;
+    user-select: none;
+}
