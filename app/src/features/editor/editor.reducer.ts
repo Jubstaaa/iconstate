@@ -61,7 +61,8 @@ export const toIconState = (layout: Layout, limits: Limits): IconState => {
                 : slot.app
         )
 
-    return [write(layout.dock), ...layout.pages.map(write)]
+    const pages = layout.pages.filter(page => page.length > 0)
+    return [write(layout.dock), ...(pages.length ? pages : [[]]).map(write)]
 }
 
 const findSlot = (layout: Layout, id: string): Slot | undefined => {
@@ -141,12 +142,14 @@ const insert = (layout: Layout, target: Target, slots: Slot[]): Layout => {
     }
 }
 
-const prune = (layout: Layout): Layout => {
-    const pages = layout.pages.map(page => page.filter(slot => !isFolderSlot(slot) || slot.apps.length > 0))
-    const trimmed = [...pages]
-    while (trimmed.length > 1 && trimmed[trimmed.length - 1].length === 0) trimmed.pop()
-    return { ...layout, pages: trimmed }
-}
+/**
+ * Drop folders that have been emptied out. Empty *pages* stay: one is usually
+ * there because someone just added it to drag things onto.
+ */
+const prune = (layout: Layout): Layout => ({
+    ...layout,
+    pages: layout.pages.map(page => page.filter(slot => !isFolderSlot(slot) || slot.apps.length > 0)),
+})
 
 const move = (layout: Layout, ids: string[], target: Target): Layout => {
     const moving = ids
@@ -244,6 +247,13 @@ export const editorReducer = (state: EditorState, action: Action): EditorState =
             return remember(state, dissolve(state.layout, action.id))
         case 'add-page':
             return remember(state, { ...state.layout, pages: [...state.layout.pages, []] })
+        case 'remove-page': {
+            if (state.layout.pages.length < 2 || state.layout.pages[action.page]?.length) return state
+            return remember(state, {
+                ...state.layout,
+                pages: state.layout.pages.filter((_, at) => at !== action.page),
+            })
+        }
         case 'undo': {
             const previous = state.past[state.past.length - 1]
             if (!previous) return state

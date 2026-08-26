@@ -1,8 +1,7 @@
 import type { ReactNode } from 'react'
-import type { Limits } from './editor.types'
 
 export interface PhoneFrameProps {
-    limits: Limits
     aspect: number
+    onMeasure: (size: { width: number; height: number }) => void
     children: ReactNode
 }

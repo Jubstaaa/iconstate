@@ -24,30 +24,43 @@ import type { Metrics } from './features/editor/editor.constants'
 import type { EditorCommands } from './features/editor/home-editor.types'
 import type { Device, DiffSummary, IconManifest, IconState, ProgressEvent } from './lib/core.types'
 
+/** Progress events are machine names; the user gets a sentence. */
 const describe = (event: ProgressEvent): string => {
     switch (event.event) {
+        case 'connecting':
+            return 'Looking for your iPhone'
         case 'connected':
-            return `${event.name} · iOS ${event.ios}`
+            return `Connected to ${event.name}`
         case 'icon-state-read':
-            return 'reading the home screen'
+            return 'Reading the home screen'
+        case 'icons-wanted':
+            return `Fetching ${event.count} app icons`
         case 'icon':
-            return `icon ${event.done} of ${event.total}`
+            return `Fetching app icons — ${event.done} of ${event.total}`
+        case 'icons-ready':
+            return 'App icons ready'
         case 'looking-up':
-            return `asking the App Store about ${event.count} apps`
+            return `Asking the App Store about ${event.count} apps`
+        case 'looked-up':
+            return `Asking the App Store — ${event.done} of ${event.total}`
         case 'looked-up-done':
-            return `the App Store placed ${event.resolved} apps`
+            return `The App Store sorted ${event.resolved} apps`
         case 'unassigned':
-            return `${event.count} apps had no rule`
+            return `${event.count} apps had no rule and went to Unsorted`
         case 'backed-up':
-            return 'backed up'
+            return 'Backed up your current layout'
         case 'writing':
-            return 'writing to the iPhone'
+            return 'Writing to your iPhone'
         case 'written':
-            return 'written'
+            return 'Written to your iPhone'
+        case 'reading-file':
+            return 'Reading the saved layout'
+        case 'saved':
+            return 'Saved'
         case 'error':
             return String(event.message)
         default:
-            return event.event
+            return ''
     }
 }
 

@@ -8,6 +8,7 @@ import { isFolderSlot } from './editor.types'
 import FolderSheet from './folder-sheet'
 import { SEPARATOR, parseDropTarget, sideOf } from './home-editor.types'
 import { IconsProvider } from './icons.context'
+import { ScreenProvider, geometryFor } from './screen.context'
 import PageDots from './page-dots'
 import PagesStrip from './pages-strip'
 import PhoneFrame from './phone-frame'
@@ -34,12 +35,14 @@ export default function HomeEditor({
     const [dragging, setDragging] = useState<Slot | null>(null)
     const [hint, setHint] = useState<Hint | null>(null)
     const [menu, setMenu] = useState<ContextMenuState | null>(null)
+    const [size, setSize] = useState({ width: 0, height: 0 })
 
     // Press and hold to drag; a quick click stays a click, which is what lets a
     // single tap open a folder the way it does on the phone.
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { delay: 170, tolerance: 8 } })
     )
+    const geometry = useMemo(() => geometryFor(size.width, size.height, limits), [size, limits])
     const { layout } = state
     const pageCount = layout.pages.length
 
@@ -184,7 +187,15 @@ export default function HomeEditor({
             items.push({
                 label: 'Add a page',
                 disabled: pageCount >= limits.pages,
-                onPick: () => dispatch({ type: 'add-page' }),
+                onPick: () => {
+                    dispatch({ type: 'add-page' })
+                    setPage(pageCount)
+                },
+            })
+            items.push({
+                label: 'Remove this page',
+                disabled: pageCount < 2 || (layout.pages[page]?.length ?? 0) > 0,
+                onPick: () => dispatch({ type: 'remove-page', page }),
             })
             items.push({ label: 'Undo', shortcut: '⌘Z', onPick: () => dispatch({ type: 'undo' }) })
             items.push({ label: 'Redo', shortcut: '⇧⌘Z', onPick: () => dispatch({ type: 'redo' }) })
@@ -212,7 +223,7 @@ export default function HomeEditor({
 
             setMenu({ x: event.clientX, y: event.clientY, items })
         },
-        [commands, dispatch, handleGroup, layout, limits.pages, pageCount, selection]
+        [commands, dispatch, handleGroup, layout, limits.pages, page, pageCount, selection]
     )
 
     useEffect(() => {
@@ -239,83 +250,91 @@ export default function HomeEditor({
 
     return (
         <IconsProvider value={icons}>
-            <DndContext
-                sensors={sensors}
-                collisionDetection={pointerWithin}
-                onDragStart={handleDragStart}
-                onDragMove={handleDragMove}
-                onDragEnd={handleDragEnd}
-                onDragCancel={() => {
-                    setDragging(null)
-                    setHint(null)
-                }}
-            >
-                <PhoneFrame limits={limits} aspect={aspect}>
-                    {offline ? (
-                        <div className='absolute inset-0 z-30 grid place-items-center bg-black/45 px-10 backdrop-blur-md'>
-                            <p className='text-center text-[13px] leading-relaxed text-white/85'>{offline}</p>
-                        </div>
-                    ) : null}
+            <ScreenProvider value={geometry}>
+                <DndContext
+                    sensors={sensors}
+                    collisionDetection={pointerWithin}
+                    onDragStart={handleDragStart}
+                    onDragMove={handleDragMove}
+                    onDragEnd={handleDragEnd}
+                    onDragCancel={() => {
+                        setDragging(null)
+                        setHint(null)
+                    }}
+                >
+                    <PhoneFrame aspect={aspect} onMeasure={setSize}>
+                        {offline ? (
+                            <div className='absolute inset-0 z-30 grid place-items-center bg-black/45 px-10 backdrop-blur-md'>
+                                <p className='text-center text-[13px] leading-relaxed text-white/85'>
+                                    {offline}
+                                </p>
+                            </div>
+                        ) : null}
 
-                    <PagesStrip
-                        pages={layout.pages}
-                        limits={limits}
-                        selection={selection}
-                        hint={hint}
-                        page={page}
-                        onPageChange={setPage}
-                        onSelect={handleSelect}
-                        onOpen={setOpenFolderId}
-                        onContextMenu={openMenu}
-                    />
-                    <div className='pb-[10px]'>
-                        <PageDots count={pageCount} active={page} onGo={go} />
-                    </div>
-                    <div onContextMenu={event => openMenu(event)}>
-                        <DockRow
-                            slots={layout.dock}
+                        <PagesStrip
+                            pages={layout.pages}
                             limits={limits}
                             selection={selection}
                             hint={hint}
+                            page={page}
+                            onPageChange={setPage}
                             onSelect={handleSelect}
+                            onOpen={setOpenFolderId}
                             onContextMenu={openMenu}
                         />
-                    </div>
-
-                    <AnimatePresence>
-                        {openFolder ? (
-                            <FolderSheet
-                                folder={openFolder}
+                        <div className='pb-[10px]'>
+                            <PageDots count={pageCount} active={page} onGo={go} />
+                        </div>
+                        <div onContextMenu={event => openMenu(event)}>
+                            <DockRow
+                                slots={layout.dock}
                                 limits={limits}
                                 selection={selection}
                                 hint={hint}
                                 onSelect={handleSelect}
-                                onRename={name => dispatch({ type: 'rename', id: openFolder.id, name })}
-                                onClose={() => setOpenFolderId(null)}
                                 onContextMenu={openMenu}
                             />
-                        ) : null}
-                    </AnimatePresence>
-                </PhoneFrame>
-
-                <DragOverlay dropAnimation={{ duration: 200, easing: 'cubic-bezier(0.32,0.72,0,1)' }}>
-                    {dragging ? (
-                        <div className='w-[74px] rotate-[2deg] drop-shadow-[0_18px_28px_rgba(0,0,0,0.7)]'>
-                            <SlotTile
-                                slot={dragging}
-                                limits={limits}
-                                selected={false}
-                                dimmed={false}
-                                onSelect={() => {}}
-                            />
                         </div>
-                    ) : null}
-                </DragOverlay>
 
-                <AnimatePresence>
-                    {menu ? <ContextMenu menu={menu} onClose={() => setMenu(null)} /> : null}
-                </AnimatePresence>
-            </DndContext>
+                        <AnimatePresence>
+                            {openFolder ? (
+                                <FolderSheet
+                                    folder={openFolder}
+                                    limits={limits}
+                                    selection={selection}
+                                    hint={hint}
+                                    onSelect={handleSelect}
+                                    onRename={name => dispatch({ type: 'rename', id: openFolder.id, name })}
+                                    onDissolve={() => {
+                                        dispatch({ type: 'dissolve', id: openFolder.id })
+                                        setOpenFolderId(null)
+                                    }}
+                                    onClose={() => setOpenFolderId(null)}
+                                    onContextMenu={openMenu}
+                                />
+                            ) : null}
+                        </AnimatePresence>
+                    </PhoneFrame>
+
+                    <DragOverlay dropAnimation={{ duration: 200, easing: 'cubic-bezier(0.32,0.72,0,1)' }}>
+                        {dragging ? (
+                            <div className='w-[74px] rotate-[2deg] drop-shadow-[0_18px_28px_rgba(0,0,0,0.7)]'>
+                                <SlotTile
+                                    slot={dragging}
+                                    limits={limits}
+                                    selected={false}
+                                    dimmed={false}
+                                    onSelect={() => {}}
+                                />
+                            </div>
+                        ) : null}
+                    </DragOverlay>
+
+                    <AnimatePresence>
+                        {menu ? <ContextMenu menu={menu} onClose={() => setMenu(null)} /> : null}
+                    </AnimatePresence>
+                </DndContext>
+            </ScreenProvider>
         </IconsProvider>
     )
 }

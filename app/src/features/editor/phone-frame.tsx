@@ -1,7 +1,6 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useRef } from 'react'
 
 import wallpaper from '../../assets/wallpaper.svg'
-import { ScreenProvider, geometryFor } from './screen.context'
 import StatusBar from './status-bar'
 
 import type { PhoneFrameProps } from './phone-frame.types'
@@ -9,26 +8,27 @@ import type { PhoneFrameProps } from './phone-frame.types'
 const SIDE = 'pointer-events-none absolute w-[3px] rounded-full bg-white/20'
 
 /**
- * The device is the window. The bezel is drawn right up to the window edge, so
- * there is no page around it and no gap between the two — the window is
- * transparent and undecorated, and this is the only thing in it.
+ * The device is the window: the bezel is drawn to the window edge and the frame
+ * keeps its own proportions, so a badly sized window letterboxes it rather than
+ * stretching it.
  */
-export default function PhoneFrame({ limits, aspect, children }: PhoneFrameProps) {
+export default function PhoneFrame({ aspect, onMeasure, children }: PhoneFrameProps) {
     const screen = useRef<HTMLDivElement>(null)
-    const [size, setSize] = useState({ width: 0, height: 0 })
 
     useLayoutEffect(() => {
         const node = screen.current
         if (!node) return
+
         const measure = () => {
             const box = node.getBoundingClientRect()
-            setSize({ width: box.width, height: box.height })
+            onMeasure({ width: box.width, height: box.height })
         }
+
         measure()
         const observer = new ResizeObserver(measure)
         observer.observe(node)
         return () => observer.disconnect()
-    }, [])
+    }, [onMeasure])
 
     return (
         <div className='relative mx-auto min-h-0 flex-1' style={{ aspectRatio: aspect }}>
@@ -48,15 +48,13 @@ export default function PhoneFrame({ limits, aspect, children }: PhoneFrameProps
 
                     <div className='absolute left-1/2 top-[1.3%] z-10 h-[3.3%] w-[29%] -translate-x-1/2 rounded-full bg-black' />
 
-                    <ScreenProvider value={geometryFor(size.width, size.height, limits)}>
-                        <div className='relative flex h-full flex-col'>
-                            <StatusBar />
-                            {children}
-                            <div className='pointer-events-none absolute inset-x-0 bottom-[9px] flex justify-center'>
-                                <span className='h-[5px] w-[36%] rounded-full bg-white/90' />
-                            </div>
+                    <div className='relative flex h-full flex-col'>
+                        <StatusBar />
+                        {children}
+                        <div className='pointer-events-none absolute inset-x-0 bottom-[9px] flex justify-center'>
+                            <span className='h-[5px] w-[36%] rounded-full bg-white/90' />
                         </div>
-                    </ScreenProvider>
+                    </div>
                 </div>
             </div>
         </div>

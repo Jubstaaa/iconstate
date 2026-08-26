@@ -55,6 +55,7 @@ export type Action =
     | { type: 'rename'; id: string; name: string }
     | { type: 'dissolve'; id: string }
     | { type: 'add-page' }
+    | { type: 'remove-page'; page: number }
     | { type: 'undo' }
     | { type: 'redo' }
 

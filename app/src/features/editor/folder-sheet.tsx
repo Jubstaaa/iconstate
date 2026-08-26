@@ -1,5 +1,5 @@
 import { motion } from 'motion/react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import EmptyCell from './empty-cell'
 import PageDots from './page-dots'
@@ -15,6 +15,7 @@ export default function FolderSheet({
     hint,
     onSelect,
     onRename,
+    onDissolve,
     onClose,
     onContextMenu,
 }: FolderSheetProps) {
@@ -25,8 +26,8 @@ export default function FolderSheet({
 
     useEffect(() => setName(folder.name), [folder.id, folder.name])
 
-    // A folder holds one 3x3 grid per page, and pages sit side by side, exactly
-    // as they do on the home screen.
+    // One 3x3 grid per page, side by side behind a native scroller — the same
+    // shape as the home screen.
     const pages = useMemo(() => {
         const out: (typeof folder.apps)[] = []
         for (let start = 0; start < folder.apps.length; start += limits.folderPage) {
@@ -35,11 +36,12 @@ export default function FolderSheet({
         return out.length ? out : [[]]
     }, [folder.apps, limits.folderPage])
 
-    useEffect(() => {
+    const go = useCallback((next: number) => {
         const node = strip.current
         if (!node) return
-        node.scrollTo({ left: page * node.clientWidth, behavior: 'smooth' })
-    }, [page])
+        node.scrollTo({ left: next * node.clientWidth, behavior: 'smooth' })
+        setPage(next)
+    }, [])
 
     return (
         <motion.div
@@ -47,7 +49,7 @@ export default function FolderSheet({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
-            className='absolute inset-0 z-20 flex flex-col bg-black/35 backdrop-blur-2xl'
+            className='absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-black/40 backdrop-blur-2xl'
             onClick={event => {
                 if (event.target === event.currentTarget) onClose()
             }}
@@ -61,7 +63,7 @@ export default function FolderSheet({
                     if (event.key === 'Enter') event.currentTarget.blur()
                     if (event.key === 'Escape') onClose()
                 }}
-                className='mx-auto mt-[12%] w-3/4 shrink-0 rounded-lg bg-transparent text-center text-[17px] font-semibold text-white outline-none focus:bg-white/10'
+                className='w-3/4 shrink-0 rounded-lg bg-transparent text-center text-[17px] font-semibold text-white outline-none focus:bg-white/10'
             />
 
             <motion.div
@@ -69,8 +71,8 @@ export default function FolderSheet({
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.72, opacity: 0 }}
                 transition={{ type: 'spring', stiffness: 460, damping: 36, mass: 0.7 }}
-                className='mt-[6%] flex min-h-0 flex-col'
-                style={{ paddingInline: `${screen.edge}px` }}
+                className='w-full shrink-0'
+                style={{ paddingInline: screen.edge }}
             >
                 <div
                     ref={strip}
@@ -78,16 +80,15 @@ export default function FolderSheet({
                         const node = event.currentTarget
                         setPage(Math.round(node.scrollLeft / node.clientWidth))
                     }}
-                    className='flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain rounded-[9%] bg-white/[0.14] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
+                    className='flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain rounded-[9%] bg-white/[0.16] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
                 >
                     {pages.map((apps, index) => (
                         <div
                             key={index}
-                            className='grid w-full shrink-0 snap-center gap-y-[6%] p-[7%]'
+                            className='grid w-full shrink-0 snap-center justify-center gap-y-4 p-[7%]'
                             style={{
                                 gridTemplateColumns: `repeat(${limits.folderColumns}, ${screen.icon}px)`,
                                 columnGap: `${screen.gap}px`,
-                                justifyContent: 'center',
                             }}
                         >
                             {apps.map(child => (
@@ -114,13 +115,16 @@ export default function FolderSheet({
                         </div>
                     ))}
                 </div>
-
-                {pages.length > 1 ? (
-                    <div className='mt-[5%]'>
-                        <PageDots count={pages.length} active={page} onGo={setPage} />
-                    </div>
-                ) : null}
             </motion.div>
+
+            {pages.length > 1 ? <PageDots count={pages.length} active={page} onGo={go} /> : null}
+
+            <button
+                onClick={onDissolve}
+                className='shrink-0 rounded-full bg-white/15 px-4 py-1.5 text-[12px] text-white/90 transition hover:bg-white/25'
+            >
+                Empty onto the page
+            </button>
         </motion.div>
     )
 }
