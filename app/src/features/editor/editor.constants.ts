@@ -64,14 +64,15 @@ export const limitsFrom = (metrics: Metrics | null): Limits => {
     }
 }
 
-export const CHROME_HEIGHT = 46
-/** Window padding, the gap under the title bar, and the device bezel. */
-export const OUTER = 8 * 2 + 9 + 5 * 2
+/** Padding around the device inside the window. */
+const OUTER = 10 * 2
 
-/** Window size that gives the device's own screen its real proportions. */
-export const windowSizeFor = (metrics: Metrics | null, width: number) => {
-    const screenWidth = metrics?.homeScreenWidth ?? 440
-    const screenHeight = metrics?.homeScreenHeight ?? 956
-    const inner = width - OUTER
-    return { width, height: Math.round((inner * screenHeight) / screenWidth) + OUTER + CHROME_HEIGHT }
+export const deviceAspect = (metrics: Metrics | null): number => {
+    const width = metrics?.homeScreenWidth ?? 440
+    const height = metrics?.homeScreenHeight ?? 956
+    return width / height
 }
+
+/** Window height that leaves no letterboxing around the device. */
+export const windowHeightFor = (metrics: Metrics | null, width: number) =>
+    Math.round((width - OUTER) / deviceAspect(metrics)) + OUTER

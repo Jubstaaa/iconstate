@@ -17,7 +17,6 @@
     body,
     #root {
         height: 100%;
-        background: transparent;
     }
 
     body {
@@ -27,18 +26,12 @@
         overflow: hidden;
     }
 
-    /*
-     * The window is transparent and undecorated. The title bar and the device are
-     * two separate floating pieces with desktop showing between them, the way the
-     * Simulator does it — so nothing here paints a background.
-     */
     #root {
         display: flex;
         flex-direction: column;
-        gap: 9px;
         height: 100%;
-        padding: 8px;
-        background: transparent;
+        padding: 10px;
+        background: var(--color-ink);
     }
 
     ::selection {
@@ -57,4 +50,12 @@
 @utility no-drag {
     -webkit-user-drag: none;
     user-select: none;
+}
+
+@utility drag-window {
+    -webkit-app-region: drag;
+}
+
+@utility no-drag-window {
+    -webkit-app-region: no-drag;
 }

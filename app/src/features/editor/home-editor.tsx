@@ -23,6 +23,7 @@ export default function HomeEditor({
     limits,
     icons,
     selection,
+    aspect,
     offline,
     commands,
     dispatch,
@@ -249,7 +250,7 @@ export default function HomeEditor({
                     setHint(null)
                 }}
             >
-                <PhoneFrame limits={limits}>
+                <PhoneFrame limits={limits} aspect={aspect}>
                     {offline ? (
                         <div className='absolute inset-0 z-30 grid place-items-center bg-black/45 px-10 backdrop-blur-md'>
                             <p className='text-center text-[13px] leading-relaxed text-white/85'>{offline}</p>

@@ -18,6 +18,7 @@ export interface HomeEditorProps {
     limits: Limits
     icons: IconManifest
     selection: Set<string>
+    aspect: number
     offline: string
     commands: EditorCommands
     dispatch: (action: Action) => void

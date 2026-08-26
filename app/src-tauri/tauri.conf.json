@@ -13,15 +13,11 @@
         "windows": [
             {
                 "title": "IconState",
-                "width": 452,
-                "height": 944,
-                "minWidth": 340,
+                "width": 470,
+                "height": 1010,
+                "minWidth": 360,
                 "minHeight": 700,
-                "decorations": true,
-                "transparent": true,
-                "shadow": false,
-                "titleBarStyle": "Overlay",
-                "hiddenTitle": true
+                "theme": "Dark"
             }
         ],
         "security": {
@@ -30,8 +26,7 @@
                 "enable": true,
                 "scope": ["$HOME/.iconstate/icons/**"]
             }
-        },
-        "macOSPrivateApi": true
+        }
     },
     "bundle": {
         "active": true,
