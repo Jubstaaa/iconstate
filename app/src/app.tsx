@@ -1,5 +1,5 @@
 import { LogicalSize, getCurrentWindow } from '@tauri-apps/api/window'
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useReducer, useState } from 'react'
 
 import { limitsFrom, windowSizeFor } from './features/editor/editor.constants'
 import { editorReducer, initialEditorState, toIconState } from './features/editor/editor.reducer'
@@ -11,7 +11,6 @@ import {
     diffLayout,
     fetchIcons,
     fetchMetrics,
-    fetchWallpaper,
     getErrorMessage,
     listDevices,
     onProgress,
@@ -19,7 +18,6 @@ import {
     readIconState,
     restoreBackup,
 } from './lib/core'
-import { readImageFile, readStoredWallpaper, storeWallpaper } from './lib/wallpaper'
 
 import type { Metrics } from './features/editor/editor.constants'
 import type { EditorCommands } from './features/editor/home-editor.types'
@@ -57,8 +55,6 @@ export default function App() {
     const [baseline, setBaseline] = useState<IconState | null>(null)
     const [metrics, setMetrics] = useState<Metrics | null>(null)
     const [icons, setIcons] = useState<IconManifest>({})
-    const [wallpaper, setWallpaper] = useState<string | null>(null)
-    const [ownWallpaper, setOwnWallpaper] = useState<string | null>(readStoredWallpaper)
     const [change, setChange] = useState<DiffSummary | null>(null)
     const [status, setStatus] = useState('looking for an iPhone')
     const [busy, setBusy] = useState(false)
@@ -66,7 +62,6 @@ export default function App() {
     const [selection, setSelection] = useState<Set<string>>(new Set())
     const [device, setDevice] = useState('')
     const [system, setSystem] = useState('not connected')
-    const picker = useRef<HTMLInputElement>(null)
 
     const serial = devices[0]?.serial
     const limits = useMemo(() => limitsFrom(metrics), [metrics])
@@ -95,7 +90,6 @@ export default function App() {
                 setMetrics(grid)
                 dispatch({ type: 'load', state: read })
                 setIcons(await fetchIcons(target))
-                setWallpaper(await fetchWallpaper(target).catch(() => null))
             }),
         [guard]
     )
@@ -106,7 +100,6 @@ export default function App() {
         busy,
         dirty,
         canUndoWrite: Boolean(serial),
-        hasOwnWallpaper: Boolean(ownWallpaper),
         onReload: handleReload,
         onPropose: useCallback(
             (lookUp: boolean) =>
@@ -128,11 +121,6 @@ export default function App() {
                 }),
             [guard, load, serial]
         ),
-        onPickWallpaper: useCallback(() => picker.current?.click(), []),
-        onClearWallpaper: useCallback(() => {
-            storeWallpaper(null)
-            setOwnWallpaper(null)
-        }, []),
     }
 
     const handleApply = useCallback(
@@ -143,16 +131,6 @@ export default function App() {
                 await load(serial)
             }),
         [edited, guard, load, serial]
-    )
-
-    const handleWallpaperFile = useCallback(
-        (file: File) =>
-            guard(async () => {
-                const dataUrl = await readImageFile(file)
-                storeWallpaper(dataUrl)
-                setOwnWallpaper(dataUrl)
-            }),
-        [guard]
     )
 
     useEffect(() => {
@@ -206,7 +184,6 @@ export default function App() {
                     state={state}
                     limits={limits}
                     icons={icons}
-                    wallpaper={ownWallpaper ?? wallpaper}
                     selection={selection}
                     status={status}
                     commands={commands}
@@ -218,18 +195,6 @@ export default function App() {
                     <p className='max-w-64 text-center text-[13px] leading-relaxed text-dim'>{status}</p>
                 </div>
             )}
-
-            <input
-                ref={picker}
-                type='file'
-                accept='image/*'
-                className='hidden'
-                onChange={event => {
-                    const file = event.target.files?.[0]
-                    if (file) handleWallpaperFile(file)
-                    event.target.value = ''
-                }}
-            />
 
             {change ? (
                 <DiffReview

@@ -17,6 +17,7 @@
     body,
     #root {
         height: 100%;
+        background: transparent;
     }
 
     body {
@@ -26,14 +27,18 @@
         overflow: hidden;
     }
 
-    /* The window is transparent and undecorated, so only the device shows. */
+    /*
+     * The window is transparent and undecorated. The title bar and the device are
+     * two separate floating pieces with desktop showing between them, the way the
+     * Simulator does it — so nothing here paints a background.
+     */
     #root {
         display: flex;
         flex-direction: column;
+        gap: 9px;
         height: 100%;
-        overflow: hidden;
-        border-radius: 12px 12px 50px 50px;
-        background: #0e1116;
+        padding: 8px;
+        background: transparent;
     }
 
     ::selection {

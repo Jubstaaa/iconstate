@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 956" preserveAspectRatio="xMidYMid slice">
+    <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0.3" y2="1">
+            <stop offset="0" stop-color="#1b1145"/>
+            <stop offset="0.45" stop-color="#2a1b5e"/>
+            <stop offset="1" stop-color="#06060f"/>
+        </linearGradient>
+        <radialGradient id="dawn" cx="0.78" cy="0.16" r="0.72">
+            <stop offset="0" stop-color="#ff7a59" stop-opacity="0.55"/>
+            <stop offset="0.35" stop-color="#c2478f" stop-opacity="0.32"/>
+            <stop offset="1" stop-color="#c2478f" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="deep" cx="0.12" cy="0.82" r="0.85">
+            <stop offset="0" stop-color="#2f6df6" stop-opacity="0.42"/>
+            <stop offset="1" stop-color="#2f6df6" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="haze" cx="0.5" cy="0.52" r="0.6">
+            <stop offset="0" stop-color="#8b5cf6" stop-opacity="0.22"/>
+            <stop offset="1" stop-color="#8b5cf6" stop-opacity="0"/>
+        </radialGradient>
+        <filter id="grain">
+            <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/>
+            <feColorMatrix type="saturate" values="0"/>
+        </filter>
+    </defs>
+
+    <rect width="440" height="956" fill="url(#sky)"/>
+    <rect width="440" height="956" fill="url(#dawn)"/>
+    <rect width="440" height="956" fill="url(#deep)"/>
+    <rect width="440" height="956" fill="url(#haze)"/>
+    <rect width="440" height="956" filter="url(#grain)" opacity="0.045"/>
+</svg>

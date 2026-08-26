@@ -63,17 +63,23 @@ The app is the point: a real iPhone home screen you can rearrange with a mouse.
 The icons are the device's own PNGs and the grid is the size SpringBoard says it
 is — four columns by six rows on this phone, not a number someone typed in.
 
-The wallpaper is the one thing the device lies about. `getHomeScreenWallpaperPNGData`
-returns a stale copy on iOS 26 — the same bytes every time, and not what is
-actually on the phone. Wallpapers moved to the poster system in iOS 16 and this
-SpringBoard command never followed; `getWallpaperInfo` is worse, it closes the
-connection for every name. So the device's answer is only a starting point and
-you can drop in your own image instead.
+The wallpaper is not read from the device at all. `getHomeScreenWallpaperPNGData`
+returns a stale copy on iOS 26 — the same bytes every time, verified by hashing
+repeated fetches, and not what is actually on the phone. Wallpapers moved to the
+poster system in iOS 16 and this SpringBoard command never followed;
+`getWallpaperInfo` is worse, it closes the connection for every name. Since the
+answer is wrong anyway, the editor ships one of its own in
+`app/src/assets/wallpaper.svg`. Apple's own wallpapers are not an option: they
+are copyrighted and cannot be redistributed here.
 
-The window *is* the phone. It has no decorations of its own: the app draws the
-title bar (device name, iOS version, three actions) and the bezel runs to the
-window edge, so there is no page around the device and no gap between the two.
-Everything else lives in the right-click menu, the way it does in a simulator.
+The window *is* the phone. It has no decorations and no background: the title
+bar and the device are two floating pieces with the desktop showing between
+them, the way the Simulator does it. The title bar carries the device name, the
+iOS version, and three buttons — sort into folders, read the phone again, review
+changes. Everything else lives in the right-click menu.
+
+Transparency on macOS needs Tauri's `macOSPrivateApi`, which rules out the Mac
+App Store; this ships through GitHub Releases, so that is not a constraint.
 
 Drawing the frame by hand was a choice, not a gap. `devices.css` has a good
 iPhone 14 Pro, but it resets `.device *` to `display: block`, which flattens

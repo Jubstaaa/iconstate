@@ -16,12 +16,12 @@ export default function SimulatorChrome({ device, system, actions }: SimulatorCh
     return (
         <div
             data-tauri-drag-region
-            className='flex h-[52px] shrink-0 items-center justify-between border-b border-white/8 bg-[#16191f] px-3 select-none'
+            className='flex h-[46px] shrink-0 items-center justify-between rounded-[15px] bg-[#1d2026] px-3 shadow-[0_4px_12px_-6px_rgba(0,0,0,0.6)] ring-1 ring-white/8 select-none'
         >
             <div className='flex items-center gap-2'>
                 <Light tone='bg-[#ff5f57]' onClick={() => getCurrentWindow().close()} />
                 <Light tone='bg-[#febc2e]' onClick={() => getCurrentWindow().minimize()} />
-                <span className='size-[12px] rounded-full bg-white/15' />
+                <Light tone='bg-[#28c840]' onClick={() => getCurrentWindow().toggleMaximize()} />
             </div>
 
             <div data-tauri-drag-region className='pointer-events-none text-center leading-tight'>

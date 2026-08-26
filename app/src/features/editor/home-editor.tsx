@@ -23,7 +23,6 @@ export default function HomeEditor({
     state,
     limits,
     icons,
-    wallpaper,
     selection,
     status,
     commands,
@@ -196,13 +195,6 @@ export default function HomeEditor({
             items.push({ label: 'Sort, looking up unknown apps', onPick: () => commands.onPropose(true) })
             items.push(SEPARATOR)
 
-            items.push({
-                label: commands.hasOwnWallpaper ? 'Change wallpaper…' : 'Use my own wallpaper…',
-                onPick: commands.onPickWallpaper,
-            })
-            if (commands.hasOwnWallpaper) {
-                items.push({ label: "Use the phone's wallpaper", onPick: commands.onClearWallpaper })
-            }
             items.push({ label: 'Read from iPhone again', onPick: commands.onReload })
             items.push(SEPARATOR)
 
@@ -258,7 +250,7 @@ export default function HomeEditor({
                     setHint(null)
                 }}
             >
-                <PhoneFrame wallpaper={wallpaper}>
+                <PhoneFrame>
                     <PagesStrip
                         pages={layout.pages}
                         limits={limits}

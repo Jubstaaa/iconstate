@@ -6,21 +6,17 @@ export interface EditorCommands {
     busy: boolean
     dirty: boolean
     canUndoWrite: boolean
-    hasOwnWallpaper: boolean
     onReload: () => void
     onPropose: (lookUp: boolean) => void
     onReview: () => void
     onDiscard: () => void
     onUndoWrite: () => void
-    onPickWallpaper: () => void
-    onClearWallpaper: () => void
 }
 
 export interface HomeEditorProps {
     state: EditorState
     limits: Limits
     icons: IconManifest
-    wallpaper: string | null
     selection: Set<string>
     status: string
     commands: EditorCommands
