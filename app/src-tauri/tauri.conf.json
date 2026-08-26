@@ -4,9 +4,9 @@
   "version": "0.0.0",
   "identifier": "com.ilkerbalcilar.iconstate",
   "build": {
-    "beforeDevCommand": "npm run dev",
+    "beforeDevCommand": "../scripts/build-sidecar.sh && npm run dev",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "npm run build",
+    "beforeBuildCommand": "npm run build && ../scripts/build-sidecar.sh",
     "frontendDist": "../dist"
   },
   "app": {

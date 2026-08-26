@@ -5,6 +5,13 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TRIPLE="$(rustc -vV | awk '/^host:/ {print $2}')"
 OUT="$ROOT/app/src-tauri/binaries"
 
+BINARY="$OUT/iconstate-core-$TRIPLE"
+
+if [ -x "$BINARY" ] && [ -z "$(find "$ROOT/core/src" "$ROOT/core/pyproject.toml" "$ROOT/core/entrypoint.py" -newer "$BINARY" -print -quit)" ]; then
+    echo "sidecar up to date: $BINARY"
+    exec "$BINARY" --version
+fi
+
 cd "$ROOT/core"
 [ -d .venv ] || uv venv --python 3.12
 uv pip install -q -e . --group dev
@@ -22,8 +29,8 @@ uv pip install -q -e . --group dev
     entrypoint.py
 
 mkdir -p "$OUT"
-cp "$ROOT/core/dist/iconstate-core" "$OUT/iconstate-core-$TRIPLE"
-chmod +x "$OUT/iconstate-core-$TRIPLE"
+cp "$ROOT/core/dist/iconstate-core" "$BINARY"
+chmod +x "$BINARY"
 
-echo "sidecar ready: $OUT/iconstate-core-$TRIPLE"
-"$OUT/iconstate-core-$TRIPLE" --version
+echo "sidecar ready: $BINARY"
+"$BINARY" --version
