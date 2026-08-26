@@ -70,12 +70,22 @@ SpringBoard command never followed; `getWallpaperInfo` is worse, it closes the
 connection for every name. So the device's answer is only a starting point and
 you can drop in your own image instead.
 
-Drag an icon onto another to make a folder, onto a folder to file it there, onto
-an empty cell to move it. Click to select, ⌘-click or shift-click to select
-several, ⌘G to fold the selection into one folder. Double-click a folder to open
-it, rename it in place, or tip it back out onto the page. Arrow keys turn pages,
-⌘Z undoes. Nothing is written until Review changes, and that shows the same diff
-the CLI prints.
+The window is the phone and nothing else — no toolbar, no sidebar. Every command
+lives in the right-click menu, the way it does in a simulator.
+
+Press and hold to drag; a quick click opens a folder. Drop an icon on the middle
+of another to make a folder, on its edge to slot in beside it, on a folder to
+file it there. Click to select, ⌘-click or shift-click for several, ⌘G to fold
+the selection into one folder. Arrow keys or a two-finger swipe move between
+pages, ⌘Z undoes.
+
+Pages sit side by side behind one native horizontal scroller with CSS scroll
+snapping, so the swipe, the momentum and the settle are the browser's own. An
+earlier version animated the transition by hand and it never felt right; the fix
+was to delete it rather than tune it.
+
+Nothing is written until Review changes, which shows the same diff the CLI
+prints.
 
 ```bash
 ./scripts/build-sidecar.sh      # freezes the CLI next to the Tauri shell

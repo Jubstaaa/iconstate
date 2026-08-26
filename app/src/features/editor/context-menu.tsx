@@ -36,26 +36,30 @@ export default function ContextMenu({ menu, onClose }: ContextMenuProps) {
             onPointerDown={event => event.stopPropagation()}
             className='fixed z-40 min-w-52 origin-top-left rounded-xl border border-white/10 bg-[#1c1f26]/95 p-1 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.8)] backdrop-blur-xl'
         >
-            {menu.items.map(item => (
-                <button
-                    key={item.label}
-                    disabled={item.disabled}
-                    onClick={() => {
-                        item.onPick()
-                        onClose()
-                    }}
-                    className={`flex w-full items-center justify-between gap-6 rounded-lg px-2.5 py-1.5 text-left text-[13px] transition ${
-                        item.disabled
-                            ? 'cursor-default text-dim/50'
-                            : item.danger
-                              ? 'text-alarm hover:bg-alarm/15'
-                              : 'text-chalk hover:bg-white/10'
-                    }`}
-                >
-                    {item.label}
-                    {item.shortcut ? <span className='text-[11px] text-dim'>{item.shortcut}</span> : null}
-                </button>
-            ))}
+            {menu.items.map((item, index) =>
+                item.label === '—' ? (
+                    <span key={`sep-${index}`} className='my-1 block h-px bg-white/10' />
+                ) : (
+                    <button
+                        key={item.label}
+                        disabled={item.disabled}
+                        onClick={() => {
+                            item.onPick()
+                            onClose()
+                        }}
+                        className={`flex w-full items-center justify-between gap-6 rounded-lg px-2.5 py-1.5 text-left text-[13px] transition ${
+                            item.disabled
+                                ? 'cursor-default text-dim/50'
+                                : item.danger
+                                  ? 'text-alarm hover:bg-alarm/15'
+                                  : 'text-chalk hover:bg-white/10'
+                        }`}
+                    >
+                        {item.label}
+                        {item.shortcut ? <span className='text-[11px] text-dim'>{item.shortcut}</span> : null}
+                    </button>
+                )
+            )}
         </motion.div>
     )
 }

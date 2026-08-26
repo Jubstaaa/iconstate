@@ -6,7 +6,7 @@ const SIDE_BUTTON = 'absolute w-[3px] rounded-full bg-white/25'
 
 export default function PhoneFrame({ wallpaper, aspect, children }: PhoneFrameProps) {
     return (
-        <div className='relative h-full' style={{ aspectRatio: aspect }}>
+        <div className='relative h-full max-w-full' style={{ aspectRatio: aspect }}>
             <span className={`${SIDE_BUTTON} -left-[3px] top-[16%] h-[3.5%]`} />
             <span className={`${SIDE_BUTTON} -left-[3px] top-[23%] h-[6.5%]`} />
             <span className={`${SIDE_BUTTON} -left-[3px] top-[31%] h-[6.5%]`} />

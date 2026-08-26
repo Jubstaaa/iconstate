@@ -1,10 +1,8 @@
-import { useCallback, useEffect, useMemo, useReducer, useState } from 'react'
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 
-import EditorToolbar from './features/editor/editor-toolbar'
 import { limitsFrom, screenAspect } from './features/editor/editor.constants'
 import { editorReducer, initialEditorState, toIconState } from './features/editor/editor.reducer'
 import HomeEditor from './features/editor/home-editor'
-import WallpaperPicker from './features/editor/wallpaper-picker'
 import DiffReview from './features/diff-review/diff-review'
 import {
     applyLayout,
@@ -19,19 +17,18 @@ import {
     readIconState,
     restoreBackup,
 } from './lib/core'
-import { checkForUpdate } from './lib/update'
 import { readImageFile, readStoredWallpaper, storeWallpaper } from './lib/wallpaper'
 
 import type { Metrics } from './features/editor/editor.constants'
+import type { EditorCommands } from './features/editor/home-editor.types'
 import type { Device, DiffSummary, IconManifest, IconState, ProgressEvent } from './lib/core.types'
-import type { UpdateInfo } from './lib/update'
 
 const describe = (event: ProgressEvent): string => {
     switch (event.event) {
         case 'connected':
             return `${event.name} · iOS ${event.ios}`
         case 'icon-state-read':
-            return 'read the home screen'
+            return 'reading the home screen'
         case 'icon':
             return `icon ${event.done} of ${event.total}`
         case 'looking-up':
@@ -43,7 +40,7 @@ const describe = (event: ProgressEvent): string => {
         case 'backed-up':
             return 'backed up'
         case 'writing':
-            return 'writing to the device'
+            return 'writing to the iPhone'
         case 'written':
             return 'written'
         case 'error':
@@ -61,16 +58,13 @@ export default function App() {
     const [wallpaper, setWallpaper] = useState<string | null>(null)
     const [ownWallpaper, setOwnWallpaper] = useState<string | null>(readStoredWallpaper)
     const [change, setChange] = useState<DiffSummary | null>(null)
-    const [status, setStatus] = useState('')
-    const [error, setError] = useState('')
+    const [status, setStatus] = useState('looking for an iPhone')
     const [busy, setBusy] = useState(false)
-    const [update, setUpdate] = useState<UpdateInfo | null>(null)
-    const [device, setDevice] = useState('')
     const [state, dispatch] = useReducer(editorReducer, initialEditorState)
     const [selection, setSelection] = useState<Set<string>>(new Set())
+    const picker = useRef<HTMLInputElement>(null)
 
     const serial = devices[0]?.serial
-    const shownWallpaper = ownWallpaper ?? wallpaper
     const limits = useMemo(() => limitsFrom(metrics), [metrics])
     const aspect = useMemo(() => screenAspect(metrics), [metrics])
     const edited = useMemo(() => toIconState(state.layout, limits), [state.layout, limits])
@@ -81,11 +75,10 @@ export default function App() {
 
     const guard = useCallback(async (work: () => Promise<void>) => {
         setBusy(true)
-        setError('')
         try {
             await work()
         } catch (cause) {
-            setError(getErrorMessage(cause))
+            setStatus(getErrorMessage(cause))
         } finally {
             setBusy(false)
         }
@@ -104,34 +97,40 @@ export default function App() {
         [guard]
     )
 
-    const handleRefresh = useCallback(
-        () =>
-            guard(async () => {
-                const found = await listDevices()
-                setDevices(found)
-                if (!found.length) setStatus('plug the iPhone in over USB and trust this Mac')
-            }),
-        [guard]
-    )
+    const handleReload = useCallback(() => load(serial), [load, serial])
 
-    const handlePropose = useCallback(
-        (lookup: boolean) =>
-            guard(async () => {
-                dispatch({ type: 'load', state: await planLayout(serial, { lookup }) })
-            }),
-        [guard, serial]
-    )
-
-    const handleGroup = useCallback(() => {
-        if (selection.size < 2) return
-        dispatch({ type: 'group', ids: [...selection], name: 'New Folder' })
-        setSelection(new Set())
-    }, [selection])
-
-    const handleReview = useCallback(
-        () => guard(async () => setChange(await diffLayout(edited, serial))),
-        [edited, guard, serial]
-    )
+    const commands: EditorCommands = {
+        busy,
+        dirty,
+        canUndoWrite: Boolean(serial),
+        hasOwnWallpaper: Boolean(ownWallpaper),
+        onReload: handleReload,
+        onPropose: useCallback(
+            (lookUp: boolean) =>
+                guard(async () => {
+                    dispatch({ type: 'load', state: await planLayout(serial, { lookup: lookUp }) })
+                }),
+            [guard, serial]
+        ),
+        onReview: useCallback(
+            () => guard(async () => setChange(await diffLayout(edited, serial))),
+            [edited, guard, serial]
+        ),
+        onDiscard: useCallback(() => baseline && dispatch({ type: 'load', state: baseline }), [baseline]),
+        onUndoWrite: useCallback(
+            () =>
+                guard(async () => {
+                    await restoreBackup(undefined, serial)
+                    await load(serial)
+                }),
+            [guard, load, serial]
+        ),
+        onPickWallpaper: useCallback(() => picker.current?.click(), []),
+        onClearWallpaper: useCallback(() => {
+            storeWallpaper(null)
+            setOwnWallpaper(null)
+        }, []),
+    }
 
     const handleApply = useCallback(
         () =>
@@ -143,7 +142,7 @@ export default function App() {
         [edited, guard, load, serial]
     )
 
-    const handlePickWallpaper = useCallback(
+    const handleWallpaperFile = useCallback(
         (file: File) =>
             guard(async () => {
                 const dataUrl = await readImageFile(file)
@@ -153,129 +152,52 @@ export default function App() {
         [guard]
     )
 
-    const handleClearWallpaper = useCallback(() => {
-        storeWallpaper(null)
-        setOwnWallpaper(null)
-    }, [])
-
-    const handleRestore = useCallback(
-        () =>
-            guard(async () => {
-                await restoreBackup(undefined, serial)
-                await load(serial)
-            }),
-        [guard, load, serial]
-    )
-
     useEffect(() => {
-        const unlisten = onProgress(event => {
-            if (event.event === 'connected') setDevice(`${event.name} · iOS ${event.ios}`)
-            setStatus(describe(event))
+        const unlisten = onProgress(event => setStatus(describe(event)))
+        guard(async () => {
+            const found = await listDevices()
+            setDevices(found)
+            if (!found.length) setStatus('plug the iPhone in over USB and trust this Mac')
         })
-        handleRefresh()
-        checkForUpdate()
-            .then(setUpdate)
-            .catch(() => setUpdate(null))
         return () => {
             unlisten.then(stop => stop())
         }
-    }, [handleRefresh])
+    }, [guard])
 
     useEffect(() => {
         if (serial && !baseline) load(serial)
     }, [baseline, load, serial])
 
     return (
-        <div className='flex h-full flex-col gap-3 p-4'>
-            <header className='flex shrink-0 items-center justify-between gap-4'>
-                <div className='flex items-center gap-3'>
-                    <span className='grid size-7 place-items-center rounded-lg bg-glow/15 ring-1 ring-glow/30'>
-                        <svg viewBox='0 0 16 16' className='size-3.5' fill='currentColor'>
-                            <rect x='1' y='1' width='6' height='6' rx='2' />
-                            <rect x='9' y='1' width='6' height='6' rx='2' />
-                            <rect x='1' y='9' width='6' height='6' rx='2' />
-                            <rect x='9' y='9' width='6' height='6' rx='2' />
-                        </svg>
-                    </span>
-                    <div className='leading-tight'>
-                        <h1 className='text-[13px] font-semibold tracking-tight'>{device || 'IconState'}</h1>
-                        <p className='text-[11px] text-dim'>
-                            {error ? (
-                                <span className='text-alarm'>{error}</span>
-                            ) : (
-                                status || serial || 'no device'
-                            )}
-                        </p>
-                    </div>
-                </div>
-                <EditorToolbar
-                    busy={busy}
-                    dirty={dirty}
-                    selectionCount={selection.size}
-                    canUndo={state.past.length > 0}
-                    canRedo={state.future.length > 0}
-                    onGroup={handleGroup}
-                    onUndo={() => dispatch({ type: 'undo' })}
-                    onRedo={() => dispatch({ type: 'redo' })}
-                    onReset={() => baseline && dispatch({ type: 'load', state: baseline })}
-                    onReview={handleReview}
+        <div className='grid h-full place-items-center p-3 pt-7'>
+            {baseline ? (
+                <HomeEditor
+                    state={state}
+                    limits={limits}
+                    icons={icons}
+                    wallpaper={ownWallpaper ?? wallpaper}
+                    aspect={aspect}
+                    selection={selection}
+                    status={status}
+                    commands={commands}
+                    dispatch={dispatch}
+                    onSelectionChange={setSelection}
                 />
-            </header>
+            ) : (
+                <p className='max-w-64 text-center text-[13px] leading-relaxed text-dim'>{status}</p>
+            )}
 
-            <main className='min-h-0 flex-1 py-1'>
-                {baseline ? (
-                    <HomeEditor
-                        state={state}
-                        limits={limits}
-                        icons={icons}
-                        wallpaper={shownWallpaper}
-                        aspect={aspect}
-                        selection={selection}
-                        dispatch={dispatch}
-                        onSelectionChange={setSelection}
-                    />
-                ) : (
-                    <div className='grid h-full place-items-center text-sm text-dim'>
-                        {busy ? 'reading the iPhone…' : 'plug the iPhone in over USB and trust this Mac'}
-                    </div>
-                )}
-            </main>
-
-            <footer className='flex shrink-0 items-center justify-between text-xs text-dim'>
-                <div className='flex gap-2'>
-                    <button className='hover:text-chalk' onClick={handleRefresh} disabled={busy}>
-                        Refresh device
-                    </button>
-                    <button
-                        className='hover:text-chalk'
-                        onClick={() => handlePropose(false)}
-                        disabled={busy || !baseline}
-                    >
-                        Propose folders
-                    </button>
-                    <button
-                        className='hover:text-chalk'
-                        onClick={() => handlePropose(true)}
-                        disabled={busy || !baseline}
-                    >
-                        Propose + look up unknown apps
-                    </button>
-                    <button className='hover:text-chalk' onClick={handleRestore} disabled={busy || !serial}>
-                        Undo last write
-                    </button>
-                </div>
-                <WallpaperPicker
-                    custom={Boolean(ownWallpaper)}
-                    stale={Boolean(wallpaper)}
-                    onPick={handlePickWallpaper}
-                    onClear={handleClearWallpaper}
-                />
-                {update ? (
-                    <a className='text-glow' href={update.url} target='_blank' rel='noreferrer'>
-                        version {update.version} is available
-                    </a>
-                ) : null}
-            </footer>
+            <input
+                ref={picker}
+                type='file'
+                accept='image/*'
+                className='hidden'
+                onChange={event => {
+                    const file = event.target.files?.[0]
+                    if (file) handleWallpaperFile(file)
+                    event.target.value = ''
+                }}
+            />
 
             {change ? (
                 <DiffReview

@@ -13,10 +13,13 @@
         "windows": [
             {
                 "title": "IconState",
-                "width": 1240,
+                "width": 452,
                 "height": 940,
-                "minWidth": 980,
-                "minHeight": 760
+                "minWidth": 380,
+                "minHeight": 720,
+                "titleBarStyle": "Overlay",
+                "hiddenTitle": true,
+                "backgroundColor": "#0b0d11"
             }
         ],
         "security": {
