@@ -1,4 +1,5 @@
 import { isFolder } from '../../lib/core.types'
+import { isFolderSlot } from './editor.types'
 
 import type { AppIcon, IconState } from '../../lib/core.types'
 import type {
@@ -12,7 +13,6 @@ import type {
     Target,
     Zone,
 } from './editor.types'
-import { isFolderSlot } from './editor.types'
 
 let counter = 0
 const nextId = (prefix: string) => `${prefix}:${(counter += 1)}`
@@ -64,9 +64,6 @@ export const toIconState = (layout: Layout, limits: Limits): IconState => {
     return [write(layout.dock), ...layout.pages.map(write)]
 }
 
-const zoneKey = (zone: Zone): string =>
-    zone.kind === 'page' ? `page:${zone.page}` : zone.kind === 'dock' ? 'dock' : `folder:${zone.id}`
-
 const findSlot = (layout: Layout, id: string): Slot | undefined => {
     for (const slot of [...layout.dock, ...layout.pages.flat()]) {
         if (slot.id === id) return slot
@@ -76,58 +73,6 @@ const findSlot = (layout: Layout, id: string): Slot | undefined => {
         }
     }
     return undefined
-}
-
-const withoutIds = (layout: Layout, ids: Set<string>): Layout => ({
-    dock: layout.dock.filter(slot => !ids.has(slot.id)),
-    pages: layout.pages.map(page =>
-        page
-            .filter(slot => !ids.has(slot.id))
-            .map(slot =>
-                isFolderSlot(slot) ? { ...slot, apps: slot.apps.filter(app => !ids.has(app.id)) } : slot
-            )
-    ),
-})
-
-const insert = (layout: Layout, zone: Zone, index: number, slots: Slot[]): Layout => {
-    const place = <T>(list: T[], items: T[]): T[] => {
-        const at = Math.max(0, Math.min(index, list.length))
-        return [...list.slice(0, at), ...items, ...list.slice(at)]
-    }
-
-    if (zone.kind === 'dock') {
-        return {
-            ...layout,
-            dock: place(
-                layout.dock,
-                slots.filter(slot => !isFolderSlot(slot))
-            ),
-        }
-    }
-
-    if (zone.kind === 'page') {
-        return {
-            ...layout,
-            pages: layout.pages.map((page, at) => (at === zone.page ? place(page, slots) : page)),
-        }
-    }
-
-    const apps = slots.flatMap(slot => (isFolderSlot(slot) ? slot.apps : [slot]))
-    return {
-        ...layout,
-        pages: layout.pages.map(page =>
-            page.map(slot =>
-                isFolderSlot(slot) && slot.id === zone.id ? { ...slot, apps: place(slot.apps, apps) } : slot
-            )
-        ),
-    }
-}
-
-const prune = (layout: Layout): Layout => {
-    const pages = layout.pages.map(page => page.filter(slot => !isFolderSlot(slot) || slot.apps.length > 0))
-    const trimmed = [...pages]
-    while (trimmed.length > 1 && trimmed[trimmed.length - 1].length === 0) trimmed.pop()
-    return { ...layout, pages: trimmed }
 }
 
 const zoneOf = (layout: Layout, id: string): { zone: Zone; index: number } | undefined => {
@@ -146,30 +91,95 @@ const zoneOf = (layout: Layout, id: string): { zone: Zone; index: number } | und
     return undefined
 }
 
+const withoutIds = (layout: Layout, ids: Set<string>): Layout => ({
+    dock: layout.dock.filter(slot => !ids.has(slot.id)),
+    pages: layout.pages.map(page =>
+        page
+            .filter(slot => !ids.has(slot.id))
+            .map(slot =>
+                isFolderSlot(slot) ? { ...slot, apps: slot.apps.filter(app => !ids.has(app.id)) } : slot
+            )
+    ),
+})
+
+/**
+ * Resolve where slots land against the anchor slot, in the list the moved slots
+ * have already been removed from. Indices computed before the removal go stale
+ * the moment more than one slot moves, so the anchor is the thing that survives.
+ */
+const place = <T extends { id: string }>(list: T[], slots: T[], target: Target): T[] => {
+    const anchor = target.anchorId ? list.findIndex(item => item.id === target.anchorId) : -1
+    const at = anchor < 0 ? list.length : target.position === 'after' ? anchor + 1 : anchor
+    return [...list.slice(0, at), ...slots, ...list.slice(at)]
+}
+
+const insert = (layout: Layout, target: Target, slots: Slot[]): Layout => {
+    const { zone } = target
+
+    if (zone.kind === 'dock') return { ...layout, dock: place(layout.dock, slots, target) }
+
+    if (zone.kind === 'page') {
+        return {
+            ...layout,
+            pages: layout.pages.map((page, at) => (at === zone.page ? place(page, slots, target) : page)),
+        }
+    }
+
+    // A folder holds apps, never other folders — SpringBoard has no nesting.
+    const apps = slots.filter((slot): slot is AppSlot => !isFolderSlot(slot))
+    if (!apps.length) return layout
+
+    return {
+        ...layout,
+        pages: layout.pages.map(page =>
+            page.map(slot =>
+                isFolderSlot(slot) && slot.id === zone.id
+                    ? { ...slot, apps: place(slot.apps, apps, target) }
+                    : slot
+            )
+        ),
+    }
+}
+
+const prune = (layout: Layout): Layout => {
+    const pages = layout.pages.map(page => page.filter(slot => !isFolderSlot(slot) || slot.apps.length > 0))
+    const trimmed = [...pages]
+    while (trimmed.length > 1 && trimmed[trimmed.length - 1].length === 0) trimmed.pop()
+    return { ...layout, pages: trimmed }
+}
+
 const move = (layout: Layout, ids: string[], target: Target): Layout => {
-    const moving = ids.map(id => findSlot(layout, id)).filter((slot): slot is Slot => slot !== undefined)
+    const moving = ids
+        .filter(id => id !== target.anchorId)
+        .map(id => findSlot(layout, id))
+        .filter((slot): slot is Slot => slot !== undefined)
     if (!moving.length) return layout
 
-    const origin = zoneOf(layout, moving[0].id)
-    const sameZone = origin && zoneKey(origin.zone) === zoneKey(target.zone)
-    const shift = sameZone && origin.index < target.index ? moving.length : 0
+    // Dropping a folder into a folder must not quietly spill its contents.
+    if (target.zone.kind === 'folder' && moving.some(isFolderSlot)) return layout
 
-    const emptied = withoutIds(layout, new Set(ids))
-    return prune(insert(emptied, target.zone, target.index - shift, moving))
+    const emptied = withoutIds(layout, new Set(moving.map(slot => slot.id)))
+    return prune(insert(emptied, target, moving))
 }
 
 const combine = (layout: Layout, ids: string[], ontoId: string): Layout => {
     const onto = findSlot(layout, ontoId)
-    if (!onto || ids.includes(ontoId)) return layout
-
-    if (isFolderSlot(onto))
-        return move(layout, ids, { zone: { kind: 'folder', id: onto.id }, index: onto.apps.length })
-
     const where = zoneOf(layout, ontoId)
-    if (!where || where.zone.kind !== 'page') return layout
+    if (!onto || !where || ids.includes(ontoId)) return layout
 
     const moving = ids.map(id => findSlot(layout, id)).filter((slot): slot is Slot => slot !== undefined)
-    const members = [onto, ...moving].flatMap(slot => (isFolderSlot(slot) ? slot.apps : [slot as AppSlot]))
+    if (!moving.length) return layout
+
+    // Folder onto folder would have to merge or nest, and neither is what anyone
+    // means by the gesture — treat it as a reorder and leave both folders whole.
+    if (moving.some(isFolderSlot)) {
+        return move(layout, ids, { zone: where.zone, anchorId: ontoId, position: 'before' })
+    }
+
+    if (isFolderSlot(onto)) return move(layout, ids, { zone: { kind: 'folder', id: onto.id } })
+    if (where.zone.kind !== 'page') return layout
+
+    const members = [onto as AppSlot, ...(moving as AppSlot[])]
     const folder: FolderSlot = {
         id: nextId('folder'),
         kind: 'folder',
@@ -178,7 +188,8 @@ const combine = (layout: Layout, ids: string[], ontoId: string): Layout => {
     }
 
     const emptied = withoutIds(layout, new Set([...ids, ontoId]))
-    return prune(insert(emptied, where.zone, where.index, [folder]))
+    const after = layout.pages[where.zone.page]?.[where.index + 1]?.id
+    return prune(insert(emptied, { zone: where.zone, anchorId: after, position: 'before' }, [folder]))
 }
 
 const group = (layout: Layout, ids: string[], name: string): Layout => {
@@ -188,11 +199,11 @@ const group = (layout: Layout, ids: string[], name: string): Layout => {
     const members = moving.flatMap(slot => (isFolderSlot(slot) ? slot.apps : [slot as AppSlot]))
     const where = zoneOf(layout, moving[0].id)
     const page = where?.zone.kind === 'page' ? where.zone.page : 0
-    const index = where?.zone.kind === 'page' ? where.index : (layout.pages[page]?.length ?? 0)
+    const anchorId = where?.zone.kind === 'page' ? layout.pages[page]?.[where.index + 1]?.id : undefined
 
     const folder: FolderSlot = { id: nextId('folder'), kind: 'folder', name, apps: members }
     const emptied = withoutIds(layout, new Set(ids))
-    return prune(insert(emptied, { kind: 'page', page }, index, [folder]))
+    return prune(insert(emptied, { zone: { kind: 'page', page }, anchorId, position: 'before' }, [folder]))
 }
 
 const dissolve = (layout: Layout, id: string): Layout => {
@@ -200,8 +211,9 @@ const dissolve = (layout: Layout, id: string): Layout => {
     const folder = findSlot(layout, id)
     if (!where || !folder || !isFolderSlot(folder) || where.zone.kind !== 'page') return layout
 
+    const after = layout.pages[where.zone.page]?.[where.index + 1]?.id
     const emptied = withoutIds(layout, new Set([id]))
-    return prune(insert(emptied, where.zone, where.index, folder.apps))
+    return prune(insert(emptied, { zone: where.zone, anchorId: after, position: 'before' }, folder.apps))
 }
 
 const remember = (state: EditorState, layout: Layout): EditorState =>

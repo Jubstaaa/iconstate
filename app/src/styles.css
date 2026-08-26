@@ -20,10 +20,16 @@
     }
 
     body {
-        background: var(--color-ink);
+        background:
+            radial-gradient(120% 90% at 50% -10%, #1a2030 0%, transparent 60%),
+            radial-gradient(90% 70% at 50% 110%, #141a26 0%, transparent 55%), var(--color-ink);
         color: var(--color-chalk);
         font-family: var(--font-sans);
         overflow: hidden;
+    }
+
+    ::selection {
+        background: color-mix(in oklab, var(--color-glow) 45%, transparent);
     }
 
     button {

@@ -2,15 +2,18 @@ import EmptyCell from './empty-cell'
 import SlotTile from './slot-tile'
 
 import type { Limits, Slot } from './editor.types'
+import type { Hint } from './home-editor.types'
 
 interface DockRowProps {
     slots: Slot[]
     limits: Limits
     selection: Set<string>
+    hint?: Hint | null
     onSelect: (id: string, additive: boolean) => void
+    onContextMenu?: (event: React.MouseEvent, id: string) => void
 }
 
-export default function DockRow({ slots, limits, selection, onSelect }: DockRowProps) {
+export default function DockRow({ slots, limits, selection, hint, onSelect, onContextMenu }: DockRowProps) {
     const blanks = Math.max(0, limits.dock - slots.length)
 
     return (
@@ -26,8 +29,10 @@ export default function DockRow({ slots, limits, selection, onSelect }: DockRowP
                         limits={limits}
                         selected={selection.has(slot.id)}
                         dimmed={selection.size > 0 && !selection.has(slot.id)}
+                        hint={hint?.id === slot.id ? hint.side : undefined}
                         labelled={false}
                         onSelect={onSelect}
+                        onContextMenu={onContextMenu}
                     />
                 ))}
                 {Array.from({ length: blanks }, (_, offset) => (

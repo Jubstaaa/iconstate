@@ -33,9 +33,13 @@ export interface Limits {
 
 export type Zone = { kind: 'page'; page: number } | { kind: 'dock' } | { kind: 'folder'; id: string }
 
+export type Position = 'before' | 'after'
+
 export interface Target {
     zone: Zone
-    index: number
+    /** Drop next to this slot. Without one the slots go to the end of the zone. */
+    anchorId?: string
+    position?: Position
 }
 
 export type Action =

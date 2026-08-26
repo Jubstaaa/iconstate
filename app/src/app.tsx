@@ -65,6 +65,7 @@ export default function App() {
     const [error, setError] = useState('')
     const [busy, setBusy] = useState(false)
     const [update, setUpdate] = useState<UpdateInfo | null>(null)
+    const [device, setDevice] = useState('')
     const [state, dispatch] = useReducer(editorReducer, initialEditorState)
     const [selection, setSelection] = useState<Set<string>>(new Set())
 
@@ -167,7 +168,10 @@ export default function App() {
     )
 
     useEffect(() => {
-        const unlisten = onProgress(event => setStatus(describe(event)))
+        const unlisten = onProgress(event => {
+            if (event.event === 'connected') setDevice(`${event.name} · iOS ${event.ios}`)
+            setStatus(describe(event))
+        })
         handleRefresh()
         checkForUpdate()
             .then(setUpdate)
@@ -184,10 +188,25 @@ export default function App() {
     return (
         <div className='flex h-full flex-col gap-3 p-4'>
             <header className='flex shrink-0 items-center justify-between gap-4'>
-                <div className='flex items-baseline gap-3'>
-                    <h1 className='text-base font-semibold tracking-tight'>IconState</h1>
-                    <span className='text-xs text-dim'>{status || serial || 'no device'}</span>
-                    {error ? <span className='text-xs text-alarm'>{error}</span> : null}
+                <div className='flex items-center gap-3'>
+                    <span className='grid size-7 place-items-center rounded-lg bg-glow/15 ring-1 ring-glow/30'>
+                        <svg viewBox='0 0 16 16' className='size-3.5' fill='currentColor'>
+                            <rect x='1' y='1' width='6' height='6' rx='2' />
+                            <rect x='9' y='1' width='6' height='6' rx='2' />
+                            <rect x='1' y='9' width='6' height='6' rx='2' />
+                            <rect x='9' y='9' width='6' height='6' rx='2' />
+                        </svg>
+                    </span>
+                    <div className='leading-tight'>
+                        <h1 className='text-[13px] font-semibold tracking-tight'>{device || 'IconState'}</h1>
+                        <p className='text-[11px] text-dim'>
+                            {error ? (
+                                <span className='text-alarm'>{error}</span>
+                            ) : (
+                                status || serial || 'no device'
+                            )}
+                        </p>
+                    </div>
                 </div>
                 <EditorToolbar
                     busy={busy}
@@ -203,7 +222,7 @@ export default function App() {
                 />
             </header>
 
-            <main className='min-h-0 flex-1'>
+            <main className='min-h-0 flex-1 py-1'>
                 {baseline ? (
                     <HomeEditor
                         state={state}

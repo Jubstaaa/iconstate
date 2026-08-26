@@ -1,7 +1,7 @@
 import type { EditorToolbarProps } from './editor-toolbar.types'
 
-const button =
-    'rounded-lg bg-panel px-3 py-1.5 text-xs text-chalk ring-1 ring-hairline transition hover:ring-glow disabled:opacity-35 disabled:hover:ring-hairline'
+const chip =
+    'rounded-lg px-2.5 py-1.5 text-[12px] text-chalk/85 transition hover:bg-white/8 hover:text-chalk disabled:pointer-events-none disabled:text-dim/45'
 
 export default function EditorToolbar({
     busy,
@@ -16,26 +16,28 @@ export default function EditorToolbar({
     onReview,
 }: EditorToolbarProps) {
     return (
-        <div className='flex items-center gap-2'>
-            <button className={button} onClick={onGroup} disabled={busy || selectionCount < 2}>
-                {selectionCount > 1 ? `Group ${selectionCount} apps` : 'Group selection'}
+        <div className='flex items-center gap-1 rounded-xl border border-white/8 bg-white/4 p-1 backdrop-blur-xl'>
+            <button className={chip} onClick={onGroup} disabled={busy || selectionCount < 2}>
+                {selectionCount > 1 ? `Group ${selectionCount}` : 'Group'}
                 <span className='ml-1.5 text-dim'>⌘G</span>
             </button>
-            <button className={button} onClick={onUndo} disabled={busy || !canUndo}>
-                Undo <span className='ml-1 text-dim'>⌘Z</span>
+            <span className='h-4 w-px bg-white/10' />
+            <button className={chip} onClick={onUndo} disabled={busy || !canUndo} title='Undo (⌘Z)'>
+                Undo
             </button>
-            <button className={button} onClick={onRedo} disabled={busy || !canRedo}>
+            <button className={chip} onClick={onRedo} disabled={busy || !canRedo} title='Redo (⇧⌘Z)'>
                 Redo
             </button>
-            <button className={button} onClick={onReset} disabled={busy || !dirty}>
-                Discard edits
+            <button className={chip} onClick={onReset} disabled={busy || !dirty}>
+                Discard
             </button>
+            <span className='h-4 w-px bg-white/10' />
             <button
-                className='rounded-lg bg-glow px-3 py-1.5 text-xs font-semibold text-ink transition hover:brightness-110 disabled:opacity-35'
+                className='rounded-lg bg-glow px-3 py-1.5 text-[12px] font-semibold text-ink transition hover:brightness-110 disabled:bg-white/10 disabled:text-dim/60'
                 onClick={onReview}
                 disabled={busy || !dirty}
             >
-                Review changes
+                {dirty ? 'Review changes' : 'No changes'}
             </button>
         </div>
     )

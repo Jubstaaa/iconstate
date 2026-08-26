@@ -1,4 +1,5 @@
 import { useDraggable, useDroppable } from '@dnd-kit/core'
+import { motion } from 'motion/react'
 
 import AppGlyph from './app-glyph'
 import { isFolderSlot } from './editor.types'
@@ -11,8 +12,10 @@ interface SlotTileProps {
     selected: boolean
     dimmed: boolean
     labelled?: boolean
+    hint?: 'before' | 'after' | 'onto'
     onSelect: (id: string, additive: boolean) => void
     onOpen?: (id: string) => void
+    onContextMenu?: (event: React.MouseEvent, id: string) => void
 }
 
 export default function SlotTile({
@@ -21,28 +24,47 @@ export default function SlotTile({
     selected,
     dimmed,
     labelled = true,
+    hint,
     onSelect,
     onOpen,
+    onContextMenu,
 }: SlotTileProps) {
     const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: slot.id })
-    const { setNodeRef: setDropRef, isOver } = useDroppable({ id: `onto:${slot.id}` })
+    const { setNodeRef: setDropRef } = useDroppable({ id: `onto:${slot.id}` })
 
-    const ring = selected ? 'ring-2 ring-glow' : isOver ? 'ring-2 ring-white' : 'ring-1 ring-white/10'
+    const ring = selected
+        ? 'ring-2 ring-glow'
+        : hint === 'onto'
+          ? 'ring-2 ring-white'
+          : 'ring-1 ring-white/10'
 
     return (
-        <div
+        <motion.div
+            layout
+            transition={{ type: 'spring', stiffness: 520, damping: 42, mass: 0.6 }}
             ref={node => {
                 setNodeRef(node)
                 setDropRef(node)
             }}
             {...attributes}
             {...listeners}
-            className={`no-drag flex w-full flex-col items-center gap-[4px] outline-none transition-opacity ${
-                isDragging || dimmed ? 'opacity-35' : 'opacity-100'
+            className={`no-drag relative flex w-full flex-col items-center gap-[4px] outline-none transition-opacity ${
+                isDragging ? 'opacity-0' : dimmed ? 'opacity-35' : 'opacity-100'
             }`}
-            onClick={event => onSelect(slot.id, event.metaKey || event.shiftKey)}
-            onDoubleClick={() => onOpen?.(slot.id)}
+            onClick={event => {
+                const additive = event.metaKey || event.shiftKey
+                if (!additive && isFolderSlot(slot) && onOpen) onOpen(slot.id)
+                else onSelect(slot.id, additive)
+            }}
+            onContextMenu={event => onContextMenu?.(event, slot.id)}
         >
+            {hint === 'before' || hint === 'after' ? (
+                <span
+                    className={`absolute inset-y-0 w-[3px] rounded-full bg-white ${
+                        hint === 'before' ? '-left-[7%]' : '-right-[7%]'
+                    }`}
+                />
+            ) : null}
             {isFolderSlot(slot) ? (
                 <div
                     className={`grid aspect-square w-full gap-[4%] overflow-hidden rounded-[22%] bg-white/20 p-[7%] backdrop-blur-md ${ring}`}
@@ -67,6 +89,6 @@ export default function SlotTile({
                     {isFolderSlot(slot) ? slot.name : slot.app.displayName}
                 </span>
             ) : null}
-        </div>
+        </motion.div>
     )
 }
