@@ -153,19 +153,37 @@ export default function App() {
             else if (event.event === 'written') notifyDone('Written to the iPhone')
             else notifyProgress(message)
         })
-        guard(async () => {
-            const found = await listDevices()
-            setDevices(found)
-            if (!found.length) setStatus('plug the iPhone in over USB and trust this Mac')
-        })
         return () => {
             unlisten.then(stop => stop())
         }
-    }, [guard])
+    }, [])
 
     useEffect(() => {
         if (serial && !baseline) load(serial)
     }, [baseline, load, serial])
+
+    // Nothing tells us when a cable goes in, so watch for one while there is no
+    // device — quietly, without the spinner or a toast.
+    useEffect(() => {
+        if (serial) return
+
+        let watching = true
+        const look = async () => {
+            try {
+                const found = await listDevices()
+                if (watching && found.length) setDevices(found)
+            } catch {
+                // still nothing plugged in
+            }
+        }
+
+        look()
+        const timer = window.setInterval(look, 3000)
+        return () => {
+            watching = false
+            window.clearInterval(timer)
+        }
+    }, [serial])
 
     useEffect(() => {
         getCurrentWindow().setTitle(device ? `${device} — ${system}` : 'IconState')
