@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
 
+import { useScreen } from './screen.context'
+
 const clock = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
 
 export default function StatusBar() {
     const [time, setTime] = useState(clock)
+    const screen = useScreen()
 
     useEffect(() => {
         const timer = window.setInterval(() => setTime(clock()), 15_000)
@@ -11,7 +14,10 @@ export default function StatusBar() {
     }, [])
 
     return (
-        <div className='pointer-events-none flex items-center justify-between px-[9%] pt-[3%] text-[11px] font-semibold text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.6)]'>
+        <div
+            className='pointer-events-none flex shrink-0 items-center justify-between px-[9%] text-[12px] font-semibold text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.6)]'
+            style={{ height: screen.statusBar }}
+        >
             <span className='tabular-nums'>{time}</span>
             <span className='flex items-center gap-[5px]'>
                 <svg viewBox='0 0 18 12' className='h-[10px] w-[15px]' fill='currentColor'>

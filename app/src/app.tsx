@@ -1,11 +1,13 @@
 import { LogicalSize, getCurrentWindow } from '@tauri-apps/api/window'
-import { useCallback, useEffect, useMemo, useReducer, useState } from 'react'
+import { Toaster } from 'sonner'
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 
 import { limitsFrom, windowSizeFor } from './features/editor/editor.constants'
 import { editorReducer, initialEditorState, toIconState } from './features/editor/editor.reducer'
 import HomeEditor from './features/editor/home-editor'
 import SimulatorChrome from './features/editor/simulator-chrome'
 import DiffReview from './features/diff-review/diff-review'
+import { notifyDone, notifyFailed, notifyIdle, notifyProgress } from './lib/notify'
 import {
     applyLayout,
     diffLayout,
@@ -58,6 +60,7 @@ export default function App() {
     const [change, setChange] = useState<DiffSummary | null>(null)
     const [status, setStatus] = useState('looking for an iPhone')
     const [busy, setBusy] = useState(false)
+    const working = useRef(false)
     const [state, dispatch] = useReducer(editorReducer, initialEditorState)
     const [selection, setSelection] = useState<Set<string>>(new Set())
     const [device, setDevice] = useState('')
@@ -73,11 +76,14 @@ export default function App() {
 
     const guard = useCallback(async (work: () => Promise<void>) => {
         setBusy(true)
+        working.current = true
         try {
             await work()
+            notifyIdle()
         } catch (cause) {
-            setStatus(getErrorMessage(cause))
+            notifyFailed(getErrorMessage(cause))
         } finally {
+            working.current = false
             setBusy(false)
         }
     }, [])
@@ -139,7 +145,12 @@ export default function App() {
                 setDevice(String(event.name))
                 setSystem(`iOS ${event.ios}`)
             }
-            setStatus(describe(event))
+            const message = describe(event)
+            setStatus(message)
+            if (!working.current) return
+            if (event.event === 'error') notifyFailed(message)
+            else if (event.event === 'written') notifyDone('Written to the iPhone')
+            else notifyProgress(message)
         })
         guard(async () => {
             const found = await listDevices()
@@ -185,7 +196,6 @@ export default function App() {
                     limits={limits}
                     icons={icons}
                     selection={selection}
-                    status={status}
                     commands={commands}
                     dispatch={dispatch}
                     onSelectionChange={setSelection}
@@ -195,6 +205,23 @@ export default function App() {
                     <p className='max-w-64 text-center text-[13px] leading-relaxed text-dim'>{status}</p>
                 </div>
             )}
+
+            <Toaster
+                position='top-center'
+                theme='dark'
+                offset={64}
+                gap={8}
+                toastOptions={{
+                    style: {
+                        background: 'rgba(28,31,38,0.92)',
+                        border: '1px solid rgba(255,255,255,0.12)',
+                        color: '#e9edf3',
+                        borderRadius: '999px',
+                        fontSize: '12px',
+                        backdropFilter: 'blur(24px)',
+                    },
+                }}
+            />
 
             {change ? (
                 <DiffReview

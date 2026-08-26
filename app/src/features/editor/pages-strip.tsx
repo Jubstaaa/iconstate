@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react'
 
 import HomePage from './home-page'
+import { useScreen } from './screen.context'
 
 import type { PagesStripProps } from './pages-strip.types'
 
@@ -20,6 +21,7 @@ export default function PagesStrip({
     onOpen,
     onContextMenu,
 }: PagesStripProps) {
+    const screen = useScreen()
     const strip = useRef<HTMLDivElement>(null)
     const settling = useRef(false)
 
@@ -51,8 +53,8 @@ export default function PagesStrip({
             {pages.map((slots, index) => (
                 <div
                     key={index}
-                    className='w-full shrink-0 snap-center pt-[7%] pb-[1%]'
-                    style={{ paddingInline: `${limits.edgeShare * 100}%` }}
+                    className='w-full shrink-0 snap-center'
+                    style={{ paddingTop: screen.topInset }}
                 >
                     <HomePage
                         page={index}

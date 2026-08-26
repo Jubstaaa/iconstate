@@ -3,6 +3,7 @@ import { motion } from 'motion/react'
 
 import AppGlyph from './app-glyph'
 import { isFolderSlot } from './editor.types'
+import { useScreen } from './screen.context'
 
 import type { Limits, Slot } from './editor.types'
 
@@ -29,6 +30,7 @@ export default function SlotTile({
     onOpen,
     onContextMenu,
 }: SlotTileProps) {
+    const screen = useScreen()
     const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: slot.id })
     const { setNodeRef: setDropRef } = useDroppable({ id: `onto:${slot.id}` })
 
@@ -48,7 +50,7 @@ export default function SlotTile({
             }}
             {...attributes}
             {...listeners}
-            className={`no-drag relative flex w-full flex-col items-center gap-[4px] outline-none transition-opacity ${
+            className={`no-drag relative flex flex-col items-center gap-[5px] outline-none transition-opacity ${
                 isDragging ? 'opacity-0' : dimmed ? 'opacity-35' : 'opacity-100'
             }`}
             onClick={event => {
@@ -67,8 +69,10 @@ export default function SlotTile({
             ) : null}
             {isFolderSlot(slot) ? (
                 <div
-                    className={`grid aspect-square w-full gap-[5%] overflow-hidden rounded-[23%] bg-white/[0.18] p-[9%] ${ring}`}
+                    className={`grid shrink-0 gap-[5%] overflow-hidden rounded-[23%] bg-white/[0.28] p-[8%] backdrop-blur-md ${ring}`}
                     style={{
+                        width: screen.icon,
+                        height: screen.icon,
                         gridTemplateColumns: `repeat(${limits.folderColumns}, minmax(0, 1fr))`,
                         gridTemplateRows: `repeat(${limits.folderRows}, minmax(0, 1fr))`,
                     }}
@@ -82,10 +86,17 @@ export default function SlotTile({
                     ))}
                 </div>
             ) : (
-                <AppGlyph app={slot.app} className={`aspect-square w-full rounded-[23%] ${ring}`} />
+                <AppGlyph
+                    app={slot.app}
+                    className={`shrink-0 rounded-[23%] ${ring}`}
+                    style={{ width: screen.icon, height: screen.icon }}
+                />
             )}
             {labelled ? (
-                <span className='w-full truncate text-center text-[11px] leading-none font-normal text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]'>
+                <span
+                    className='truncate text-center text-[11px] leading-none font-normal text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]'
+                    style={{ maxWidth: screen.icon * 1.35 }}
+                >
                     {isFolderSlot(slot) ? slot.name : slot.app.displayName}
                 </span>
             ) : null}

@@ -12,7 +12,6 @@ import PageDots from './page-dots'
 import PagesStrip from './pages-strip'
 import PhoneFrame from './phone-frame'
 import SlotTile from './slot-tile'
-import StatusToast from './status-toast'
 
 import type { DragEndEvent, DragMoveEvent, DragStartEvent } from '@dnd-kit/core'
 import type { ContextMenuState, MenuItem } from './context-menu.types'
@@ -24,7 +23,6 @@ export default function HomeEditor({
     limits,
     icons,
     selection,
-    status,
     commands,
     dispatch,
     onSelectionChange,
@@ -250,7 +248,7 @@ export default function HomeEditor({
                     setHint(null)
                 }}
             >
-                <PhoneFrame>
+                <PhoneFrame limits={limits}>
                     <PagesStrip
                         pages={layout.pages}
                         limits={limits}
@@ -262,10 +260,10 @@ export default function HomeEditor({
                         onOpen={setOpenFolderId}
                         onContextMenu={openMenu}
                     />
-                    <div className='px-[6%] pb-[1%]'>
+                    <div className='pb-[2%]'>
                         <PageDots count={pageCount} active={page} onGo={go} />
                     </div>
-                    <div className='px-[5%] pb-[2%] pt-[1%]' onContextMenu={event => openMenu(event)}>
+                    <div onContextMenu={event => openMenu(event)}>
                         <DockRow
                             slots={layout.dock}
                             limits={limits}
@@ -275,8 +273,6 @@ export default function HomeEditor({
                             onContextMenu={openMenu}
                         />
                     </div>
-
-                    <StatusToast message={status} busy={commands.busy} />
 
                     <AnimatePresence>
                         {openFolder ? (

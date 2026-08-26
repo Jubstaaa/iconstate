@@ -1,4 +1,5 @@
 import EmptyCell from './empty-cell'
+import { useScreen } from './screen.context'
 import SlotTile from './slot-tile'
 
 import type { Limits, Slot } from './editor.types'
@@ -14,15 +15,19 @@ interface DockRowProps {
 }
 
 export default function DockRow({ slots, limits, selection, hint, onSelect, onContextMenu }: DockRowProps) {
+    const screen = useScreen()
     const blanks = Math.max(0, limits.dock - slots.length)
 
     return (
-        <div className='rounded-[30px] bg-white/[0.16] p-[3%]'>
+        <div
+            className='mx-auto w-fit rounded-[32px] bg-white/[0.22] backdrop-blur-xl'
+            style={{ padding: screen.dockPad }}
+        >
             <div
                 className='grid'
                 style={{
-                    gridTemplateColumns: `repeat(${limits.dock}, minmax(0, 1fr))`,
-                    columnGap: `${limits.gapShare * 100}%`,
+                    gridTemplateColumns: `repeat(${limits.dock}, ${screen.icon}px)`,
+                    columnGap: `${screen.gap}px`,
                 }}
             >
                 {slots.map(slot => (

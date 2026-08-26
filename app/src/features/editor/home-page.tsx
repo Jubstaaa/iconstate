@@ -1,4 +1,5 @@
 import EmptyCell from './empty-cell'
+import { useScreen } from './screen.context'
 import SlotTile from './slot-tile'
 
 import type { Limits, Slot } from './editor.types'
@@ -25,14 +26,17 @@ export default function HomePage({
     onOpen,
     onContextMenu,
 }: HomePageProps) {
+    const screen = useScreen()
     const blanks = Math.max(0, limits.page - slots.length)
 
     return (
         <div
-            className='grid h-full w-full content-between'
+            className='grid h-full content-start justify-center'
             style={{
-                gridTemplateColumns: `repeat(${limits.columns}, minmax(0, 1fr))`,
-                columnGap: `${limits.gapShare * 100}%`,
+                gridTemplateColumns: `repeat(${limits.columns}, ${screen.icon}px)`,
+                gridAutoRows: `${screen.rowStep}px`,
+                columnGap: `${screen.gap}px`,
+                paddingInline: `${screen.edge}px`,
             }}
         >
             {slots.map(slot => (

@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 
 import EmptyCell from './empty-cell'
 import PageDots from './page-dots'
+import { useScreen } from './screen.context'
 import SlotTile from './slot-tile'
 
 import type { FolderSheetProps } from './folder-sheet.types'
@@ -20,6 +21,7 @@ export default function FolderSheet({
     const [name, setName] = useState(folder.name)
     const [page, setPage] = useState(0)
     const strip = useRef<HTMLDivElement>(null)
+    const screen = useScreen()
 
     useEffect(() => setName(folder.name), [folder.id, folder.name])
 
@@ -68,7 +70,7 @@ export default function FolderSheet({
                 exit={{ scale: 0.72, opacity: 0 }}
                 transition={{ type: 'spring', stiffness: 460, damping: 36, mass: 0.7 }}
                 className='mt-[6%] flex min-h-0 flex-col'
-                style={{ paddingInline: `${limits.edgeShare * 100}%` }}
+                style={{ paddingInline: `${screen.edge}px` }}
             >
                 <div
                     ref={strip}
@@ -83,8 +85,9 @@ export default function FolderSheet({
                             key={index}
                             className='grid w-full shrink-0 snap-center gap-y-[6%] p-[7%]'
                             style={{
-                                gridTemplateColumns: `repeat(${limits.folderColumns}, minmax(0, 1fr))`,
-                                columnGap: `${limits.gapShare * 100}%`,
+                                gridTemplateColumns: `repeat(${limits.folderColumns}, ${screen.icon}px)`,
+                                columnGap: `${screen.gap}px`,
+                                justifyContent: 'center',
                             }}
                         >
                             {apps.map(child => (
