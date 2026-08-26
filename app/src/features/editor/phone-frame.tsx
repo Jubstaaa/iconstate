@@ -52,7 +52,7 @@ export default function PhoneFrame({ limits, children }: PhoneFrameProps) {
                         <div className='relative flex h-full flex-col'>
                             <StatusBar />
                             {children}
-                            <div className='pointer-events-none flex shrink-0 justify-center pb-[9px]'>
+                            <div className='pointer-events-none absolute inset-x-0 bottom-[9px] flex justify-center'>
                                 <span className='h-[5px] w-[36%] rounded-full bg-white/90' />
                             </div>
                         </div>

@@ -50,7 +50,7 @@ export default function SlotTile({
             }}
             {...attributes}
             {...listeners}
-            className={`no-drag relative flex flex-col items-center gap-[5px] outline-none transition-opacity ${
+            className={`no-drag relative flex flex-col items-center outline-none transition-opacity ${
                 isDragging ? 'opacity-0' : dimmed ? 'opacity-35' : 'opacity-100'
             }`}
             onClick={event => {
@@ -59,6 +59,7 @@ export default function SlotTile({
                 else onSelect(slot.id, additive)
             }}
             onContextMenu={event => onContextMenu?.(event, slot.id)}
+            style={{ gap: screen.labelGap }}
         >
             {hint === 'before' || hint === 'after' ? (
                 <span

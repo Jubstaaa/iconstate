@@ -14,8 +14,11 @@ export interface ScreenGeometry {
     statusBar: number
     /** Clear space between the status bar and the first row. */
     topInset: number
-    dockPad: number
-    dockBottom: number
+    dockHeight: number
+    dockRadius: number
+    dockInsetX: number
+    dockInsetY: number
+    labelGap: number
 }
 
 const FALLBACK: ScreenGeometry = {
@@ -27,8 +30,11 @@ const FALLBACK: ScreenGeometry = {
     rowStep: 0,
     statusBar: 0,
     topInset: 0,
-    dockPad: 0,
-    dockBottom: 0,
+    dockHeight: 0,
+    dockRadius: 0,
+    dockInsetX: 0,
+    dockInsetY: 0,
+    labelGap: 0,
 }
 
 const ScreenContext = createContext<ScreenGeometry>(FALLBACK)
@@ -42,12 +48,20 @@ export const useScreen = (): ScreenGeometry => useContext(ScreenContext)
  * reports its grid against the screen — chaining the two shrank every icon.
  * Measure the screen once and hand out pixels instead.
  */
-/** iOS home screen proportions, taken against the 440x956 point screen. */
-const ROW_STEP = 112 / 440
-const STATUS_BAR = 54 / 956
-const TOP_INSET = 46 / 956
-const DOCK_PAD = 14 / 440
-const DOCK_BOTTOM = 34 / 956
+/*
+ * Measured off Apple's iOS 26 UI kit, on its 393x852 iPhone home screen:
+ *   status bar 54 tall · first icon row at y=90 · row pitch 98
+ *   icons 60 square on a 90.33 pitch, 31 clear at each edge
+ *   dock 393x122 at y=730, radius 41, inner plate 371x98 inset 11/12
+ */
+const ROW_STEP = 98 / 393
+const STATUS_BAR = 54 / 852
+const TOP_INSET = 36 / 852
+const DOCK_HEIGHT = 122 / 852
+const DOCK_RADIUS = 41 / 393
+const DOCK_INSET_X = 11 / 393
+const DOCK_INSET_Y = 12 / 852
+const LABEL_GAP = 6 / 393
 
 export const geometryFor = (width: number, height: number, limits: Limits): ScreenGeometry => ({
     width,
@@ -58,6 +72,9 @@ export const geometryFor = (width: number, height: number, limits: Limits): Scre
     rowStep: width * ROW_STEP,
     statusBar: height * STATUS_BAR,
     topInset: height * TOP_INSET,
-    dockPad: width * DOCK_PAD,
-    dockBottom: height * DOCK_BOTTOM,
+    dockHeight: height * DOCK_HEIGHT,
+    dockRadius: width * DOCK_RADIUS,
+    dockInsetX: width * DOCK_INSET_X,
+    dockInsetY: height * DOCK_INSET_Y,
+    labelGap: width * LABEL_GAP,
 })

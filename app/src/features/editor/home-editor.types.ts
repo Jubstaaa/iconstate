@@ -18,6 +18,7 @@ export interface HomeEditorProps {
     limits: Limits
     icons: IconManifest
     selection: Set<string>
+    offline: string
     commands: EditorCommands
     dispatch: (action: Action) => void
     onSelectionChange: (selection: Set<string>) => void

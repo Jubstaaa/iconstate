@@ -58,7 +58,7 @@ export default function App() {
     const [metrics, setMetrics] = useState<Metrics | null>(null)
     const [icons, setIcons] = useState<IconManifest>({})
     const [change, setChange] = useState<DiffSummary | null>(null)
-    const [status, setStatus] = useState('looking for an iPhone')
+    const [status, setStatus] = useState('')
     const [busy, setBusy] = useState(false)
     const working = useRef(false)
     const [state, dispatch] = useReducer(editorReducer, initialEditorState)
@@ -146,6 +146,7 @@ export default function App() {
                 setSystem(`iOS ${event.ios}`)
             }
             const message = describe(event)
+            if (!message) return
             setStatus(message)
             if (!working.current) return
             if (event.event === 'error') notifyFailed(message)
@@ -190,26 +191,27 @@ export default function App() {
                     { label: 'Review changes', icon: 'review', disabled: !dirty, onPick: commands.onReview },
                 ]}
             />
-            {baseline ? (
-                <HomeEditor
-                    state={state}
-                    limits={limits}
-                    icons={icons}
-                    selection={selection}
-                    commands={commands}
-                    dispatch={dispatch}
-                    onSelectionChange={setSelection}
-                />
-            ) : (
-                <div className='grid min-h-0 flex-1 place-items-center'>
-                    <p className='max-w-64 text-center text-[13px] leading-relaxed text-dim'>{status}</p>
-                </div>
-            )}
+            <HomeEditor
+                state={state}
+                limits={limits}
+                icons={icons}
+                selection={selection}
+                offline={
+                    baseline
+                        ? ''
+                        : busy
+                          ? status || 'Reading your iPhone…'
+                          : 'No iPhone connected.\nPlug one in over USB and tap Trust on the phone.'
+                }
+                commands={commands}
+                dispatch={dispatch}
+                onSelectionChange={setSelection}
+            />
 
             <Toaster
-                position='top-center'
+                position='bottom-center'
                 theme='dark'
-                offset={64}
+                offset={118}
                 gap={8}
                 toastOptions={{
                     style: {

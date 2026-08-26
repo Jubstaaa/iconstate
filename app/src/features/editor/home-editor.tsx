@@ -23,6 +23,7 @@ export default function HomeEditor({
     limits,
     icons,
     selection,
+    offline,
     commands,
     dispatch,
     onSelectionChange,
@@ -249,6 +250,12 @@ export default function HomeEditor({
                 }}
             >
                 <PhoneFrame limits={limits}>
+                    {offline ? (
+                        <div className='absolute inset-0 z-30 grid place-items-center bg-black/45 px-10 backdrop-blur-md'>
+                            <p className='text-center text-[13px] leading-relaxed text-white/85'>{offline}</p>
+                        </div>
+                    ) : null}
+
                     <PagesStrip
                         pages={layout.pages}
                         limits={limits}
@@ -260,7 +267,7 @@ export default function HomeEditor({
                         onOpen={setOpenFolderId}
                         onContextMenu={openMenu}
                     />
-                    <div className='pb-[2%]'>
+                    <div className='pb-[10px]'>
                         <PageDots count={pageCount} active={page} onGo={go} />
                     </div>
                     <div onContextMenu={event => openMenu(event)}>

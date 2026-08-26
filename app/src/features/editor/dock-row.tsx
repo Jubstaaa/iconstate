@@ -20,32 +20,41 @@ export default function DockRow({ slots, limits, selection, hint, onSelect, onCo
 
     return (
         <div
-            className='mx-auto w-fit rounded-[32px] bg-white/[0.22] backdrop-blur-xl'
-            style={{ padding: screen.dockPad }}
+            className='shrink-0'
+            style={{
+                height: screen.dockHeight,
+                paddingInline: screen.dockInsetX,
+                paddingBlock: screen.dockInsetY,
+            }}
         >
             <div
-                className='grid'
-                style={{
-                    gridTemplateColumns: `repeat(${limits.dock}, ${screen.icon}px)`,
-                    columnGap: `${screen.gap}px`,
-                }}
+                className='flex h-full items-center justify-center bg-white/[0.22] backdrop-blur-xl'
+                style={{ borderRadius: screen.dockRadius }}
             >
-                {slots.map(slot => (
-                    <SlotTile
-                        key={slot.id}
-                        slot={slot}
-                        limits={limits}
-                        selected={selection.has(slot.id)}
-                        dimmed={selection.size > 0 && !selection.has(slot.id)}
-                        hint={hint?.id === slot.id ? hint.side : undefined}
-                        labelled={false}
-                        onSelect={onSelect}
-                        onContextMenu={onContextMenu}
-                    />
-                ))}
-                {Array.from({ length: blanks }, (_, offset) => (
-                    <EmptyCell key={`dock-blank-${offset}`} id={`dock:${slots.length + offset}`} />
-                ))}
+                <div
+                    className='grid'
+                    style={{
+                        gridTemplateColumns: `repeat(${limits.dock}, ${screen.icon}px)`,
+                        columnGap: `${screen.gap}px`,
+                    }}
+                >
+                    {slots.map(slot => (
+                        <SlotTile
+                            key={slot.id}
+                            slot={slot}
+                            limits={limits}
+                            selected={selection.has(slot.id)}
+                            dimmed={selection.size > 0 && !selection.has(slot.id)}
+                            hint={hint?.id === slot.id ? hint.side : undefined}
+                            labelled={false}
+                            onSelect={onSelect}
+                            onContextMenu={onContextMenu}
+                        />
+                    ))}
+                    {Array.from({ length: blanks }, (_, offset) => (
+                        <EmptyCell key={`dock-blank-${offset}`} id={`dock:${slots.length + offset}`} />
+                    ))}
+                </div>
             </div>
         </div>
     )

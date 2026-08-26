@@ -1,7 +1,7 @@
 import type { Limits } from './editor.types'
 
-/** iOS keeps roughly this much clear on the left and right of the icon grid. */
-const EDGE_SHARE = 0.061
+/** 31 points clear at each edge of a 393 point screen, per Apple's UI kit. */
+const EDGE_SHARE = 31 / 393
 
 export const DEFAULT_LIMITS: Limits = {
     dock: 4,
