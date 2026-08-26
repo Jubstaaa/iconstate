@@ -1,0 +1,45 @@
+name: release
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  release:
+    name: draft release
+    runs-on: macos-15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: app/src-tauri
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: core/pyproject.toml
+      - name: Stamp the version from the tag
+        run: python3 scripts/set-version.py "${GITHUB_REF_NAME}"
+      - run: npm ci
+        working-directory: app
+      - name: Build the sidecar
+        run: ./scripts/build-sidecar.sh
+      - uses: tauri-apps/tauri-action@v0
+        with:
+          projectPath: app
+          tagName: ${{ github.ref_name }}
+          releaseName: IconState ${{ github.ref_name }}
+          releaseDraft: true
+          prerelease: false
+          args: --bundles app,dmg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run the packaged sidecar
+        run: ./scripts/verify-bundle.sh

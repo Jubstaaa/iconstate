@@ -1,0 +1,44 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dmg:
+    name: macOS arm64 dmg
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: app/src-tauri
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: core/pyproject.toml
+      - run: npm ci
+        working-directory: app
+      - name: Build the sidecar
+        run: ./scripts/build-sidecar.sh
+      - name: Build the app
+        run: npm run tauri build -- --bundles app,dmg
+        working-directory: app
+      - name: Run the packaged sidecar
+        run: ./scripts/verify-bundle.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: IconState-aarch64-apple-darwin
+          path: app/src-tauri/target/release/bundle/dmg/*.dmg
+          if-no-files-found: error
