@@ -34,3 +34,22 @@ export interface CoreFailure {
 
 export const isFolder = (item: IconStateItem): item is FolderIcon =>
     (item as FolderIcon).listType === 'folder'
+
+export interface Move {
+    key: string
+    displayName: string
+    before: string
+    after: string
+}
+
+export interface DiffSummary {
+    empty: boolean
+    touched: number
+    moves: Move[]
+    addedFolders: string[]
+    removedFolders: string[]
+    addedApps: { key: string; displayName: string }[]
+    removedApps: { key: string; displayName: string }[]
+}
+
+export type Assignments = Record<string, string>

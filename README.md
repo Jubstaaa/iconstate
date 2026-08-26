@@ -35,11 +35,20 @@ uv pip install -e . --group dev
 .venv/bin/iconstate show             # the home screen as a tree
 .venv/bin/iconstate dump -o now.json # the raw icon state
 .venv/bin/iconstate apps -o apps.json
-.venv/bin/iconstate validate -p plan.json -i now.json
+
+.venv/bin/iconstate plan                 # the folder layout the rules propose
+.venv/bin/iconstate diff                 # what applying it would change
+.venv/bin/iconstate apply                # backs up, shows the diff, asks first
+.venv/bin/iconstate backups              # every layout ever written over
+.venv/bin/iconstate restore              # put the most recent one back
 ```
 
-Every command also accepts `-i file.json` instead of a device, so the whole
-engine can be driven offline.
+Every read-only command also accepts `-i file.json` instead of a device, so the
+whole engine can be driven offline.
+
+Nothing reaches the phone without passing `validate` against the device's own
+inventory, writing a backup, and printing the diff for confirmation. After the
+write the layout is read back and any drift from the plan is reported.
 
 Progress is written to stderr as one JSON object per line; the payload goes to
 stdout. That is what lets the Tauri shell turn a CLI run into UI events without
@@ -56,6 +65,25 @@ cd app && npm install && npm run tauri dev
 (`iconstate-core-aarch64-apple-darwin`), which is what Tauri looks for. A
 mismatch makes the app fail to launch with no error, so the release pipeline
 runs the packaged sidecar as its last step.
+
+## How apps get sorted
+
+`core/src/iconstate/core/rules.py` maps bundle identifiers to folder names. It
+is generated, not hand-edited:
+
+```bash
+python3 scripts/derive-rules.py path/to/a/good-layout.json
+```
+
+Keying on bundle identifiers rather than display names matters more than it
+looks: two apps on this phone are both called "the same name", and WhatsApp ships
+with an invisible character in its name.
+
+Apps the table does not know go into an `Unsorted` folder and are reported on
+stderr as an `unassigned` event. That is the seam the LLM categoriser plugs
+into — pass its decisions back as `--assign decisions.json`, a plain
+`{"com.example.app": "Games"}` map, and the plan is rebuilt with them layered
+on the offline table.
 
 ## Tests
 

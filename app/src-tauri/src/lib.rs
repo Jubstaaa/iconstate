@@ -1,3 +1,5 @@
+use std::io::Write;
+
 use serde::Serialize;
 use tauri::{AppHandle, Emitter};
 use tauri_plugin_shell::process::CommandEvent;
@@ -93,6 +95,18 @@ async fn list_devices(app: AppHandle) -> Result<serde_json::Value, CoreFailure> 
     run_core_json(&app, vec!["devices".into(), "--json".into()]).await
 }
 
+fn write_temp(name: &str, value: &serde_json::Value) -> Result<std::path::PathBuf, CoreFailure> {
+    let path = std::env::temp_dir().join(format!("iconstate-{name}.json"));
+    let mut file = std::fs::File::create(&path).map_err(|error| {
+        CoreFailure::new(format!("could not stage {name}: {error}"), Vec::new())
+    })?;
+    file.write_all(value.to_string().as_bytes())
+        .map_err(|error| {
+            CoreFailure::new(format!("could not stage {name}: {error}"), Vec::new())
+        })?;
+    Ok(path)
+}
+
 #[tauri::command]
 async fn read_icon_state(
     app: AppHandle,
@@ -104,6 +118,87 @@ async fn read_icon_state(
         args.push(serial);
     }
     run_core_json(&app, args).await
+}
+
+#[tauri::command]
+async fn plan_layout(
+    app: AppHandle,
+    serial: Option<String>,
+    assignments: Option<serde_json::Value>,
+) -> Result<serde_json::Value, CoreFailure> {
+    let mut args = vec!["plan".to_string(), "--json".to_string()];
+    if let Some(serial) = serial {
+        args.push("--serial".into());
+        args.push(serial);
+    }
+    if let Some(assignments) = assignments {
+        let path = write_temp("assignments", &assignments)?;
+        args.push("--assign".into());
+        args.push(path.to_string_lossy().into_owned());
+    }
+    run_core_json(&app, args).await
+}
+
+#[tauri::command]
+async fn diff_layout(
+    app: AppHandle,
+    serial: Option<String>,
+    plan: serde_json::Value,
+) -> Result<serde_json::Value, CoreFailure> {
+    let path = write_temp("plan", &plan)?;
+    let mut args = vec![
+        "diff".to_string(),
+        "--json".to_string(),
+        "--plan".to_string(),
+        path.to_string_lossy().into_owned(),
+    ];
+    if let Some(serial) = serial {
+        args.push("--serial".into());
+        args.push(serial);
+    }
+    run_core_json(&app, args).await
+}
+
+#[tauri::command]
+async fn apply_layout(
+    app: AppHandle,
+    serial: Option<String>,
+    plan: serde_json::Value,
+) -> Result<(), CoreFailure> {
+    let path = write_temp("plan", &plan)?;
+    let mut args = vec![
+        "apply".to_string(),
+        "--yes".to_string(),
+        "--plan".to_string(),
+        path.to_string_lossy().into_owned(),
+    ];
+    if let Some(serial) = serial {
+        args.push("--serial".into());
+        args.push(serial);
+    }
+    run_core(&app, args).await.map(|_| ())
+}
+
+#[tauri::command]
+async fn list_backups(app: AppHandle) -> Result<serde_json::Value, CoreFailure> {
+    run_core_json(&app, vec!["backups".into(), "--json".into()]).await
+}
+
+#[tauri::command]
+async fn restore_backup(
+    app: AppHandle,
+    serial: Option<String>,
+    file: Option<String>,
+) -> Result<(), CoreFailure> {
+    let mut args = vec!["restore".to_string(), "--yes".to_string()];
+    if let Some(file) = file {
+        args.push(file);
+    }
+    if let Some(serial) = serial {
+        args.push("--serial".into());
+        args.push(serial);
+    }
+    run_core(&app, args).await.map(|_| ())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -124,7 +219,12 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             core_version,
             list_devices,
-            read_icon_state
+            read_icon_state,
+            plan_layout,
+            diff_layout,
+            apply_layout,
+            list_backups,
+            restore_backup
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
