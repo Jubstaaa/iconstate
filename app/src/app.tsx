@@ -4,6 +4,7 @@ import EditorToolbar from './features/editor/editor-toolbar'
 import { limitsFrom, screenAspect } from './features/editor/editor.constants'
 import { editorReducer, initialEditorState, toIconState } from './features/editor/editor.reducer'
 import HomeEditor from './features/editor/home-editor'
+import WallpaperPicker from './features/editor/wallpaper-picker'
 import DiffReview from './features/diff-review/diff-review'
 import {
     applyLayout,
@@ -19,6 +20,7 @@ import {
     restoreBackup,
 } from './lib/core'
 import { checkForUpdate } from './lib/update'
+import { readImageFile, readStoredWallpaper, storeWallpaper } from './lib/wallpaper'
 
 import type { Metrics } from './features/editor/editor.constants'
 import type { Device, DiffSummary, IconManifest, IconState, ProgressEvent } from './lib/core.types'
@@ -57,6 +59,7 @@ export default function App() {
     const [metrics, setMetrics] = useState<Metrics | null>(null)
     const [icons, setIcons] = useState<IconManifest>({})
     const [wallpaper, setWallpaper] = useState<string | null>(null)
+    const [ownWallpaper, setOwnWallpaper] = useState<string | null>(readStoredWallpaper)
     const [change, setChange] = useState<DiffSummary | null>(null)
     const [status, setStatus] = useState('')
     const [error, setError] = useState('')
@@ -66,6 +69,7 @@ export default function App() {
     const [selection, setSelection] = useState<Set<string>>(new Set())
 
     const serial = devices[0]?.serial
+    const shownWallpaper = ownWallpaper ?? wallpaper
     const limits = useMemo(() => limitsFrom(metrics), [metrics])
     const aspect = useMemo(() => screenAspect(metrics), [metrics])
     const edited = useMemo(() => toIconState(state.layout, limits), [state.layout, limits])
@@ -138,6 +142,21 @@ export default function App() {
         [edited, guard, load, serial]
     )
 
+    const handlePickWallpaper = useCallback(
+        (file: File) =>
+            guard(async () => {
+                const dataUrl = await readImageFile(file)
+                storeWallpaper(dataUrl)
+                setOwnWallpaper(dataUrl)
+            }),
+        [guard]
+    )
+
+    const handleClearWallpaper = useCallback(() => {
+        storeWallpaper(null)
+        setOwnWallpaper(null)
+    }, [])
+
     const handleRestore = useCallback(
         () =>
             guard(async () => {
@@ -190,7 +209,7 @@ export default function App() {
                         state={state}
                         limits={limits}
                         icons={icons}
-                        wallpaper={wallpaper}
+                        wallpaper={shownWallpaper}
                         aspect={aspect}
                         selection={selection}
                         dispatch={dispatch}
@@ -226,6 +245,12 @@ export default function App() {
                         Undo last write
                     </button>
                 </div>
+                <WallpaperPicker
+                    custom={Boolean(ownWallpaper)}
+                    stale={Boolean(wallpaper)}
+                    onPick={handlePickWallpaper}
+                    onClear={handleClearWallpaper}
+                />
                 {update ? (
                     <a className='text-glow' href={update.url} target='_blank' rel='noreferrer'>
                         version {update.version} is available

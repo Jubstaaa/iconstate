@@ -60,9 +60,15 @@ a server, a port, or a lifecycle to manage.
 ## The desktop app
 
 The app is the point: a real iPhone home screen you can rearrange with a mouse.
-The wallpaper comes off the device, the icons are the device's own PNGs, and the
-grid is the size SpringBoard says it is — four columns by six rows on this
-phone, not a number someone typed in.
+The icons are the device's own PNGs and the grid is the size SpringBoard says it
+is — four columns by six rows on this phone, not a number someone typed in.
+
+The wallpaper is the one thing the device lies about. `getHomeScreenWallpaperPNGData`
+returns a stale copy on iOS 26 — the same bytes every time, and not what is
+actually on the phone. Wallpapers moved to the poster system in iOS 16 and this
+SpringBoard command never followed; `getWallpaperInfo` is worse, it closes the
+connection for every name. So the device's answer is only a starting point and
+you can drop in your own image instead.
 
 Drag an icon onto another to make a folder, onto a folder to file it there, onto
 an empty cell to move it. Click to select, ⌘-click or shift-click to select
