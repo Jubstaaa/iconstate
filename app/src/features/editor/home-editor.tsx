@@ -184,14 +184,12 @@ export default function HomeEditor({
             }
             if (items.length) items.push(SEPARATOR)
 
+            // Adding a page blanks the screen and the cause is not found yet, so the
+            // command is held back rather than shipped broken.
             items.push({
-                label: 'Add a page',
-                shortcut: '⌘N',
-                disabled: pageCount >= limits.pages,
-                onPick: () => {
-                    dispatch({ type: 'add-page' })
-                    setPage(pageCount)
-                },
+                label: 'Add a page (being fixed)',
+                disabled: true,
+                onPick: () => dispatch({ type: 'add-page' }),
             })
             items.push({
                 label: 'Remove this page',
@@ -239,12 +237,6 @@ export default function HomeEditor({
             if (event.key === 'g' && (event.metaKey || event.ctrlKey)) {
                 event.preventDefault()
                 handleGroup()
-            }
-            if (event.key === 'n' && (event.metaKey || event.ctrlKey)) {
-                event.preventDefault()
-                if (pageCount >= limits.pages) return
-                dispatch({ type: 'add-page' })
-                setPage(pageCount)
             }
             if (event.key === 'z' && (event.metaKey || event.ctrlKey)) {
                 event.preventDefault()
