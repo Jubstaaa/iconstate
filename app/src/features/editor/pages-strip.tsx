@@ -41,12 +41,21 @@ export default function PagesStrip({
         const wanted = page * node.clientWidth
         if (Math.abs(node.scrollLeft - wanted) < 2) return
 
+        // Mandatory snapping fights a scripted smooth scroll — the browser keeps
+        // pulling the offset back to the nearest snap point and the page ends up
+        // stranded half way. Lift snapping for the length of the animation.
         settling.current = true
+        node.style.scrollSnapType = 'none'
         node.scrollTo({ left: wanted, behavior: 'smooth' })
+
         const timer = window.setTimeout(() => {
+            node.style.scrollSnapType = ''
             settling.current = false
         }, 500)
-        return () => window.clearTimeout(timer)
+        return () => {
+            window.clearTimeout(timer)
+            node.style.scrollSnapType = ''
+        }
     }, [page, pages.length])
 
     return (
@@ -59,7 +68,7 @@ export default function PagesStrip({
             {pages.map((slots, index) => (
                 <div
                     key={index}
-                    className='w-full shrink-0 snap-center'
+                    className='w-full shrink-0 snap-start'
                     style={{ paddingTop: screen.topInset }}
                 >
                     <HomePage

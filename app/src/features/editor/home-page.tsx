@@ -29,6 +29,32 @@ export default function HomePage({
     const screen = useScreen()
     const blanks = Math.max(0, limits.page - slots.length)
 
+    if (!slots.length) {
+        return (
+            <div className='grid h-full place-items-center'>
+                <div
+                    className='grid w-full'
+                    style={{
+                        gridTemplateColumns: `repeat(${limits.columns}, ${screen.icon}px)`,
+                        columnGap: `${screen.gap}px`,
+                        paddingInline: `${screen.edge}px`,
+                        justifyContent: 'center',
+                    }}
+                >
+                    {Array.from({ length: limits.columns }, (_, offset) => (
+                        <EmptyCell key={`empty-${offset}`} id={`cell:${page}:${offset}`} />
+                    ))}
+                    <p
+                        className='col-span-full mt-4 text-center text-[13px] text-white/60'
+                        style={{ textShadow: '0 1px 2px rgba(0,0,0,0.6)' }}
+                    >
+                        Empty page — drag apps here
+                    </p>
+                </div>
+            </div>
+        )
+    }
+
     return (
         <div
             className='grid h-full content-start justify-center'

@@ -38,8 +38,12 @@ export default function FolderSheet({
 
     const go = useCallback((next: number) => {
         const node = strip.current
-        if (!node) return
+        if (!node || !node.clientWidth) return
+        node.style.scrollSnapType = 'none'
         node.scrollTo({ left: next * node.clientWidth, behavior: 'smooth' })
+        window.setTimeout(() => {
+            node.style.scrollSnapType = ''
+        }, 500)
         setPage(next)
     }, [])
 
@@ -85,7 +89,7 @@ export default function FolderSheet({
                     {pages.map((apps, index) => (
                         <div
                             key={index}
-                            className='grid w-full shrink-0 snap-center justify-center gap-y-4 p-[7%]'
+                            className='grid w-full shrink-0 snap-start justify-center gap-y-4 p-[7%]'
                             style={{
                                 gridTemplateColumns: `repeat(${limits.folderColumns}, ${screen.icon}px)`,
                                 columnGap: `${screen.gap}px`,
