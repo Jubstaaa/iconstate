@@ -186,6 +186,7 @@ export default function HomeEditor({
 
             items.push({
                 label: 'Add a page',
+                shortcut: '⌘N',
                 disabled: pageCount >= limits.pages,
                 onPick: () => {
                     dispatch({ type: 'add-page' })
@@ -239,6 +240,12 @@ export default function HomeEditor({
                 event.preventDefault()
                 handleGroup()
             }
+            if (event.key === 'n' && (event.metaKey || event.ctrlKey)) {
+                event.preventDefault()
+                if (pageCount >= limits.pages) return
+                dispatch({ type: 'add-page' })
+                setPage(pageCount)
+            }
             if (event.key === 'z' && (event.metaKey || event.ctrlKey)) {
                 event.preventDefault()
                 dispatch({ type: event.shiftKey ? 'redo' : 'undo' })
@@ -246,7 +253,7 @@ export default function HomeEditor({
         }
         window.addEventListener('keydown', onKey)
         return () => window.removeEventListener('keydown', onKey)
-    }, [dispatch, go, handleGroup, onSelectionChange, page])
+    }, [dispatch, go, handleGroup, limits.pages, onSelectionChange, page, pageCount])
 
     return (
         <IconsProvider value={icons}>

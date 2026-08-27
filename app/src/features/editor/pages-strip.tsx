@@ -27,21 +27,27 @@ export default function PagesStrip({
 
     const handleScroll = useCallback(() => {
         const node = strip.current
-        if (!node || settling.current) return
-        const at = Math.round(node.scrollLeft / node.clientWidth)
+        if (!node || settling.current || !node.clientWidth) return
+        const at = Math.max(0, Math.min(Math.round(node.scrollLeft / node.clientWidth), pages.length - 1))
         if (at !== page) onPageChange(at)
-    }, [onPageChange, page])
+    }, [onPageChange, page, pages.length])
 
+    // Also runs when a page is added or removed: the scroller has just grown or
+    // shrunk, and the target offset moves with it.
     useEffect(() => {
         const node = strip.current
-        if (!node) return
+        if (!node || !node.clientWidth) return
+
         const wanted = page * node.clientWidth
         if (Math.abs(node.scrollLeft - wanted) < 2) return
+
         settling.current = true
         node.scrollTo({ left: wanted, behavior: 'smooth' })
-        const timer = window.setTimeout(() => (settling.current = false), 420)
+        const timer = window.setTimeout(() => {
+            settling.current = false
+        }, 500)
         return () => window.clearTimeout(timer)
-    }, [page])
+    }, [page, pages.length])
 
     return (
         <div
