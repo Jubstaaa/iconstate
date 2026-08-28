@@ -8,30 +8,24 @@ import type { PhoneFrameProps } from './phone-frame.types'
 const SIDE = 'pointer-events-none absolute w-[3px] rounded-full bg-white/20'
 
 /**
- * The device is sized from the space around it and then taken out of the flow.
+ * One device per page, side by side.
  *
- * Sizing it with flex plus aspect-ratio fed back on itself: the dock's height is
- * derived from the measured screen, that height became the frame's content
- * height, which changed the measurement again — so the frame grew without bound
- * as soon as the window was resized. Absolute positioning breaks the loop: what
- * is inside the device can never change how big the device is.
+ * Everything inside is absolutely positioned so it cannot feed back into the
+ * frame's size — deriving the dock's height from the measured screen while the
+ * screen was sized by its content made the frame grow without bound.
  */
-export default function PhoneFrame({ aspect, onMeasure, children }: PhoneFrameProps) {
+export default function PhoneFrame({ aspect, label, onMeasure, children }: PhoneFrameProps) {
     const host = useRef<HTMLDivElement>(null)
     const screen = useRef<HTMLDivElement>(null)
-    const [box, setBox] = useState({ width: 0, height: 0 })
+    const [width, setWidth] = useState(0)
 
+    // Width comes from the row's height, measured on the row itself — asking the
+    // frame for its own size is what let it feed back on itself before.
     useLayoutEffect(() => {
-        const node = host.current
+        const node = host.current?.parentElement
         if (!node) return
 
-        const measure = () => {
-            const space = node.getBoundingClientRect()
-            if (!space.width || !space.height) return
-            const height = Math.min(space.height, space.width / aspect)
-            setBox({ width: Math.round(height * aspect), height: Math.round(height) })
-        }
-
+        const measure = () => setWidth(Math.round(node.getBoundingClientRect().height * aspect))
         measure()
         const observer = new ResizeObserver(measure)
         observer.observe(node)
@@ -40,23 +34,32 @@ export default function PhoneFrame({ aspect, onMeasure, children }: PhoneFramePr
 
     useLayoutEffect(() => {
         const node = screen.current
-        if (!node) return
-        const rect = node.getBoundingClientRect()
-        onMeasure({ width: rect.width, height: rect.height })
-    }, [box.width, box.height, onMeasure])
+        if (!node || !onMeasure) return
+
+        const measure = () => {
+            const rect = node.getBoundingClientRect()
+            if (rect.width) onMeasure({ width: rect.width, height: rect.height })
+        }
+
+        measure()
+        const observer = new ResizeObserver(measure)
+        observer.observe(node)
+        return () => observer.disconnect()
+    }, [onMeasure])
 
     return (
-        <div ref={host} className='relative min-h-0 min-w-0 flex-1'>
-            <div
-                className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'
-                style={{ width: box.width, height: box.height }}
-            >
+        <div
+            ref={host}
+            className='flex h-full min-h-0 shrink-0 flex-col items-center gap-2'
+            style={{ width }}
+        >
+            <div className='relative w-full min-h-0 flex-1'>
                 <span className={`${SIDE} -left-[2px] top-[14%] h-[3.5%]`} />
                 <span className={`${SIDE} -left-[2px] top-[21%] h-[6.5%]`} />
                 <span className={`${SIDE} -left-[2px] top-[29%] h-[6.5%]`} />
                 <span className={`${SIDE} -right-[2px] top-[22%] h-[9%]`} />
 
-                <div className='size-full rounded-[54px] bg-[#0b0d11] p-[11px] shadow-[0_6px_16px_-8px_rgba(0,0,0,0.7),inset_0_0_2px_1px_rgba(255,255,255,0.22),0_0_0_1px_rgba(255,255,255,0.08)]'>
+                <div className='absolute inset-0 rounded-[54px] bg-[#0b0d11] p-[11px] shadow-[0_6px_16px_-8px_rgba(0,0,0,0.7),inset_0_0_2px_1px_rgba(255,255,255,0.22),0_0_0_1px_rgba(255,255,255,0.08)]'>
                     <div ref={screen} className='relative size-full overflow-hidden rounded-[44px] bg-ink'>
                         <img
                             src={wallpaper}
@@ -77,6 +80,7 @@ export default function PhoneFrame({ aspect, onMeasure, children }: PhoneFramePr
                     </div>
                 </div>
             </div>
+            <span className='shrink-0 text-[11px] text-dim'>{label}</span>
         </div>
     )
 }

@@ -2,6 +2,8 @@ import { DndContext, DragOverlay, PointerSensor, pointerWithin, useSensor, useSe
 import { AnimatePresence } from 'motion/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
+import { LogicalSize, getCurrentWindow } from '@tauri-apps/api/window'
+
 import ContextMenu from './context-menu'
 import DockRow from './dock-row'
 import { isFolderSlot } from './editor.types'
@@ -9,8 +11,7 @@ import FolderSheet from './folder-sheet'
 import { SEPARATOR, parseDropTarget, sideOf } from './home-editor.types'
 import { IconsProvider } from './icons.context'
 import { ScreenProvider, geometryFor } from './screen.context'
-import PageDots from './page-dots'
-import PagesStrip from './pages-strip'
+import HomePage from './home-page'
 import PhoneFrame from './phone-frame'
 import SlotTile from './slot-tile'
 
@@ -18,6 +19,14 @@ import type { DragEndEvent, DragMoveEvent, DragStartEvent } from '@dnd-kit/core'
 import type { ContextMenuState, MenuItem } from './context-menu.types'
 import type { FolderSlot, Slot, Target } from './editor.types'
 import type { Hint, HomeEditorProps } from './home-editor.types'
+
+/** Grow the window by one device so the new page has somewhere to sit. */
+const widenWindow = async (extra: number) => {
+    const window_ = getCurrentWindow()
+    const factor = await window_.scaleFactor()
+    const outer = (await window_.outerSize()).toLogical(factor)
+    await window_.setSize(new LogicalSize(Math.round(outer.width + extra), Math.round(outer.height)))
+}
 
 export default function HomeEditor({
     state,
@@ -30,7 +39,6 @@ export default function HomeEditor({
     dispatch,
     onSelectionChange,
 }: HomeEditorProps) {
-    const [page, setPage] = useState(0)
     const [openFolderId, setOpenFolderId] = useState<string | null>(null)
     const [dragging, setDragging] = useState<Slot | null>(null)
     const [hint, setHint] = useState<Hint | null>(null)
@@ -46,17 +54,16 @@ export default function HomeEditor({
     const { layout } = state
     const pageCount = layout.pages.length
 
+    const openFolderPage = useMemo(
+        () => layout.pages.findIndex(slots => slots.some(slot => slot.id === openFolderId)),
+        [layout, openFolderId]
+    )
+
     const openFolder = useMemo<FolderSlot | null>(() => {
         if (!openFolderId) return null
         const found = layout.pages.flat().find(slot => slot.id === openFolderId)
         return found && isFolderSlot(found) ? found : null
     }, [layout, openFolderId])
-
-    const go = useCallback((next: number) => setPage(Math.max(0, Math.min(next, pageCount - 1))), [pageCount])
-
-    useEffect(() => {
-        if (page > pageCount - 1) go(pageCount - 1)
-    }, [go, page, pageCount])
 
     const handleSelect = useCallback(
         (id: string, additive: boolean) => {
@@ -81,9 +88,9 @@ export default function HomeEditor({
                 .flat()
                 .filter(isFolderSlot)
                 .find(folder => folder.apps.some(app => app.id === id))
-            return holder ? { kind: 'folder', id: holder.id } : { kind: 'page', page }
+            return holder ? { kind: 'folder', id: holder.id } : { kind: 'page', page: 0 }
         },
-        [layout, page]
+        [layout]
     )
 
     const handleDragStart = useCallback(
@@ -189,12 +196,15 @@ export default function HomeEditor({
             items.push({
                 label: 'Add a page',
                 disabled: pageCount >= limits.pages,
-                onPick: () => dispatch({ type: 'add-page' }),
+                onPick: () => {
+                    dispatch({ type: 'add-page' })
+                    widenWindow(size.width + 44)
+                },
             })
             items.push({
-                label: 'Remove this page',
-                disabled: pageCount < 2 || (layout.pages[page]?.length ?? 0) > 0,
-                onPick: () => dispatch({ type: 'remove-page', page }),
+                label: 'Remove the last page',
+                disabled: pageCount < 2 || (layout.pages.at(-1)?.length ?? 0) > 0,
+                onPick: () => dispatch({ type: 'remove-page', page: pageCount - 1 }),
             })
             items.push({ label: 'Undo', shortcut: '⌘Z', onPick: () => dispatch({ type: 'undo' }) })
             items.push({ label: 'Redo', shortcut: '⇧⌘Z', onPick: () => dispatch({ type: 'redo' }) })
@@ -222,14 +232,12 @@ export default function HomeEditor({
 
             setMenu({ x: event.clientX, y: event.clientY, items })
         },
-        [commands, dispatch, handleGroup, layout, limits.pages, page, pageCount, selection]
+        [commands, dispatch, handleGroup, layout, limits.pages, pageCount, selection, size.width]
     )
 
     useEffect(() => {
         const onKey = (event: KeyboardEvent) => {
             if (event.target instanceof HTMLInputElement) return
-            if (event.key === 'ArrowRight') go(page + 1)
-            if (event.key === 'ArrowLeft') go(page - 1)
             if (event.key === 'Escape') {
                 setOpenFolderId(null)
                 onSelectionChange(new Set())
@@ -245,7 +253,7 @@ export default function HomeEditor({
         }
         window.addEventListener('keydown', onKey)
         return () => window.removeEventListener('keydown', onKey)
-    }, [dispatch, go, handleGroup, limits.pages, onSelectionChange, page, pageCount])
+    }, [dispatch, handleGroup, onSelectionChange])
 
     return (
         <IconsProvider value={icons}>
@@ -261,59 +269,71 @@ export default function HomeEditor({
                         setHint(null)
                     }}
                 >
-                    <PhoneFrame aspect={aspect} onMeasure={setSize}>
-                        {offline ? (
-                            <div className='absolute inset-0 z-30 grid place-items-center bg-black/45 px-10 backdrop-blur-md'>
-                                <p className='text-center text-[13px] leading-relaxed text-white/85'>
-                                    {offline}
-                                </p>
-                            </div>
-                        ) : null}
+                    <div className='flex h-full min-h-0 gap-5 overflow-x-auto px-1 [scrollbar-width:thin]'>
+                        {layout.pages.map((slots, index) => (
+                            <PhoneFrame
+                                key={index}
+                                aspect={aspect}
+                                label={`Page ${index + 1}`}
+                                onMeasure={index === 0 ? setSize : undefined}
+                            >
+                                <div
+                                    className='min-h-0 flex-1 pt-[7%]'
+                                    onContextMenu={event => openMenu(event)}
+                                >
+                                    <HomePage
+                                        page={index}
+                                        slots={slots}
+                                        limits={limits}
+                                        selection={selection}
+                                        hint={hint}
+                                        onSelect={handleSelect}
+                                        onOpen={setOpenFolderId}
+                                        onContextMenu={openMenu}
+                                    />
+                                </div>
+                                <div onContextMenu={event => openMenu(event)}>
+                                    <DockRow
+                                        slots={layout.dock}
+                                        limits={limits}
+                                        selection={selection}
+                                        hint={hint}
+                                        onSelect={handleSelect}
+                                        onContextMenu={openMenu}
+                                    />
+                                </div>
 
-                        <PagesStrip
-                            pages={layout.pages}
-                            limits={limits}
-                            selection={selection}
-                            hint={hint}
-                            page={page}
-                            onPageChange={setPage}
-                            onSelect={handleSelect}
-                            onOpen={setOpenFolderId}
-                            onContextMenu={openMenu}
-                        />
-                        <div className='pb-[10px]'>
-                            <PageDots count={pageCount} active={page} onGo={go} />
-                        </div>
-                        <div onContextMenu={event => openMenu(event)}>
-                            <DockRow
-                                slots={layout.dock}
-                                limits={limits}
-                                selection={selection}
-                                hint={hint}
-                                onSelect={handleSelect}
-                                onContextMenu={openMenu}
-                            />
-                        </div>
+                                {offline && index === 0 ? (
+                                    <div className='absolute inset-0 z-30 grid place-items-center bg-black/45 px-10 backdrop-blur-md'>
+                                        <p className='text-center text-[13px] leading-relaxed whitespace-pre-line text-white/85'>
+                                            {offline}
+                                        </p>
+                                    </div>
+                                ) : null}
 
-                        <AnimatePresence>
-                            {openFolder ? (
-                                <FolderSheet
-                                    folder={openFolder}
-                                    limits={limits}
-                                    selection={selection}
-                                    hint={hint}
-                                    onSelect={handleSelect}
-                                    onRename={name => dispatch({ type: 'rename', id: openFolder.id, name })}
-                                    onDissolve={() => {
-                                        dispatch({ type: 'dissolve', id: openFolder.id })
-                                        setOpenFolderId(null)
-                                    }}
-                                    onClose={() => setOpenFolderId(null)}
-                                    onContextMenu={openMenu}
-                                />
-                            ) : null}
-                        </AnimatePresence>
-                    </PhoneFrame>
+                                <AnimatePresence>
+                                    {openFolder && openFolderPage === index ? (
+                                        <FolderSheet
+                                            folder={openFolder}
+                                            limits={limits}
+                                            selection={selection}
+                                            hint={hint}
+                                            onSelect={handleSelect}
+                                            onRename={name =>
+                                                dispatch({ type: 'rename', id: openFolder.id, name })
+                                            }
+                                            onDissolve={() => {
+                                                dispatch({ type: 'dissolve', id: openFolder.id })
+                                                setOpenFolderId(null)
+                                            }}
+                                            onClose={() => setOpenFolderId(null)}
+                                            onContextMenu={openMenu}
+                                        />
+                                    ) : null}
+                                </AnimatePresence>
+                            </PhoneFrame>
+                        ))}
+                    </div>
 
                     <DragOverlay dropAnimation={{ duration: 200, easing: 'cubic-bezier(0.32,0.72,0,1)' }}>
                         {dragging ? (
