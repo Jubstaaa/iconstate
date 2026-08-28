@@ -27,6 +27,12 @@ jobs:
       - name: Build the app
         run: bun run tauri build --bundles app,dmg
         working-directory: app
+        # The config asks for updater artifacts, and Tauri refuses to build them
+        # against a public key with no private one — so this job needs the key
+        # too, not just the release job.
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
       - name: Check the bundle
         run: ./scripts/verify-bundle.sh
       - uses: actions/upload-artifact@v4
