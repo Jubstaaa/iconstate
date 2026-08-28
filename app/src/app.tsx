@@ -1,8 +1,8 @@
-import { LogicalSize, getCurrentWindow } from '@tauri-apps/api/window'
+import { getCurrentWindow } from '@tauri-apps/api/window'
 import { Toaster } from 'sonner'
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 
-import { deviceAspect, limitsFrom, windowHeightFor } from './features/editor/editor.constants'
+import { deviceAspect, limitsFrom } from './features/editor/editor.constants'
 import { editorReducer, initialEditorState, toIconState } from './features/editor/editor.reducer'
 import HomeEditor from './features/editor/home-editor'
 import DiffReview from './features/diff-review/diff-review'
@@ -201,20 +201,6 @@ export default function App() {
     useEffect(() => {
         getCurrentWindow().setTitle(device ? `${device} — ${system}` : 'IconState')
     }, [device, system])
-
-    useEffect(() => {
-        if (!metrics) return
-        const window_ = getCurrentWindow()
-        window_.innerSize().then(async size => {
-            const factor = await window_.scaleFactor()
-            const logical = size.toLogical(factor)
-            const width = Math.round(logical.width)
-            const wanted = windowHeightFor(metrics, width)
-            if (Math.abs(wanted - Math.round(logical.height)) > 2) {
-                await window_.setSize(new LogicalSize(width, wanted))
-            }
-        })
-    }, [metrics])
 
     return (
         <>

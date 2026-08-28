@@ -64,15 +64,8 @@ export const limitsFrom = (metrics: Metrics | null): Limits => {
     }
 }
 
-/** Padding around the device inside the window. */
-const OUTER = 10 * 2
-
 export const deviceAspect = (metrics: Metrics | null): number => {
     const width = metrics?.homeScreenWidth ?? 440
     const height = metrics?.homeScreenHeight ?? 956
     return width / height
 }
-
-/** Window height that leaves no letterboxing around the device. */
-export const windowHeightFor = (metrics: Metrics | null, width: number) =>
-    Math.round((width - OUTER) / deviceAspect(metrics)) + OUTER
