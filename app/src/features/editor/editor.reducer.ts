@@ -219,54 +219,89 @@ const dissolve = (layout: Layout, id: string): Layout => {
     return prune(insert(emptied, { zone: where.zone, anchorId: after, position: 'before' }, folder.apps))
 }
 
+/**
+ * A page holds only so many icons. Anything over the limit rolls onto the front
+ * of the next page the way it does on the phone, opening pages at the end until
+ * everything fits.
+ */
+const spill = (layout: Layout, limits: Limits): Layout => {
+    if (layout.pages.every(page => page.length <= limits.page)) return layout
+
+    const pages: Slot[][] = []
+    let carry: Slot[] = []
+
+    for (const page of layout.pages) {
+        const full = [...carry, ...page]
+        pages.push(full.slice(0, limits.page))
+        carry = full.slice(limits.page)
+    }
+    while (carry.length) {
+        pages.push(carry.slice(0, limits.page))
+        carry = carry.slice(limits.page)
+    }
+
+    return { ...layout, pages }
+}
+
 const remember = (state: EditorState, layout: Layout): EditorState =>
     layout === state.layout ? state : { layout, past: [...state.past, state.layout].slice(-50), future: [] }
 
 export const initialEditorState: EditorState = { layout: { dock: [], pages: [[]] }, past: [], future: [] }
 
-export const editorReducer = (state: EditorState, action: Action): EditorState => {
-    switch (action.type) {
-        case 'load':
-            return { layout: toLayout(action.state), past: [], future: [] }
-        case 'move':
-            return remember(state, move(state.layout, action.ids, action.target))
-        case 'combine':
-            return remember(state, combine(state.layout, action.ids, action.ontoId))
-        case 'group':
-            return remember(state, group(state.layout, action.ids, action.name))
-        case 'rename':
-            return remember(state, {
-                ...state.layout,
-                pages: state.layout.pages.map(page =>
-                    page.map(slot =>
-                        isFolderSlot(slot) && slot.id === action.id ? { ...slot, name: action.name } : slot
-                    )
-                ),
-            })
-        case 'dissolve':
-            return remember(state, dissolve(state.layout, action.id))
-        case 'add-page':
-            return remember(state, { ...state.layout, pages: [...state.layout.pages, []] })
-        case 'remove-page': {
-            if (state.layout.pages.length < 2 || state.layout.pages[action.page]?.length) return state
-            return remember(state, {
-                ...state.layout,
-                pages: state.layout.pages.filter((_, at) => at !== action.page),
-            })
-        }
-        case 'undo': {
-            const previous = state.past[state.past.length - 1]
-            if (!previous) return state
-            return {
-                layout: previous,
-                past: state.past.slice(0, -1),
-                future: [state.layout, ...state.future],
+/**
+ * The dock does not overflow anywhere, so a drop that would overfill it is
+ * refused outright and the icon stays where it was.
+ */
+export const makeEditorReducer =
+    (limits: Limits) =>
+    (state: EditorState, action: Action): EditorState => {
+        const commit = (layout: Layout): EditorState =>
+            layout.dock.length > limits.dock ? state : remember(state, spill(layout, limits))
+
+        switch (action.type) {
+            case 'load':
+                return { layout: toLayout(action.state), past: [], future: [] }
+            case 'move':
+                return commit(move(state.layout, action.ids, action.target))
+            case 'combine':
+                return commit(combine(state.layout, action.ids, action.ontoId))
+            case 'group':
+                return commit(group(state.layout, action.ids, action.name))
+            case 'rename':
+                return remember(state, {
+                    ...state.layout,
+                    pages: state.layout.pages.map(page =>
+                        page.map(slot =>
+                            isFolderSlot(slot) && slot.id === action.id
+                                ? { ...slot, name: action.name }
+                                : slot
+                        )
+                    ),
+                })
+            case 'dissolve':
+                return commit(dissolve(state.layout, action.id))
+            case 'add-page':
+                return remember(state, { ...state.layout, pages: [...state.layout.pages, []] })
+            case 'remove-page': {
+                if (state.layout.pages.length < 2 || state.layout.pages[action.page]?.length) return state
+                return remember(state, {
+                    ...state.layout,
+                    pages: state.layout.pages.filter((_, at) => at !== action.page),
+                })
+            }
+            case 'undo': {
+                const previous = state.past[state.past.length - 1]
+                if (!previous) return state
+                return {
+                    layout: previous,
+                    past: state.past.slice(0, -1),
+                    future: [state.layout, ...state.future],
+                }
+            }
+            case 'redo': {
+                const [next, ...rest] = state.future
+                if (!next) return state
+                return { layout: next, past: [...state.past, state.layout], future: rest }
             }
         }
-        case 'redo': {
-            const [next, ...rest] = state.future
-            if (!next) return state
-            return { layout: next, past: [...state.past, state.layout], future: rest }
-        }
     }
-}

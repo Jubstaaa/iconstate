@@ -3,7 +3,7 @@ import { Toaster } from 'sonner'
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 
 import { deviceAspect, limitsFrom } from './features/editor/editor.constants'
-import { editorReducer, initialEditorState, toIconState } from './features/editor/editor.reducer'
+import { initialEditorState, makeEditorReducer, toIconState } from './features/editor/editor.reducer'
 import HomeEditor from './features/editor/home-editor'
 import DiffReview from './features/diff-review/diff-review'
 import { notifyDone, notifyFailed, notifyIdle, notifyProgress } from './lib/notify'
@@ -73,13 +73,18 @@ export default function App() {
     const [status, setStatus] = useState('')
     const [busy, setBusy] = useState(false)
     const working = useRef(false)
-    const [state, dispatch] = useReducer(editorReducer, initialEditorState)
+    const limits = useMemo(() => limitsFrom(metrics), [metrics])
+    // The grid the phone reports decides what fits, so the reducer is built
+    // around it rather than being handed the limits on every action.
+    const [state, dispatch] = useReducer(
+        useMemo(() => makeEditorReducer(limits), [limits]),
+        initialEditorState
+    )
     const [selection, setSelection] = useState<Set<string>>(new Set())
     const [device, setDevice] = useState('')
     const [system, setSystem] = useState('not connected')
 
     const serial = devices[0]?.serial
-    const limits = useMemo(() => limitsFrom(metrics), [metrics])
     const aspect = useMemo(() => deviceAspect(metrics), [metrics])
     const edited = useMemo(() => toIconState(state.layout, limits), [state.layout, limits])
     const dirty = useMemo(
