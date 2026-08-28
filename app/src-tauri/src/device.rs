@@ -53,9 +53,7 @@ fn to_json(value: &plist::Value) -> serde_json::Value {
         }
         plist::Value::Date(date) => serde_json::Value::String(date.to_xml_format()),
         plist::Value::Uid(uid) => serde_json::Value::from(uid.get()),
-        plist::Value::Array(items) => {
-            serde_json::Value::Array(items.iter().map(to_json).collect())
-        }
+        plist::Value::Array(items) => serde_json::Value::Array(items.iter().map(to_json).collect()),
         plist::Value::Dictionary(map) => serde_json::Value::Object(
             map.iter()
                 .map(|(key, item)| (key.clone(), to_json(item)))
@@ -236,7 +234,10 @@ async fn read_state(client: &mut SpringBoardServicesClient) -> Result<serde_json
 }
 
 /// Ask SpringBoard for a specific icon state format, to see what each one says.
-pub async fn icon_state_as(serial: Option<&str>, format: Option<&str>) -> Result<serde_json::Value> {
+pub async fn icon_state_as(
+    serial: Option<&str>,
+    format: Option<&str>,
+) -> Result<serde_json::Value> {
     let provider = provider(serial).await?;
     read_state_as(&mut springboard(&provider).await?, format).await
 }

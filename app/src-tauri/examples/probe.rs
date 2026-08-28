@@ -17,17 +17,19 @@ async fn main() {
         "icons" => {
             let wanted: Vec<String> = std::env::args().skip(2).collect();
             let directory = std::env::temp_dir().join("iconstate-probe-icons");
-            let manifest = iconstate_lib::device::icons(None, &wanted, &directory, |key, at, all| {
-                eprintln!("{at}/{all} {key}");
-            })
-            .await
-            .expect("icons");
+            let manifest =
+                iconstate_lib::device::icons(None, &wanted, &directory, |key, at, all| {
+                    eprintln!("{at}/{all} {key}");
+                })
+                .await
+                .expect("icons");
             println!("{}", serde_json::to_string_pretty(&manifest).unwrap());
         }
         "write-roundtrip" => {
             let (_, before, _) = iconstate_lib::device::icon_state(None).await.expect("read");
             let backup = std::env::args().nth(2).expect("give a backup path");
-            std::fs::write(&backup, serde_json::to_string_pretty(&before).unwrap()).expect("backup");
+            std::fs::write(&backup, serde_json::to_string_pretty(&before).unwrap())
+                .expect("backup");
             eprintln!("backed up to {backup}");
 
             let (_, settled) = iconstate_lib::device::write_icon_state(None, &before)
@@ -53,7 +55,10 @@ async fn main() {
             let last = pages.last_mut().expect("a page");
             let icons = last.as_array_mut().expect("icons");
             icons.insert(0, serde_json::Value::Bool(false));
-            eprintln!("sending last page as {}", serde_json::to_string(last).unwrap());
+            eprintln!(
+                "sending last page as {}",
+                serde_json::to_string(last).unwrap()
+            );
 
             iconstate_lib::device::write_icon_state(None, &state)
                 .await
@@ -77,7 +82,9 @@ async fn main() {
 
                 // The dock is one row and takes no gaps.
                 if index == 0 {
-                    out.push(serde_json::Value::Array(vec![serde_json::Value::Array(icons)]));
+                    out.push(serde_json::Value::Array(vec![serde_json::Value::Array(
+                        icons,
+                    )]));
                     continue;
                 }
 
@@ -137,12 +144,15 @@ async fn main() {
                 Err(error) => eprintln!("write refused: {error}"),
             }
 
-            let back = iconstate_lib::device::icon_state_as(None, Some("2")).await.expect("back");
+            let back = iconstate_lib::device::icon_state_as(None, Some("2"))
+                .await
+                .expect("back");
             println!("{}", serde_json::to_string(&back).unwrap());
         }
         _ => {
-            let (about, state, metrics) =
-                iconstate_lib::device::icon_state(None).await.expect("state");
+            let (about, state, metrics) = iconstate_lib::device::icon_state(None)
+                .await
+                .expect("state");
             eprintln!("{}", serde_json::to_string(&about).unwrap());
             eprintln!("{}", serde_json::to_string(&metrics).unwrap());
             println!("{}", serde_json::to_string_pretty(&state).unwrap());

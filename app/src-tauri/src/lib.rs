@@ -63,7 +63,10 @@ async fn fetch_metrics(serial: Option<String>) -> Answer<serde_json::Value> {
 async fn installed_apps(app: AppHandle, serial: Option<String>) -> Answer<serde_json::Value> {
     let apps = device::installed_apps(serial.as_deref()).await?;
     let count = apps.as_object().map(|map| map.len()).unwrap_or(0);
-    say(&app, json!({ "event": "installed-apps-read", "count": count }));
+    say(
+        &app,
+        json!({ "event": "installed-apps-read", "count": count }),
+    );
     Ok(apps)
 }
 
@@ -76,10 +79,16 @@ async fn fetch_icons(
     // The window usually knows which icons it wants; reading the layout again
     // just to work them out would cost another trip to the phone.
     if let Some(keys) = keys {
-        say(&app, json!({ "event": "icons-wanted", "count": keys.len() }));
+        say(
+            &app,
+            json!({ "event": "icons-wanted", "count": keys.len() }),
+        );
         let handle = app.clone();
         let manifest = device::icons(serial.as_deref(), &keys, &icon_cache(), |_, done, total| {
-            say(&handle, json!({ "event": "icon", "done": done, "total": total }));
+            say(
+                &handle,
+                json!({ "event": "icon", "done": done, "total": total }),
+            );
         })
         .await?;
         say(&app, json!({ "event": "icons-ready" }));
@@ -119,12 +128,18 @@ async fn fetch_icons(
         }
     }
 
-    say(&app, json!({ "event": "icons-wanted", "count": wanted.len() }));
+    say(
+        &app,
+        json!({ "event": "icons-wanted", "count": wanted.len() }),
+    );
 
     let cache = icon_cache();
     let handle = app.clone();
     let manifest = device::icons(serial.as_deref(), &wanted, &cache, |_, done, total| {
-        say(&handle, json!({ "event": "icon", "done": done, "total": total }));
+        say(
+            &handle,
+            json!({ "event": "icon", "done": done, "total": total }),
+        );
     })
     .await?;
 
@@ -142,20 +157,29 @@ async fn lookup_genres(
     bundle_ids: Vec<String>,
     country: Option<String>,
 ) -> Answer<catalog::Genres> {
-    say(&app, json!({ "event": "looking-up", "count": bundle_ids.len() }));
+    say(
+        &app,
+        json!({ "event": "looking-up", "count": bundle_ids.len() }),
+    );
 
     let handle = app.clone();
     let found = catalog::lookup(
         &bundle_ids,
         country.as_deref().unwrap_or("us"),
         |_, done, total| {
-            say(&handle, json!({ "event": "looked-up", "done": done, "total": total }));
+            say(
+                &handle,
+                json!({ "event": "looked-up", "done": done, "total": total }),
+            );
         },
     )
     .await?;
 
     let resolved = found.values().filter(|genres| !genres.is_empty()).count();
-    say(&app, json!({ "event": "looked-up-done", "resolved": resolved }));
+    say(
+        &app,
+        json!({ "event": "looked-up-done", "resolved": resolved }),
+    );
     Ok(found)
 }
 
@@ -167,7 +191,10 @@ async fn apply_layout(
 ) -> Answer<serde_json::Value> {
     let (_, current, _) = device::icon_state(serial.as_deref()).await?;
     let saved = backup::save_before_write(&current, serial.as_deref())?;
-    say(&app, json!({ "event": "backed-up", "file": saved.to_string_lossy() }));
+    say(
+        &app,
+        json!({ "event": "backed-up", "file": saved.to_string_lossy() }),
+    );
 
     say(&app, json!({ "event": "writing" }));
     let (_, settled) = device::write_icon_state(serial.as_deref(), &plan).await?;
@@ -195,7 +222,10 @@ async fn restore_backup(
         None => backup::latest().ok_or_else(|| "there is nothing to undo to".to_string())?,
     };
 
-    say(&app, json!({ "event": "reading-file", "file": path.to_string_lossy() }));
+    say(
+        &app,
+        json!({ "event": "reading-file", "file": path.to_string_lossy() }),
+    );
     let state = backup::read(&path)?;
 
     let (_, current, _) = device::icon_state(serial.as_deref()).await?;

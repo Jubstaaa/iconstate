@@ -44,7 +44,9 @@ async fn ask(client: &reqwest::Client, bundle_id: &str, country: &str) -> Vec<St
         .send()
         .await;
 
-    let Ok(response) = answer else { return Vec::new() };
+    let Ok(response) = answer else {
+        return Vec::new();
+    };
     let Ok(payload) = response.json::<serde_json::Value>().await else {
         return Vec::new();
     };

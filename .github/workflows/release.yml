@@ -19,16 +19,10 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: app/src-tauri
-      - uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
-          cache-dependency-glob: core/pyproject.toml
       - name: Stamp the version from the tag
         run: python3 scripts/set-version.py "${GITHUB_REF_NAME}"
       - run: bun install --frozen-lockfile
         working-directory: app
-      - name: Build the sidecar
-        run: ./scripts/build-sidecar.sh
       - uses: tauri-apps/tauri-action@v0
         with:
           projectPath: app
@@ -39,5 +33,5 @@ jobs:
           args: --bundles app,dmg
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Run the packaged sidecar
+      - name: Check the bundle
         run: ./scripts/verify-bundle.sh

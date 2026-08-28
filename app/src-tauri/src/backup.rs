@@ -18,7 +18,13 @@ fn slug(serial: Option<&str>) -> String {
     serial
         .unwrap_or("device")
         .chars()
-        .map(|char| if char.is_alphanumeric() || char == '-' || char == '_' { char } else { '-' })
+        .map(|char| {
+            if char.is_alphanumeric() || char == '-' || char == '_' {
+                char
+            } else {
+                '-'
+            }
+        })
         .collect()
 }
 
@@ -71,7 +77,10 @@ pub fn history() -> Vec<PathBuf> {
     let mut found: Vec<PathBuf> = entries
         .flatten()
         .map(|entry| entry.path())
-        .filter(|path| path.extension().is_some_and(|extension| extension == "json"))
+        .filter(|path| {
+            path.extension()
+                .is_some_and(|extension| extension == "json")
+        })
         .collect();
 
     found.sort();

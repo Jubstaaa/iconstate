@@ -10,24 +10,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  core:
-    name: core (python)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
-          cache-dependency-glob: core/pyproject.toml
-      - run: uv venv --python 3.12
-        working-directory: core
-      - run: uv pip install -e . --group dev
-        working-directory: core
-      - run: .venv/bin/ruff check .
-        working-directory: core
-      - run: .venv/bin/python -m pytest -q
-        working-directory: core
-
   app:
     name: app (rust + typescript)
     runs-on: macos-15
@@ -42,18 +24,12 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: app/src-tauri
-      - uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
-          cache-dependency-glob: core/pyproject.toml
       - run: bun install --frozen-lockfile
         working-directory: app
       - run: bun run lint
         working-directory: app
       - run: bun run build
         working-directory: app
-      - name: Build the sidecar
-        run: ./scripts/build-sidecar.sh
       - run: cargo fmt --check
         working-directory: app/src-tauri
       - run: cargo clippy --all-targets -- -D warnings

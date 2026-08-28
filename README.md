@@ -13,18 +13,28 @@ proposed for it, preview it, apply it in one write, roll it back if you hate it.
 
 | Path | What it is |
 |---|---|
-| `core/` | `iconstate` Python package: the layout engine and the CLI |
-| `core/src/iconstate/core/` | pure JSON in, JSON out — no device, fully testable |
-| `core/src/iconstate/device/` | lockdown + SpringBoard; thin on purpose, tested by hand |
-| `app/` | React + Vite frontend |
-| `app/src-tauri/` | Tauri v2 shell; runs the core as a one-shot sidecar |
+| `app/src/lib/` | the layout engine: pure JSON in, JSON out, no device, fully tested |
+| `app/src/features/` | the editor — the phone frames, drag and drop, the diff sheet |
+| `app/src-tauri/src/device.rs` | lockdown + SpringBoard; thin on purpose, tested by hand |
+| `app/src-tauri/src/` | backups and the App Store lookup, next to the Tauri shell |
+| `core/` | the original Python engine, kept for reference — nothing runs it |
 | `reference/` | real-device fixtures and the working prototype this grew from |
-| `scripts/` | sidecar build, bundle verification, version stamping |
+| `scripts/` | bundle verification, version stamping, rule derivation |
 
 The split is the whole architecture: CI has no phone, so everything that can be
-tested without one lives in `iconstate.core`.
+tested without one lives in `app/src/lib/` and never imports a Tauri command.
+
+It used to be a frozen Python CLI running as a sidecar. That worked, but it put
+46MB and a second process between the window and the phone for code that is a
+few hundred lines. The device layer is Rust now, over the [`idevice`][idevice]
+crate, and the layout engine is TypeScript in the app itself.
+
+[idevice]: https://github.com/jkcoxson/idevice
 
 ## The CLI
+
+The app no longer runs any of this — it is the original Python engine, still
+here because it is a second implementation to check the new one against.
 
 ```bash
 cd core
@@ -104,19 +114,15 @@ Nothing is written until Review changes, which shows the same diff the CLI
 prints.
 
 ```bash
-./scripts/build-sidecar.sh      # freezes the CLI next to the Tauri shell
 cd app && bun install && bun run tauri dev
 ```
 
-`scripts/build-sidecar.sh` names the binary after the Rust host triple
-(`iconstate-core-aarch64-apple-darwin`), which is what Tauri looks for. A
-mismatch makes the app fail to launch with no error, so the release pipeline
-runs the packaged sidecar as its last step.
+One binary, nothing to stage beside it.
 
 ## How apps get sorted
 
-`core/src/iconstate/core/rules.py` maps bundle identifiers to folder names. It
-is generated, not hand-edited:
+`app/src/lib/rules.ts` maps bundle identifiers to folder names. It is generated,
+not hand-edited:
 
 ```bash
 python3 scripts/derive-rules.py path/to/a/good-layout.json
@@ -126,17 +132,16 @@ Keying on bundle identifiers rather than display names matters more than it
 looks: two apps on this phone are both called "the same name", and WhatsApp ships
 with an invisible character in its name.
 
-Apps the table does not know go into an `Unsorted` folder and are reported on
-stderr as an `unassigned` event. Pass decisions back as `--assign
-decisions.json`, a plain `{"com.example.app": "Games"}` map, and the plan is
-rebuilt with them layered on the offline table.
+Apps the table does not know go into an `Unsorted` folder. Assignments are a
+plain `{"com.example.app": "Games"}` map layered on top of the offline table,
+and the plan is rebuilt with them.
 
-`--lookup` fills those in from the App Store's own category, through the public
+"Sort, looking up unknown apps" fills those in from the App Store's own category, through the public
 iTunes lookup endpoint. No account, no API key, no model — every user gets the
 same answer, and answers are cached in `~/.iconstate/genres.json` so a bundle
 identifier is only ever asked about once.
 
-`core/src/iconstate/core/genres.py` maps a store genre to a folder. The table is
+`app/src/lib/genres.ts` maps a store genre to a folder. The table is
 ordered from specific to generic and that order *is* the algorithm: an app lists
 several genres and the one the store calls primary is regularly the vaguer of
 them — Instagram leads with Photo & Video, a dating app with Lifestyle. Reading the
@@ -146,12 +151,13 @@ Social, which is where a person would look for them.
 ## Tests
 
 ```bash
-cd core && .venv/bin/python -m pytest -q
+cd app && bun run lint    # types, formatting and the tests
 ```
 
-The load-bearing one is the round-trip: every fixture in `reference/fixtures/`
-is parsed into the model, serialized back, and compared to the original byte
-structure. If that ever fails, nothing may be written to a phone.
+The load-bearing ones run the real fixtures in `reference/fixtures/` through the
+planner and assert that planning is idempotent, that every app is placed exactly
+once, and that a state does not differ from itself. If those ever fail, nothing
+may be written to a phone.
 
 ## What the device will and will not do
 
