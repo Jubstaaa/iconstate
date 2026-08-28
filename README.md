@@ -1,3 +1,5 @@
+<img src="docs/icon.png" width="96" align="right" alt="">
+
 # IconState
 
 The iPhone home screen editor Apple removed from iTunes, brought back — and it
@@ -6,8 +8,15 @@ sorts your apps into folders for you.
 Plug the phone in over USB, read the whole layout, get a folder structure
 proposed for it, preview it, apply it in one write, roll it back if you hate it.
 
+<img src="docs/home-screen.png" width="380" alt="IconState showing an iPhone home screen, folders and dock, ready to rearrange">
+
+The icons are the phone's own PNGs and the grid is the size SpringBoard reports
+— every page is drawn as its own device, side by side, and you drag between
+them.
+
 > macOS arm64 only for now. USB only — SpringBoard's layout service is not
-> reachable over the network.
+> reachable over the network. No jailbreak: this speaks the same lockdown
+> service Finder uses to back your phone up.
 
 ## Getting it
 
