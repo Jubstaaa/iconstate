@@ -16,6 +16,23 @@ export type IconStateItem = AppIcon | FolderIcon
 
 export type IconState = IconStateItem[][]
 
+/** What the device says fits where. */
+export interface Limits {
+    dock: number
+    page: number
+    folderPage: number
+    pages: number
+    columns: number
+    rows: number
+    folderColumns: number
+    folderRows: number
+    /** Icon width as a share of screen width, straight from the device. */
+    iconShare: number
+    /** Gap between columns, derived so the row adds up to the screen. */
+    gapShare: number
+    edgeShare: number
+}
+
 export interface Device {
     serial: string
     connection: string

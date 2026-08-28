@@ -8,8 +8,9 @@
         "build": "tsc && vite build",
         "preview": "vite preview",
         "tauri": "tauri",
-        "lint": "tsc --noEmit && prettier --check .",
-        "format": "prettier --write ."
+        "lint": "tsc --noEmit && prettier --check . && vitest run",
+        "format": "prettier --write .",
+        "test": "vitest run"
     },
     "dependencies": {
         "@dnd-kit/core": "^6.3.1",
@@ -26,11 +27,13 @@
     },
     "devDependencies": {
         "@tauri-apps/cli": "^2",
+        "@types/node": "^26.4.0",
         "@types/react": "^19.1.8",
         "@types/react-dom": "^19.1.6",
         "@vitejs/plugin-react": "^4.6.0",
         "prettier": "^3.9.6",
         "typescript": "~5.8.3",
-        "vite": "^7.0.4"
+        "vite": "^7.0.4",
+        "vitest": "^4.1.11"
     }
 }
