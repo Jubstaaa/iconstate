@@ -1,0 +1,1471 @@
+[
+ [
+  {
+   "bundleIdentifier": "com.apple.mobilephone",
+   "bundleVersion": "36",
+   "displayIdentifier": "com.apple.mobilephone",
+   "displayName": "Phone",
+   "iconModDate": "2026-07-17T02:54:10"
+  },
+  {
+   "bundleIdentifier": "com.example.app123",
+   "bundleVersion": "1044029620",
+   "displayIdentifier": "com.example.app123",
+   "displayName": "App 123",
+   "iconModDate": "2026-08-22T09:45:20.425795"
+  },
+  {
+   "bundleIdentifier": "com.example.app001",
+   "bundleVersion": "151.0.7922.112",
+   "displayIdentifier": "com.example.app001",
+   "displayName": "App 001",
+   "iconModDate": "2026-08-12T05:27:59.630059"
+  },
+  {
+   "bundleIdentifier": "com.example.app124",
+   "bundleVersion": "917602050",
+   "displayIdentifier": "com.example.app124",
+   "displayName": "App 124",
+   "iconModDate": "2026-08-22T09:43:38.572537"
+  }
+ ],
+ [
+  {
+   "displayName": "Apple",
+   "iconLists": [
+    [
+     {
+      "bundleIdentifier": "com.apple.AppStore",
+      "bundleVersion": "1",
+      "displayIdentifier": "com.apple.AppStore",
+      "displayName": "App Store",
+      "iconModDate": "2026-08-18T22:48:45.016757"
+     },
+     {
+      "bundleIdentifier": "com.apple.store.Jolly",
+      "bundleVersion": "6.9.0.1509",
+      "displayIdentifier": "com.apple.store.Jolly",
+      "displayName": "Apple Store",
+      "iconModDate": "2026-07-23T10:50:56.761628"
+     },
+     {
+      "bundleIdentifier": "com.apple.tips",
+      "bundleVersion": "822.6.3",
+      "displayIdentifier": "com.apple.tips",
+      "displayName": "Tips",
+      "iconModDate": "2026-08-18T22:48:48.235924"
+     },
+     {
+      "bundleIdentifier": "com.apple.supportapp",
+      "bundleVersion": "203226",
+      "displayIdentifier": "com.apple.supportapp",
+      "displayName": "Support",
+      "iconModDate": "2026-08-19T07:28:51.903160"
+     }
+    ]
+   ],
+   "listType": "folder"
+  },
+  {
+   "displayName": "Passwords",
+   "iconLists": [
+    [
+     {
+      "bundleIdentifier": "com.apple.Passwords",
+      "bundleVersion": "8624.4.5.10.5",
+      "displayIdentifier": "com.apple.Passwords",
+      "displayName": "Passwords",
+      "iconModDate": "2026-08-18T22:48:48.005362"
+     },
+     {
+      "bundleIdentifier": "com.example.app010",
+      "bundleVersion": "5.0.2.10600",
+      "displayIdentifier": "com.example.app010",
+      "displayName": "App 010",
+      "iconModDate": "2026-07-20T07:12:55.373480"
+     },
+     {
+      "bundleIdentifier": "com.example.app011",
+      "bundleVersion": "20260715.1",
+      "displayIdentifier": "com.example.app011",
+      "displayName": "App 011",
+      "iconModDate": "2026-08-13T11:46:23.296446"
+     }
+    ]
+   ],
+   "listType": "folder"
+  },
+  {
+   "displayName": "Learning",
+   "iconLists": [
+    [
+     {
+      "bundleIdentifier": "com.example.app031",
+      "bundleVersion": "6",
+      "displayIdentifier": "com.example.app031",
+      "displayName": "App 031",
+      "iconModDate": "2026-08-20T15:05:40.653315"
+     },
+     {
+      "bundleIdentifier": "com.example.app004",
+      "bundleVersion": "2.59.39",
+      "displayIdentifier": "com.example.app004",
+      "displayName": "App 004",
+      "iconModDate": "2026-08-13T11:46:09.670568"
+     },
+     {
+      "bundleIdentifier": "com.example.app055",
+      "bundleVersion": "1",
+      "displayIdentifier": "com.example.app055",
+      "displayName": "App 055",
+      "iconModDate": "2026-03-08T23:11:58.325474"
+     }
+    ]
+   ],
+   "listType": "folder"
+  },
+  {
+   "displayName": "Smart Home",
+   "iconLists": [
+    [
+     {
+      "bundleIdentifier": "com.apple.Home",
+      "bundleVersion": "1166.7.2",
+      "displayIdentifier": "com.apple.Home",
+      "displayName": "Home",
+      "iconModDate": "2026-08-18T22:48:44.225545"
+     },
+     {
+      "bundleIdentifier": "com.example.app128",
+      "bundleVersion": "11.6.203.218",
+      "displayIdentifier": "com.example.app128",
+      "displayName": "App 128",
+      "iconModDate": "2026-07-28T08:52:54.254644"
+     },
+     {
+      "bundleIdentifier": "com.example.app117",
+      "bundleVersion": "20260808165856",
+      "displayIdentifier": "com.example.app117",
+      "displayName": "App 117",
+      "iconModDate": "2026-08-22T09:44:18.264970"
+     },
+     {
+      "bundleIdentifier": "com.example.app095",
+      "bundleVersion": "36",
+      "displayIdentifier": "com.example.app095",
+      "displayName": "App 095",
+      "iconModDate": "2026-07-16T07:45:59.418192"
+     },
+     {
+      "bundleIdentifier": "com.example.app056",
+      "bundleVersion": "687",
+      "displayIdentifier": "com.example.app056",
+      "displayName": "App 056",
+      "iconModDate": "2026-07-06T06:48:52.533870"
+     }
+    ]
+   ],
+   "listType": "folder"
+  },
+  {
+   "displayName": "Tickets",
+   "iconLists": [
+    [
+     {
+      "bundleIdentifier": "com.example.app079",
+      "bundleVersion": "3124",
+      "displayIdentifier": "com.example.app079",
+      "displayName": "App 079",
+      "iconModDate": "2026-08-22T09:44:43.529960"
+     },
+     {
+      "bundleIdentifier": "com.example.app013",
+      "bundleVersion": "65",
+      "displayIdentifier": "com.example.app013",
+      "displayName": "App 013",
+      "iconModDate": "2026-08-14T07:36:45.538066"
+     },
+     {
+      "bundleIdentifier": "com.example.app017",
+      "bundleVersion": "2100000033",
+      "displayIdentifier": "com.example.app017",
+      "displayName": "App 017",
+      "iconModDate": "2026-08-01T20:20:43.375473"
+     },
+     {
+      "bundleIdentifier": "com.example.app132",
+      "bundleVersion": "478",
+      "displayIdentifier": "com.example.app132",
+      "displayName": "App 132",
+      "iconModDate": "2026-08-04T16:21:38.612530"
+     }
+    ]
+   ],
+   "listType": "folder"
+  },
+  {
+   "displayName": "Utilities",
+   "iconLists": [
+    [
+     {
+      "bundleIdentifier": "com.apple.mobiletimer",
+      "bundleVersion": "1.0",
+      "displayIdentifier": "com.apple.mobiletimer",
+      "displayName": "Clock",
+      "iconModDate": "2026-08-18T22:48:41.554286"
+     },
+     {
+      "bundleIdentifier": "com.apple.calculator",
+      "bundleVersion": "225",
+      "displayIdentifier": "com.apple.calculator",
+      "displayName": "Calculator",
+      "iconModDate": "2026-08-18T22:48:42.882788"
+     },
+     {
+      "bundleIdentifier": "com.apple.compass",
+      "bundleVersion": "1.0",
+      "displayIdentifier": "com.apple.compass",
+      "displayName": "Compass",
+      "iconModDate": "2026-08-18T22:48:47.000531"
+     },
+     {
+      "bundleIdentifier": "com.apple.Magnifier",
+      "bundleVersion": "1",
+      "displayIdentifier": "com.apple.Magnifier",
+      "displayName": "Magnifier",
+      "iconModDate": "2026-08-18T22:48:46.747067"
+     },
+     {
+      "bundleIdentifier": "com.apple.measure",
+      "bundleVersion": "181.100.4",
+      "displayIdentifier": "com.apple.measure",
+      "displayName": "Measure",
+      "iconModDate": "2026-08-18T22:48:45.504448"
+     },
+     {
+      "bundleIdentifier": "com.apple.Translate",
+      "bundleVersion": "365.14",
+      "displayIdentifier": "com.apple.Translate",
+      "displayName": "Translate",
+      "iconModDate": "2026-08-18T22:48:46.131842"
+     },
+     {
+      "bundleIdentifier": "com.apple.findmy",
+      "bundleVersion": "442.36.4.19.1",
+      "displayIdentifier": "com.apple.findmy",
+      "displayName": "Find My",
+      "iconModDate": "2026-08-18T22:48:43.426705"
+     },
+     {
+      "bundleIdentifier": "com.apple.shortcuts",
+      "bundleVersion": "4711",
+      "displayIdentifier": "com.apple.shortcuts",
+      "displayName": "Shortcuts",
+      "iconModDate": "2026-08-18T22:48:47.476373"
+     },
+     {
+      "bundleIdentifier": "com.apple.weather",
+      "bundleVersion": "1318",
+      "displayIdentifier": "com.apple.weather",
+      "displayName": "Weather",
+      "iconModDate": "2026-08-18T22:48:42.213008"
+     }
+    ],
+    [
+     {
+      "bundleIdentifier": "com.example.app007",
+      "bundleVersion": "8141248",
+      "displayIdentifier": "com.example.app007",
+      "displayName": "App 007",
+      "iconModDate": "2026-08-21T08:49:44.321482"
+     },
+     {
+      "bundleIdentifier": "com.apple.Preferences",
+      "bundleVersion": "1353.6.1",
+      "displayIdentifier": "com.apple.Preferences",
+      "displayName": "Settings",
+      "iconModDate": "2026-07-17T02:54:10"
+     },
+     {
+      "bundleIdentifier": "com.apple.MobileAddressBook",
+      "bundleVersion": "1.0",
+      "displayIdentifier": "com.apple.MobileAddressBook",
+      "displayName": "Contacts",
+      "iconModDate": "2026-08-18T22:48:47.727617"
+     },
+     {
+      "bundleIdentifier": "com.example.app062",
+      "bundleVersion": "8110024",
+      "displayIdentifier": "com.example.app062",
+      "displayName": "App 062",
+      "iconModDate": "2026-08-17T04:43:53.348600"
+     },
+     {
+      "bundleIdentifier": "com.example.app028",
+      "bundleVersion": "2",
+      "displayIdentifier": "com.example.app028",
+      "displayName": "App 028",
+      "iconModDate": "2026-07-04T08:04:36.207521"
+     },
+     {
+      "bundleIdentifier": "com.example.app122",
+      "bundleVersion": "51",
+      "displayIdentifier": "com.example.app122",
+      "displayName": "App 122",
+      "iconModDate": "2026-05-17T08:21:54.179132"
+     },
+     {
+      "bundleIdentifier": "com.example.app030",
+      "bundleVersion": "175",
+      "displayIdentifier": "com.example.app030",
+      "displayName": "App 030",
+      "iconModDate": "2026-04-05T20:51:14.238875"
+     }
+    ]
+   ],
+   "listType": "folder"
+  },
+  {
+   "displayName": "Internet",
+   "iconLists": [
+    [
+     {
+      "bundleIdentifier": "com.apple.mobilesafari",
+      "bundleVersion": "8624.4.5.10.5",
+      "displayIdentifier": "com.apple.mobilesafari",
+      "displayName": "Safari",
+      "iconModDate": "2026-08-18T22:48:41.604973"
+     },
+     {
+      "bundleIdentifier": "com.example.app039",
+      "bundleVersion": "435.4.965413651",
+      "displayIdentifier": "com.example.app039",
+      "displayName": "App 039",
+      "iconModDate": "2026-08-25T07:17:52.184668"
+     },
+     {
+      "bundleIdentifier": "com.example.app115",
+      "bundleVersion": "4",
+      "displayIdentifier": "com.example.app115",
+      "displayName": "App 115",
+      "iconModDate": "2026-08-13T01:07:53.120844"
+     },
+     {
+      "bundleIdentifier": "com.example.app114",
+      "bundleVersion": "5",
+      "displayIdentifier": "com.example.app114",
+      "displayName": "App 114",
+      "iconModDate": "2026-08-06T03:15:09.275413"
+     },
+     {
+      "bundleIdentifier": "com.example.app121",
+      "bundleVersion": "0731161259",
+      "displayIdentifier": "com.example.app121",
+      "displayName": "App 121",
+      "iconModDate": "2026-08-10T02:16:49.230873"
+     },
+     {
+      "bundleIdentifier": "com.example.app097",
+      "bundleVersion": "6",
+      "displayIdentifier": "com.example.app097",
+      "displayName": "App 097",
+      "iconModDate": "2026-07-08T21:50:30.434737"
+     },
+     {
+      "bundleIdentifier": "com.example.app134",
+      "bundleVersion": "101.102.3",
+      "displayIdentifier": "com.example.app134",
+      "displayName": "App 134",
+      "iconModDate": "2026-08-26T07:07:24.651435"
+     }
+    ]
+   ],
+   "listType": "folder"
+  },
+  {
+   "displayName": "Health",
+   "iconLists": [
+    [
+     {
+      "bundleIdentifier": "com.apple.Health",
+      "bundleVersion": "6200.7.7",
+      "displayIdentifier": "com.apple.Health",
+      "displayName": "Health",
+      "iconModDate": "2026-08-18T22:48:46.870925"
+     },
+     {
+      "bundleIdentifier": "com.apple.Fitness",
+      "bundleVersion": "1.0",
+      "displayIdentifier": "com.apple.Fitness",
+      "displayName": "Fitness",
+      "iconModDate": "2026-08-18T22:48:47.363419"
+     },
+     {
+      "bundleIdentifier": "com.apple.Bridge",
+      "bundleVersion": "1.0",
+      "displayIdentifier": "com.apple.Bridge",
+      "displayName": "Watch",
+      "iconModDate": "2026-08-18T22:48:49.232544"
+     },
+     {
+      "bundleIdentifier": "com.example.app071",
+      "bundleVersion": "8",
+      "displayIdentifier": "com.example.app071",
+      "displayName": "App 071",
+      "iconModDate": "2026-08-18T05:30:54.883555"
+     },
+     {
+      "bundleIdentifier": "com.example.app073",
+      "bundleVersion": "2026072002",
+      "displayIdentifier": "com.example.app073",
+      "displayName": "App 073",
+      "iconModDate": "2026-07-24T05:53:14.828686"
+     },
+     {
+      "bundleIdentifier": "com.example.app029",
+      "bundleVersion": "151",
+      "displayIdentifier": "com.example.app029",
+      "displayName": "App 029",
+      "iconModDate": "2026-08-26T07:47:10.598346"
+     },
+     {
+      "bundleIdentifier": "com.example.app019",
+      "bundleVersion": "4",
+      "displayIdentifier": "com.example.app019",
+      "displayName": "App 019",
+      "iconModDate": "2026-08-16T07:43:54.202964"
+     },
+     {
+      "bundleIdentifier": "com.example.app057",
+      "bundleVersion": "3",
+      "displayIdentifier": "com.example.app057",
+      "displayName": "App 057",
+      "iconModDate": "2026-06-17T10:16:48.575320"
+     }
+    ]
+   ],
+   "listType": "folder"
+  },
+  {
+   "displayName": "Travel",
+   "iconLists": [
+    [
+     {
+      "bundleIdentifier": "com.apple.Maps",
+      "bundleVersion": "2921.36.4.23.12",
+      "displayIdentifier": "com.apple.Maps",
+      "displayName": "Maps",
+      "iconModDate": "2026-08-18T22:48:46.219843"
+     },
+     {
+      "bundleIdentifier": "com.example.app041",
+      "bundleVersion": "26.33.1.9618914320",
+      "displayIdentifier": "com.example.app041",
+      "displayName": "App 041",
+      "iconModDate": "2026-08-19T07:26:21.681053"
+     },
+     {
+      "bundleIdentifier": "com.example.app100",
+      "bundleVersion": "2.17.1057.01",
+      "displayIdentifier": "com.example.app100",
+      "displayName": "App 100",
+      "iconModDate": "2026-03-08T23:06:48.924750"
+     },
+     {
+      "bundleIdentifier": "com.example.app116",
+      "bundleVersion": "5",
+      "displayIdentifier": "com.example.app116",
+      "displayName": "App 116",
+      "iconModDate": "2026-08-18T07:41:17.241785"
+     },
+     {
+      "bundleIdentifier": "com.example.app081",
+      "bundleVersion": "719",
+      "displayIdentifier": "com.example.app081",
+      "displayName": "App 081",
+      "iconModDate": "2026-08-12T05:27:13.828276"
+     },
+     {
+      "bundleIdentifier": "com.example.app046",
+      "bundleVersion": "395",
+      "displayIdentifier": "com.example.app046",
+      "displayName": "App 046",
+      "iconModDate": "2026-08-23T04:37:18.192417"
+     },
+     {
+      "bundleIdentifier": "com.example.app015",
+      "bundleVersion": "20260820122218",
+      "displayIdentifier": "com.example.app015",
+      "displayName": "App 015",
+      "iconModDate": "2026-08-26T07:44:41.083532"
+     }
+    ]
+   ],
+   "listType": "folder"
+  },
+  {
+   "displayName": "Notes & Docs",
+   "iconLists": [
+    [
+     {
+      "bundleIdentifier": "com.apple.mobilenotes",
+      "bundleVersion": "2952.140.6.1",
+      "displayIdentifier": "com.apple.mobilenotes",
+      "displayName": "Notes",
+      "iconModDate": "2026-08-18T22:48:49.563383"
+     },
+     {
+      "bundleIdentifier": "com.apple.journal",
+      "bundleVersion": "49.120.2",
+      "displayIdentifier": "com.apple.journal",
+      "displayName": "Journal",
+      "iconModDate": "2026-08-18T22:48:45.965433"
+     },
+     {
+      "bundleIdentifier": "com.apple.freeform",
+      "bundleVersion": "630.120.3",
+      "displayIdentifier": "com.apple.freeform",
+      "displayName": "Freeform",
+      "iconModDate": "2026-08-18T22:48:46.848619"
+     },
+     {
+      "bundleIdentifier": "com.apple.reminders",
+      "bundleVersion": "3976",
+      "displayIdentifier": "com.apple.reminders",
+      "displayName": "Reminders",
+      "iconModDate": "2026-08-18T22:48:50.433159"
+     },
+     {
+      "bundleIdentifier": "com.apple.VoiceMemos",
+      "bundleVersion": "1380",
+      "displayIdentifier": "com.apple.VoiceMemos",
+      "displayName": "Voice Memos",
+      "iconModDate": "2026-08-18T22:48:41.713355"
+     },
+     {
+      "bundleIdentifier": "com.apple.DocumentsApp",
+      "bundleVersion": "367.5.3",
+      "displayIdentifier": "com.apple.DocumentsApp",
+      "displayName": "Files",
+      "iconModDate": "2026-08-18T22:48:41.901840"
+     },
+     {
+      "bundleIdentifier": "com.example.app027",
+      "bundleVersion": "4.2633.41200",
+      "displayIdentifier": "com.example.app027",
+      "displayName": "App 027",
+      "iconModDate": "2026-08-22T09:49:42.580934"
+     },
+     {
+      "bundleIdentifier": "com.example.app094",
+      "bundleVersion": "1.2026.33101",
+      "displayIdentifier": "com.example.app094",
+      "displayName": "App 094",
+      "iconModDate": "2026-08-21T08:50:53.010016"
+     },
+     {
+      "bundleIdentifier": "com.apple.Keynote",
+      "bundleVersion": "7375.0.54",
+      "displayIdentifier": "com.apple.Keynote",
+      "displayName": "Keynote",
+      "iconModDate": "2026-07-02T11:04:37.884328"
+     }
+    ],
+    [
+     {
+      "bundleIdentifier": "com.example.app085",
+      "bundleVersion": "2.113.26082111",
+      "displayIdentifier": "com.example.app085",
+      "displayName": "App 085",
+      "iconModDate": "2026-08-25T07:00:58.302645"
+     },
+     {
+      "bundleIdentifier": "com.apple.Preview",
+      "bundleVersion": "1016.206.3",
+      "displayIdentifier": "com.apple.Preview",
+      "displayName": "Preview",
+      "iconModDate": "2026-08-18T22:48:50.157612"
+     },
+     {
+      "bundleIdentifier": "com.example.app006",
+      "bundleVersion": "20260810.170545",
+      "displayIdentifier": "com.example.app006",
+      "displayName": "App 006",
+      "iconModDate": "2026-08-13T12:13:08.149420"
+     }
+    ]
+   ],
+   "listType": "folder"
+  },
+  {
+   "displayName": "Games",
+   "iconLists": [
+    [
+     {
+      "bundleIdentifier": "com.example.app098",
+      "bundleVersion": "10472498",
+      "displayIdentifier": "com.example.app098",
+      "displayName": "App 098",
+      "iconModDate": "2026-03-08T23:11:33.076179"
+     },
+     {
+      "bundleIdentifier": "com.example.app099",
+      "bundleVersion": "2",
+      "displayIdentifier": "com.example.app099",
+      "displayName": "App 099",
+      "iconModDate": "2026-03-08T23:13:55.062726"
+     },
+     {
+      "bundleIdentifier": "com.example.app107",
+      "bundleVersion": "16.16.8042660",
+      "displayIdentifier": "com.example.app107",
+      "displayName": "App 107",
+      "iconModDate": "2026-08-13T11:45:28.561297"
+     },
+     {
+      "bundleIdentifier": "com.example.app090",
+      "bundleVersion": "1",
+      "displayIdentifier": "com.example.app090",
+      "displayName": "App 090",
+      "iconModDate": "2026-08-22T09:09:12.784202"
+     },
+     {
+      "bundleIdentifier": "com.example.app087",
+      "bundleVersion": "26070001",
+      "displayIdentifier": "com.example.app087",
+      "displayName": "App 087",
+      "iconModDate": "2026-07-20T07:13:05.370553"
+     },
+     {
+      "bundleIdentifier": "com.example.app088",
+      "bundleVersion": "1719",
+      "displayIdentifier": "com.example.app088",
+      "displayName": "App 088",
+      "iconModDate": "2026-03-19T07:24:30.419223"
+     },
+     {
+      "bundleIdentifier": "com.example.app127",
+      "bundleVersion": "301265793",
+      "displayIdentifier": "com.example.app127",
+      "displayName": "App 127",
+      "iconModDate": "2026-08-23T13:42:55.977642"
+     },
+     {
+      "bundleIdentifier": "com.example.app021",
+      "bundleVersion": "24714",
+      "displayIdentifier": "com.example.app021",
+      "displayName": "App 021",
+      "iconModDate": "2026-08-24T07:39:23.572081"
+     },
+     {
+      "bundleIdentifier": "com.example.app060",
+      "bundleVersion": "002606",
+      "displayIdentifier": "com.example.app060",
+      "displayName": "App 060",
+      "iconModDate": "2026-08-22T09:43:30.259135"
+     }
+    ],
+    [
+     {
+      "bundleIdentifier": "com.example.app091",
+      "bundleVersion": "37743",
+      "displayIdentifier": "com.example.app091",
+      "displayName": "App 091",
+      "iconModDate": "2026-08-04T16:15:08.163569"
+     },
+     {
+      "bundleIdentifier": "com.example.app083",
+      "bundleVersion": "21",
+      "displayIdentifier": "com.example.app083",
+      "displayName": "App 083",
+      "iconModDate": "2026-08-07T12:38:08.088188"
+     },
+     {
+      "bundleIdentifier": "com.example.app035",
+      "bundleVersion": "3",
+      "displayIdentifier": "com.example.app035",
+      "displayName": "App 035",
+      "iconModDate": "2026-06-24T10:57:36.838224"
+     },
+     {
+      "bundleIdentifier": "com.apple.games",
+      "bundleVersion": "1",
+      "displayIdentifier": "com.apple.games",
+      "displayName": "Games",
+      "iconModDate": "2026-08-18T22:48:48.991205"
+     }
+    ]
+   ],
+   "listType": "folder"
+  },
+  {
+   "displayName": "Shopping",
+   "iconLists": [
+    [
+     {
+      "bundleIdentifier": "com.example.app111",
+      "bundleVersion": "901",
+      "displayIdentifier": "com.example.app111",
+      "displayName": "App 111",
+      "iconModDate": "2026-08-26T07:45:29.502496"
+     },
+     {
+      "bundleIdentifier": "com.example.app113",
+      "bundleVersion": "894",
+      "displayIdentifier": "com.example.app113",
+      "displayName": "App 113",
+      "iconModDate": "2026-08-19T07:17:46.343019"
+     },
+     {
+      "bundleIdentifier": "com.example.app074",
+      "bundleVersion": "365",
+      "displayIdentifier": "com.example.app074",
+      "displayName": "App 074",
+      "iconModDate": "2026-08-23T13:21:58.364917"
+     },
+     {
+      "bundleIdentifier": "com.example.app045",
+      "bundleVersion": "13821800",
+      "displayIdentifier": "com.example.app045",
+      "displayName": "App 045",
+      "iconModDate": "2026-08-19T07:19:18.160159"
+     },
+     {
+      "bundleIdentifier": "com.example.app008",
+      "bundleVersion": "873006.0",
+      "displayIdentifier": "com.example.app008",
+      "displayName": "App 008",
+      "iconModDate": "2026-08-14T07:37:33.314180"
+     },
+     {
+      "bundleIdentifier": "com.example.app092",
+      "bundleVersion": "8.18.1787034306",
+      "displayIdentifier": "com.example.app092",
+      "displayName": "App 092",
+      "iconModDate": "2026-08-22T09:43:34.943221"
+     },
+     {
+      "bundleIdentifier": "com.example.app025",
+      "bundleVersion": "2",
+      "displayIdentifier": "com.example.app025",
+      "displayName": "App 025",
+      "iconModDate": "2026-08-24T07:25:48.532224"
+     },
+     {
+      "bundleIdentifier": "com.example.app047",
+      "bundleVersion": "17407",
+      "displayIdentifier": "com.example.app047",
+      "displayName": "App 047",
+      "iconModDate": "2026-08-01T20:37:34.653125"
+     },
+     {
+      "bundleIdentifier": "com.example.app005",
+      "bundleVersion": "2026.8.7.13.51",
+      "displayIdentifier": "com.example.app005",
+      "displayName": "App 005",
+      "iconModDate": "2026-08-18T05:30:48.884682"
+     }
+    ],
+    [
+     {
+      "bundleIdentifier": "com.example.app009",
+      "bundleVersion": "23",
+      "displayIdentifier": "com.example.app009",
+      "displayName": "App 009",
+      "iconModDate": "2026-07-31T06:02:48.735633"
+     }
+    ]
+   ],
+   "listType": "folder"
+  },
+  {
+   "displayName": "Music",
+   "iconLists": [
+    [
+     {
+      "bundleIdentifier": "com.apple.Music",
+      "bundleVersion": "4025.700.6",
+      "displayIdentifier": "com.apple.Music",
+      "displayName": "Music",
+      "iconModDate": "2026-08-18T22:48:52.210847"
+     },
+     {
+      "bundleIdentifier": "com.example.app093",
+      "bundleVersion": "5980",
+      "displayIdentifier": "com.example.app093",
+      "displayName": "App 093",
+      "iconModDate": "2026-08-19T07:29:37.528003"
+     },
+     {
+      "bundleIdentifier": "com.example.app042",
+      "bundleVersion": "151263",
+      "displayIdentifier": "com.example.app042",
+      "displayName": "App 042",
+      "iconModDate": "2026-08-19T07:25:16.860411"
+     },
+     {
+      "bundleIdentifier": "com.example.app102",
+      "bundleVersion": "10137",
+      "displayIdentifier": "com.example.app102",
+      "displayName": "App 102",
+      "iconModDate": "2026-08-24T07:38:45.589052"
+     }
+    ]
+   ],
+   "listType": "folder"
+  },
+  {
+   "displayName": "Photo & Video",
+   "iconLists": [
+    [
+     {
+      "bundleIdentifier": "com.apple.mobileslideshow",
+      "bundleVersion": "860.0.170",
+      "displayIdentifier": "com.apple.mobileslideshow",
+      "displayName": "Photos",
+      "iconModDate": "2026-08-18T22:48:43.164819"
+     },
+     {
+      "bundleIdentifier": "com.apple.camera",
+      "bundleVersion": "4097.140.3",
+      "displayIdentifier": "com.apple.camera",
+      "displayName": "Camera",
+      "iconModDate": "2026-08-18T22:48:48.377880"
+     },
+     {
+      "bundleIdentifier": "com.apple.iMovie",
+      "bundleVersion": "5815.58.34",
+      "displayIdentifier": "com.apple.iMovie",
+      "displayName": "iMovie",
+      "iconModDate": "2026-07-19T12:02:58.155773"
+     }
+    ]
+   ],
+   "listType": "folder"
+  },
+  {
+   "displayName": "Transport",
+   "iconLists": [
+    [
+     {
+      "bundleIdentifier": "com.example.app050",
+      "bundleVersion": "313",
+      "displayIdentifier": "com.example.app050",
+      "displayName": "App 050",
+      "iconModDate": "2026-08-14T07:47:12.433093"
+     },
+     {
+      "bundleIdentifier": "com.example.app014",
+      "bundleVersion": "7906",
+      "displayIdentifier": "com.example.app014",
+      "displayName": "App 014",
+      "iconModDate": "2026-08-18T07:43:11.011328"
+     },
+     {
+      "bundleIdentifier": "com.example.app066",
+      "bundleVersion": "77320",
+      "displayIdentifier": "com.example.app066",
+      "displayName": "App 066",
+      "iconModDate": "2026-08-18T05:19:06.523932"
+     },
+     {
+      "bundleIdentifier": "com.example.app076",
+      "bundleVersion": "97",
+      "displayIdentifier": "com.example.app076",
+      "displayName": "App 076",
+      "iconModDate": "2026-03-08T23:09:39.347437"
+     },
+     {
+      "bundleIdentifier": "com.example.app119",
+      "bundleVersion": "3.736.10002",
+      "displayIdentifier": "com.example.app119",
+      "displayName": "App 119",
+      "iconModDate": "2026-08-26T07:47:06.928159"
+     },
+     {
+      "bundleIdentifier": "com.example.app129",
+      "bundleVersion": "505985",
+      "displayIdentifier": "com.example.app129",
+      "displayName": "App 129",
+      "iconModDate": "2026-08-16T07:53:37.599088"
+     },
+     {
+      "bundleIdentifier": "com.example.app108",
+      "bundleVersion": "2691",
+      "displayIdentifier": "com.example.app108",
+      "displayName": "App 108",
+      "iconModDate": "2026-07-10T06:12:41.723383"
+     },
+     {
+      "bundleIdentifier": "com.example.app061",
+      "bundleVersion": "1",
+      "displayIdentifier": "com.example.app061",
+      "displayName": "App 061",
+      "iconModDate": "2026-08-24T07:39:01.032999"
+     },
+     {
+      "bundleIdentifier": "com.example.app084",
+      "bundleVersion": "2",
+      "displayIdentifier": "com.example.app084",
+      "displayName": "App 084",
+      "iconModDate": "2026-03-08T23:12:49.581469"
+     }
+    ],
+    [
+     {
+      "bundleIdentifier": "com.example.app012",
+      "bundleVersion": "322",
+      "displayIdentifier": "com.example.app012",
+      "displayName": "App 012",
+      "iconModDate": "2026-06-19T07:08:42.274884"
+     }
+    ]
+   ],
+   "listType": "folder"
+  },
+  {
+   "displayName": "Banking",
+   "iconLists": [
+    [
+     {
+      "bundleIdentifier": "com.example.app049",
+      "bundleVersion": "176.0.0.69",
+      "displayIdentifier": "com.example.app049",
+      "displayName": "App 049",
+      "iconModDate": "2026-08-05T06:55:23.208133"
+     },
+     {
+      "bundleIdentifier": "com.example.app020",
+      "bundleVersion": "713",
+      "displayIdentifier": "com.example.app020",
+      "displayName": "App 020",
+      "iconModDate": "2026-08-22T08:05:06.666484"
+     },
+     {
+      "bundleIdentifier": "com.example.app067",
+      "bundleVersion": "2",
+      "displayIdentifier": "com.example.app067",
+      "displayName": "App 067",
+      "iconModDate": "2026-07-14T09:20:10.781719"
+     },
+     {
+      "bundleIdentifier": "com.example.app070",
+      "bundleVersion": "1",
+      "displayIdentifier": "com.example.app070",
+      "displayName": "App 070",
+      "iconModDate": "2026-08-02T08:10:13.401672"
+     },
+     {
+      "bundleIdentifier": "com.example.app034",
+      "bundleVersion": "187",
+      "displayIdentifier": "com.example.app034",
+      "displayName": "App 034",
+      "iconModDate": "2026-08-12T07:32:55.503413"
+     },
+     {
+      "bundleIdentifier": "com.example.app078",
+      "bundleVersion": "736",
+      "displayIdentifier": "com.example.app078",
+      "displayName": "App 078",
+      "iconModDate": "2026-08-22T09:44:17.715183"
+     },
+     {
+      "bundleIdentifier": "com.example.app080",
+      "bundleVersion": "10016299",
+      "displayIdentifier": "com.example.app080",
+      "displayName": "App 080",
+      "iconModDate": "2026-08-20T16:56:24.872640"
+     },
+     {
+      "bundleIdentifier": "com.example.app125",
+      "bundleVersion": "16761",
+      "displayIdentifier": "com.example.app125",
+      "displayName": "App 125",
+      "iconModDate": "2026-08-22T09:09:14.024229"
+     },
+     {
+      "bundleIdentifier": "com.apple.Passbook",
+      "bundleVersion": "1642.7.4",
+      "displayIdentifier": "com.apple.Passbook",
+      "displayName": "Wallet",
+      "iconModDate": "2026-08-18T22:48:42.708443"
+     }
+    ],
+    [
+     {
+      "bundleIdentifier": "com.example.app120",
+      "bundleVersion": "24",
+      "displayIdentifier": "com.example.app120",
+      "displayName": "App 120",
+      "iconModDate": "2026-08-19T07:25:21.761187"
+     }
+    ]
+   ],
+   "listType": "folder"
+  },
+  {
+   "displayName": "Food",
+   "iconLists": [
+    [
+     {
+      "bundleIdentifier": "com.example.app130",
+      "bundleVersion": "263000064",
+      "displayIdentifier": "com.example.app130",
+      "displayName": "App 130",
+      "iconModDate": "2026-08-01T20:21:08.357333"
+     },
+     {
+      "bundleIdentifier": "com.example.app036",
+      "bundleVersion": "6320",
+      "displayIdentifier": "com.example.app036",
+      "displayName": "App 036",
+      "iconModDate": "2026-08-25T07:00:34.132793"
+     },
+     {
+      "bundleIdentifier": "com.example.app112",
+      "bundleVersion": "216",
+      "displayIdentifier": "com.example.app112",
+      "displayName": "App 112",
+      "iconModDate": "2026-08-19T07:27:08.275538"
+     },
+     {
+      "bundleIdentifier": "com.example.app072",
+      "bundleVersion": "2227",
+      "displayIdentifier": "com.example.app072",
+      "displayName": "App 072",
+      "iconModDate": "2026-08-26T07:44:44.903180"
+     },
+     {
+      "bundleIdentifier": "com.example.app110",
+      "bundleVersion": "2094",
+      "displayIdentifier": "com.example.app110",
+      "displayName": "App 110",
+      "iconModDate": "2026-08-21T08:49:32.671129"
+     },
+     {
+      "bundleIdentifier": "com.example.app026",
+      "bundleVersion": "7.3.0",
+      "displayIdentifier": "com.example.app026",
+      "displayName": "App 026",
+      "iconModDate": "2026-04-23T08:54:37.864093"
+     },
+     {
+      "bundleIdentifier": "com.example.app068",
+      "bundleVersion": "28514",
+      "displayIdentifier": "com.example.app068",
+      "displayName": "App 068",
+      "iconModDate": "2026-08-22T09:50:44.479351"
+     },
+     {
+      "bundleIdentifier": "com.example.app058",
+      "bundleVersion": "12",
+      "displayIdentifier": "com.example.app058",
+      "displayName": "App 058",
+      "iconModDate": "2026-08-17T19:37:42.848588"
+     },
+     {
+      "bundleIdentifier": "com.example.app043",
+      "bundleVersion": "1",
+      "displayIdentifier": "com.example.app043",
+      "displayName": "App 043",
+      "iconModDate": "2026-03-08T23:18:22.909487"
+     }
+    ]
+   ],
+   "listType": "folder"
+  },
+  {
+   "displayName": "TV & Film",
+   "iconLists": [
+    [
+     {
+      "bundleIdentifier": "com.example.app075",
+      "bundleVersion": "6087",
+      "displayIdentifier": "com.example.app075",
+      "displayName": "App 075",
+      "iconModDate": "2026-08-20T04:32:55.344292"
+     },
+     {
+      "bundleIdentifier": "com.example.app086",
+      "bundleVersion": "10.14500.24297.43",
+      "displayIdentifier": "com.example.app086",
+      "displayName": "App 086",
+      "iconModDate": "2026-08-23T04:52:52.626006"
+     },
+     {
+      "bundleIdentifier": "com.example.app044",
+      "bundleVersion": "69",
+      "displayIdentifier": "com.example.app044",
+      "displayName": "App 044",
+      "iconModDate": "2026-08-19T07:30:58.463411"
+     },
+     {
+      "bundleIdentifier": "com.example.app033",
+      "bundleVersion": "1",
+      "displayIdentifier": "com.example.app033",
+      "displayName": "App 033",
+      "iconModDate": "2026-07-31T09:19:08.619817"
+     },
+     {
+      "displayIdentifier": "com.example.app016",
+      "displayName": "App 016"
+     },
+     {
+      "bundleIdentifier": "com.example.app101",
+      "bundleVersion": "1",
+      "displayIdentifier": "com.example.app101",
+      "displayName": "App 101",
+      "iconModDate": "2026-06-14T09:23:51.140573"
+     },
+     {
+      "bundleIdentifier": "com.apple.tv",
+      "bundleVersion": "1",
+      "displayIdentifier": "com.apple.tv",
+      "displayName": "TV",
+      "iconModDate": "2026-08-18T22:48:47.562491"
+     },
+     {
+      "bundleIdentifier": "com.example.app054",
+      "bundleVersion": "2634002",
+      "displayIdentifier": "com.example.app054",
+      "displayName": "App 054",
+      "iconModDate": "2026-08-24T07:39:12.534958"
+     },
+     {
+      "bundleIdentifier": "com.example.app022",
+      "bundleVersion": "1",
+      "displayIdentifier": "com.example.app022",
+      "displayName": "App 022",
+      "iconModDate": "2026-07-31T08:45:00.008229"
+     }
+    ],
+    [
+     {
+      "bundleIdentifier": "com.example.app118",
+      "bundleVersion": "262301804398309331",
+      "displayIdentifier": "com.example.app118",
+      "displayName": "App 118",
+      "iconModDate": "2026-08-21T08:50:03.671963"
+     },
+     {
+      "bundleIdentifier": "com.example.app131",
+      "bundleVersion": "21.33.6",
+      "displayIdentifier": "com.example.app131",
+      "displayName": "App 131",
+      "iconModDate": "2026-08-23T04:32:18.893685"
+     }
+    ]
+   ],
+   "listType": "folder"
+  },
+  {
+   "displayName": "Work",
+   "iconLists": [
+    [
+     {
+      "bundleIdentifier": "com.example.app104",
+      "bundleVersion": "100772026143003",
+      "displayIdentifier": "com.example.app104",
+      "displayName": "App 104",
+      "iconModDate": "2026-08-13T12:48:36.774229"
+     },
+     {
+      "bundleIdentifier": "com.example.app051",
+      "bundleVersion": "262.0.0.15692",
+      "displayIdentifier": "com.example.app051",
+      "displayName": "App 051",
+      "iconModDate": "2026-08-23T04:32:18.575384"
+     },
+     {
+      "bundleIdentifier": "com.example.app103",
+      "bundleVersion": "26.33.0.2004700",
+      "displayIdentifier": "com.example.app103",
+      "displayName": "App 103",
+      "iconModDate": "2026-08-26T07:46:44.395610"
+     },
+     {
+      "bundleIdentifier": "com.example.app059",
+      "bundleVersion": "772",
+      "displayIdentifier": "com.example.app059",
+      "displayName": "App 059",
+      "iconModDate": "2026-08-16T07:47:00.343392"
+     },
+     {
+      "bundleIdentifier": "com.example.app133",
+      "bundleVersion": "460814",
+      "displayIdentifier": "com.example.app133",
+      "displayName": "App 133",
+      "iconModDate": "2026-08-24T15:56:20.408584"
+     }
+    ]
+   ],
+   "listType": "folder"
+  },
+  {
+   "displayName": "Mail & Calendar",
+   "iconLists": [
+    [
+     {
+      "bundleIdentifier": "com.apple.mobilemail",
+      "bundleVersion": "3864.700.51",
+      "displayIdentifier": "com.apple.mobilemail",
+      "displayName": "Mail",
+      "iconModDate": "2026-08-18T22:48:43.223821"
+     },
+     {
+      "bundleIdentifier": "com.example.app038",
+      "bundleVersion": "6.0.260803.1807240",
+      "displayIdentifier": "com.example.app038",
+      "displayName": "App 038",
+      "iconModDate": "2026-08-16T07:47:09.611166"
+     },
+     {
+      "bundleIdentifier": "com.example.app077",
+      "bundleVersion": "53470483",
+      "displayIdentifier": "com.example.app077",
+      "displayName": "App 077",
+      "iconModDate": "2026-08-25T07:00:36.794633"
+     },
+     {
+      "bundleIdentifier": "com.apple.mobilecal",
+      "bundleVersion": "1",
+      "displayIdentifier": "com.apple.mobilecal",
+      "displayName": "Calendar",
+      "iconModDate": "2026-08-18T22:48:49.436494"
+     },
+     {
+      "bundleIdentifier": "com.example.app040",
+      "bundleVersion": "26.31.0.54723900",
+      "displayIdentifier": "com.example.app040",
+      "displayName": "App 040",
+      "iconModDate": "2026-08-21T08:52:27.532023"
+     }
+    ]
+   ],
+   "listType": "folder"
+  },
+  {
+   "displayName": "Dev",
+   "iconLists": [
+    [
+     {
+      "bundleIdentifier": "com.apple.TestFlight",
+      "bundleVersion": "659.1",
+      "displayIdentifier": "com.apple.TestFlight",
+      "displayName": "TestFlight",
+      "iconModDate": "2026-07-22T00:23:03.744086"
+     },
+     {
+      "bundleIdentifier": "com.example.app037",
+      "bundleVersion": "202647905",
+      "displayIdentifier": "com.example.app037",
+      "displayName": "App 037",
+      "iconModDate": "2026-08-22T09:09:10.722747"
+     },
+     {
+      "bundleIdentifier": "com.example.app032",
+      "bundleVersion": "1017880",
+      "displayIdentifier": "com.example.app032",
+      "displayName": "App 032",
+      "iconModDate": "2026-08-16T13:17:17.942773"
+     },
+     {
+      "bundleIdentifier": "com.example.app106",
+      "bundleVersion": "8",
+      "displayIdentifier": "com.example.app106",
+      "displayName": "App 106",
+      "iconModDate": "2026-08-25T14:53:19.825776"
+     },
+     {
+      "bundleIdentifier": "developer.apple.wwdc-Release",
+      "bundleVersion": "1102.3.1",
+      "displayIdentifier": "developer.apple.wwdc-Release",
+      "displayName": "Developer",
+      "iconModDate": "2026-06-10T10:16:41.716876"
+     },
+     {
+      "bundleIdentifier": "com.apple.AppStoreConnect",
+      "bundleVersion": "1318.1",
+      "displayIdentifier": "com.apple.AppStoreConnect",
+      "displayName": "Connect",
+      "iconModDate": "2026-04-04T09:50:32.713689"
+     },
+     {
+      "bundleIdentifier": "com.example.app023",
+      "bundleVersion": "637",
+      "displayIdentifier": "com.example.app023",
+      "displayName": "App 023",
+      "iconModDate": "2026-08-10T13:17:30.598658"
+     },
+     {
+      "bundleIdentifier": "com.example.app064",
+      "bundleVersion": "633",
+      "displayIdentifier": "com.example.app064",
+      "displayName": "App 064",
+      "iconModDate": "2026-07-04T08:04:22.508651"
+     },
+     {
+      "bundleIdentifier": "com.example.app065",
+      "bundleVersion": "41",
+      "displayIdentifier": "com.example.app065",
+      "displayName": "App 065",
+      "iconModDate": "2026-07-17T13:00:47.853818"
+     }
+    ],
+    [
+     {
+      "bundleIdentifier": "com.example.app052",
+      "bundleVersion": "1",
+      "displayIdentifier": "com.example.app052",
+      "displayName": "App 052",
+      "iconModDate": "2026-08-06T09:15:21.742115"
+     },
+     {
+      "bundleIdentifier": "com.example.app053",
+      "bundleVersion": "69",
+      "displayIdentifier": "com.example.app053",
+      "displayName": "App 053",
+      "iconModDate": "2026-07-10T08:00:12.625516"
+     }
+    ]
+   ],
+   "listType": "folder"
+  },
+  {
+   "displayName": "AI",
+   "iconLists": [
+    [
+     {
+      "bundleIdentifier": "com.example.app002",
+      "bundleVersion": "32447307459",
+      "displayIdentifier": "com.example.app002",
+      "displayName": "App 002",
+      "iconModDate": "2026-08-23T06:25:16.488755"
+     },
+     {
+      "bundleIdentifier": "com.example.app003",
+      "bundleVersion": "1.2026.3270601.0",
+      "displayIdentifier": "com.example.app003",
+      "displayName": "App 003",
+      "iconModDate": "2026-08-22T09:50:13.507721"
+     },
+     {
+      "bundleIdentifier": "com.apple.GenerativePlaygroundApp",
+      "bundleVersion": "148.5.2",
+      "displayIdentifier": "com.apple.GenerativePlaygroundApp",
+      "displayName": "Playground",
+      "iconModDate": "2026-08-18T22:48:47.872310"
+     }
+    ]
+   ],
+   "listType": "folder"
+  },
+  {
+   "displayName": "Social",
+   "iconLists": [
+    [
+     {
+      "bundleIdentifier": "com.example.app048",
+      "bundleVersion": "1043399932",
+      "displayIdentifier": "com.example.app048",
+      "displayName": "App 048",
+      "iconModDate": "2026-08-20T18:30:04.257564"
+     },
+     {
+      "bundleIdentifier": "com.example.app126",
+      "bundleVersion": "16",
+      "displayIdentifier": "com.example.app126",
+      "displayName": "App 126",
+      "iconModDate": "2026-08-25T07:18:38.635512"
+     },
+     {
+      "bundleIdentifier": "com.example.app109",
+      "bundleVersion": "464038",
+      "displayIdentifier": "com.example.app109",
+      "displayName": "App 109",
+      "iconModDate": "2026-08-19T07:26:46.236203"
+     },
+     {
+      "bundleIdentifier": "com.example.app096",
+      "bundleVersion": "14.20.0.56",
+      "displayIdentifier": "com.example.app096",
+      "displayName": "App 096",
+      "iconModDate": "2026-08-20T04:32:58.744198"
+     },
+     {
+      "bundleIdentifier": "com.example.app089",
+      "bundleVersion": "636848",
+      "displayIdentifier": "com.example.app089",
+      "displayName": "App 089",
+      "iconModDate": "2026-08-19T07:29:10.040846"
+     },
+     {
+      "bundleIdentifier": "com.example.app063",
+      "bundleVersion": "9.32.2755",
+      "displayIdentifier": "com.example.app063",
+      "displayName": "App 063",
+      "iconModDate": "2026-08-13T11:48:02.826605"
+     },
+     {
+      "bundleIdentifier": "com.example.app082",
+      "bundleVersion": "2",
+      "displayIdentifier": "com.example.app082",
+      "displayName": "App 082",
+      "iconModDate": "2026-08-22T18:38:46.785159"
+     },
+     {
+      "bundleIdentifier": "com.example.app018",
+      "bundleVersion": "5.475.0.31776185",
+      "displayIdentifier": "com.example.app018",
+      "displayName": "App 018",
+      "iconModDate": "2026-08-20T18:29:37.239334"
+     }
+    ]
+   ],
+   "listType": "folder"
+  },
+  {
+   "displayName": "Messaging",
+   "iconLists": [
+    [
+     {
+      "bundleIdentifier": "com.apple.MobileSMS",
+      "bundleVersion": "1450.700.71.2.1",
+      "displayIdentifier": "com.apple.MobileSMS",
+      "displayName": "Messages",
+      "iconModDate": "2026-08-18T22:48:44.138463"
+     },
+     {
+      "bundleIdentifier": "com.example.app105",
+      "bundleVersion": "34622",
+      "displayIdentifier": "com.example.app105",
+      "displayName": "App 105",
+      "iconModDate": "2026-08-22T09:51:01.174769"
+     },
+     {
+      "bundleIdentifier": "com.example.app024",
+      "bundleVersion": "94578",
+      "displayIdentifier": "com.example.app024",
+      "displayName": "App 024",
+      "iconModDate": "2026-03-08T20:05:08.083995"
+     },
+     {
+      "bundleIdentifier": "com.apple.facetime",
+      "bundleVersion": "36",
+      "displayIdentifier": "com.apple.facetime",
+      "displayName": "FaceTime",
+      "iconModDate": "2026-08-18T22:48:45.976207"
+     },
+     {
+      "bundleIdentifier": "com.example.app069",
+      "bundleVersion": "371.0.105922",
+      "displayIdentifier": "com.example.app069",
+      "displayName": "App 069",
+      "iconModDate": "2026-08-16T07:39:29.524076"
+     }
+    ]
+   ],
+   "listType": "folder"
+  }
+ ]
+]
