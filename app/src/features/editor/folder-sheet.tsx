@@ -1,7 +1,9 @@
+import { useDroppable } from '@dnd-kit/core'
 import { motion } from 'motion/react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import EmptyCell from './empty-cell'
+import { panelTarget } from './folder-sheet.types'
 import PageDots from './page-dots'
 import { useScreen } from './screen.context'
 import SlotTile from './slot-tile'
@@ -23,6 +25,10 @@ export default function FolderSheet({
     const [page, setPage] = useState(0)
     const strip = useRef<HTMLDivElement>(null)
     const screen = useScreen()
+
+    // The whole panel takes drops, so missing a tile inside the folder lands at
+    // the end of it rather than falling through to the page behind.
+    const { setNodeRef: setPanelRef } = useDroppable({ id: panelTarget(folder) })
 
     useEffect(() => setName(folder.name), [folder.id, folder.name])
 
@@ -79,20 +85,23 @@ export default function FolderSheet({
                 style={{ paddingInline: screen.edge }}
             >
                 <div
-                    ref={strip}
+                    ref={node => {
+                        strip.current = node
+                        setPanelRef(node)
+                    }}
                     onScroll={event => {
                         const node = event.currentTarget
                         setPage(Math.round(node.scrollLeft / node.clientWidth))
                     }}
-                    className='flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain rounded-[9%] bg-white/[0.16] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
+                    className='flex aspect-square snap-x snap-mandatory overflow-x-auto overscroll-x-contain rounded-[13%] bg-white/[0.13] ring-1 ring-white/15 backdrop-blur-2xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
                 >
                     {pages.map((apps, index) => (
                         <div
                             key={index}
-                            className='grid w-full shrink-0 snap-start justify-center gap-y-4 p-[7%]'
+                            className='grid w-full shrink-0 snap-start place-items-center p-[6%]'
                             style={{
-                                gridTemplateColumns: `repeat(${limits.folderColumns}, ${screen.icon}px)`,
-                                columnGap: `${screen.gap}px`,
+                                gridTemplateColumns: `repeat(${limits.folderColumns}, minmax(0, 1fr))`,
+                                gridTemplateRows: `repeat(${limits.folderRows}, minmax(0, 1fr))`,
                             }}
                         >
                             {apps.map(child => (

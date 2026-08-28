@@ -12,3 +12,6 @@ export interface FolderSheetProps {
     onClose: () => void
     onContextMenu: (event: React.MouseEvent, id?: string) => void
 }
+
+/** Drop anywhere in the open folder: the end of its last page. */
+export const panelTarget = (folder: FolderSlot): string => `infolder:${folder.id}:${folder.apps.length}`

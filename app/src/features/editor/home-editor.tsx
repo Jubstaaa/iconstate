@@ -8,6 +8,7 @@ import ContextMenu from './context-menu'
 import DockRow from './dock-row'
 import { isFolderSlot } from './editor.types'
 import FolderSheet from './folder-sheet'
+import { panelTarget } from './folder-sheet.types'
 import { SEPARATOR, bareId, parseDropTarget, sideOf } from './home-editor.types'
 import { IconsProvider } from './icons.context'
 import { ScreenProvider, geometryFor } from './screen.context'
@@ -15,7 +16,7 @@ import HomePage from './home-page'
 import PhoneFrame from './phone-frame'
 import SlotTile from './slot-tile'
 
-import type { DragEndEvent, DragMoveEvent, DragStartEvent } from '@dnd-kit/core'
+import type { CollisionDetection, DragEndEvent, DragMoveEvent, DragStartEvent } from '@dnd-kit/core'
 import type { ContextMenuState, MenuItem } from './context-menu.types'
 import type { FolderSlot, Slot, Target } from './editor.types'
 import type { Hint, HomeEditorProps } from './home-editor.types'
@@ -80,6 +81,30 @@ export default function HomeEditor({
         const found = layout.pages.flat().find(slot => slot.id === openFolderId)
         return found && isFolderSlot(found) ? found : null
     }, [layout, openFolderId])
+
+    /**
+     * An open folder sits above the page, but collisions are settled by where
+     * the pointer is, not by what is on top — so missing a tile inside the
+     * folder used to drop the icon onto the page behind it. Inside the panel,
+     * only the folder's own targets count.
+     */
+    const collisionDetection = useCallback<CollisionDetection>(
+        args => {
+            const hits = pointerWithin(args)
+            if (!openFolder) return hits
+
+            const panel = panelTarget(openFolder)
+            const held = new Set(openFolder.apps.map(app => `onto:${app.id}`))
+            const isInside = (id: string) => held.has(id) || id.startsWith(`infolder:${openFolder.id}:`)
+
+            const tiles = hits.filter(hit => hit.id !== panel && isInside(String(hit.id)))
+            if (tiles.length) return tiles
+
+            const whole = hits.filter(hit => hit.id === panel)
+            return whole.length ? whole : hits
+        },
+        [openFolder]
+    )
 
     const handleSelect = useCallback(
         (id: string, additive: boolean) => {
@@ -302,7 +327,7 @@ export default function HomeEditor({
             <ScreenProvider value={geometry}>
                 <DndContext
                     sensors={sensors}
-                    collisionDetection={pointerWithin}
+                    collisionDetection={collisionDetection}
                     onDragStart={handleDragStart}
                     onDragMove={handleDragMove}
                     onDragEnd={handleDragEnd}

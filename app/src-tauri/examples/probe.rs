@@ -37,6 +37,13 @@ async fn main() {
 
             println!("{}", serde_json::to_string_pretty(&settled).unwrap());
         }
+        "format" => {
+            let format = std::env::args().nth(2);
+            let state = iconstate_lib::device::icon_state_as(None, format.as_deref())
+                .await
+                .expect("state");
+            println!("{}", serde_json::to_string(&state).unwrap());
+        }
         _ => {
             let (about, state, metrics) =
                 iconstate_lib::device::icon_state(None).await.expect("state");

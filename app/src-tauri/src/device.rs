@@ -171,11 +171,11 @@ async fn springboard(provider: &UsbmuxdProvider) -> Result<SpringBoardServicesCl
 /// this in private methods, so the framing is done here against its public raw
 /// socket — which also keeps the commands we send in one place, rather than
 /// spread between our code and the crate's.
-async fn ask(
+async fn tell(
     client: &mut SpringBoardServicesClient,
     request: plist::Dictionary,
     what: &str,
-) -> Result<plist::Value> {
+) -> Result<()> {
     let mut body = Vec::new();
     plist::Value::Dictionary(request)
         .to_writer_xml(&mut body)
@@ -188,7 +188,15 @@ async fn ask(
         .idevice
         .send_raw(&message)
         .await
-        .map_err(|error| format!("could not ask for {what}: {error}"))?;
+        .map_err(|error| format!("could not ask for {what}: {error}"))
+}
+
+async fn ask(
+    client: &mut SpringBoardServicesClient,
+    request: plist::Dictionary,
+    what: &str,
+) -> Result<plist::Value> {
+    tell(client, request, what).await?;
 
     let head = client
         .idevice
@@ -210,14 +218,26 @@ async fn ask(
     plist::from_bytes(&body).map_err(|error| format!("{what} came back malformed: {error}"))
 }
 
-async fn read_state(client: &mut SpringBoardServicesClient) -> Result<serde_json::Value> {
+async fn read_state_as(
+    client: &mut SpringBoardServicesClient,
+    format: Option<&str>,
+) -> Result<serde_json::Value> {
     let mut request = command("getIconState");
-    request.insert(
-        "formatVersion".into(),
-        plist::Value::String(FORMAT_VERSION.into()),
-    );
+    if let Some(format) = format {
+        request.insert("formatVersion".into(), plist::Value::String(format.into()));
+    }
     let state = ask(client, request, "the home screen").await?;
     Ok(to_json(&state))
+}
+
+async fn read_state(client: &mut SpringBoardServicesClient) -> Result<serde_json::Value> {
+    read_state_as(client, Some(FORMAT_VERSION)).await
+}
+
+/// Ask SpringBoard for a specific icon state format, to see what each one says.
+pub async fn icon_state_as(serial: Option<&str>, format: Option<&str>) -> Result<serde_json::Value> {
+    let provider = provider(serial).await?;
+    read_state_as(&mut springboard(&provider).await?, format).await
 }
 
 async fn read_metrics(client: &mut SpringBoardServicesClient) -> Result<serde_json::Value> {
@@ -251,21 +271,20 @@ pub async fn metrics(serial: Option<&str>) -> Result<serde_json::Value> {
 
 /// Send a layout and read back what SpringBoard actually settled on.
 ///
-/// The acknowledgement has to be read even though it says nothing useful —
-/// leaving it in the stream desyncs the read that follows.
+/// setIconState answers nothing and the socket is spent once it lands, so the
+/// read back has to happen over a connection of its own.
 pub async fn write_icon_state(
     serial: Option<&str>,
     state: &serde_json::Value,
 ) -> Result<(DeviceInfo, serde_json::Value)> {
     let provider = provider(serial).await?;
     let about = info(&provider).await?;
-    let mut client = springboard(&provider).await?;
 
     let mut request = command("setIconState");
     request.insert("iconState".into(), to_plist(state));
-    ask(&mut client, request, "the write").await?;
+    tell(&mut springboard(&provider).await?, request, "the write").await?;
 
-    let settled = read_state(&mut client).await?;
+    let settled = read_state(&mut springboard(&provider).await?).await?;
     Ok((about, settled))
 }
 
