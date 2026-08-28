@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="face" x1="0" y1="0" x2="0.35" y2="1">
+      <stop offset="0" stop-color="#332a63"/>
+      <stop offset="0.45" stop-color="#1d1943"/>
+      <stop offset="1" stop-color="#0d0c22"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.72" cy="0.26" r="0.62">
+      <stop offset="0" stop-color="#6f5ad8" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#6f5ad8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.46"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.26"/>
+    </linearGradient>
+    <linearGradient id="held" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#a8c4ff"/>
+      <stop offset="1" stop-color="#3f6dff"/>
+    </linearGradient>
+    <filter id="lift" x="-60%" y="-60%" width="220%" height="220%">
+      <feDropShadow dx="0" dy="26" stdDeviation="26" flood-color="#05040f" flood-opacity="0.62"/>
+    </filter>
+  </defs>
+
+  <g>
+    <rect x="100" y="100" width="824" height="824" rx="188" fill="url(#face)"/>
+    <rect x="100" y="100" width="824" height="824" rx="188" fill="url(#glow)"/>
+
+    <!-- the home screen: three rows of tiles, evenly set -->
+    <g fill="url(#tile)">
+      <rect x="266" y="300" width="150" height="150" rx="42"/>
+      <rect x="437" y="300" width="150" height="150" rx="42"/>
+
+      <rect x="266" y="471" width="150" height="150" rx="42"/>
+      <rect x="437" y="471" width="150" height="150" rx="42"/>
+      <rect x="608" y="471" width="150" height="150" rx="42"/>
+
+      <rect x="266" y="642" width="150" height="150" rx="42"/>
+      <rect x="437" y="642" width="150" height="150" rx="42"/>
+      <rect x="608" y="642" width="150" height="150" rx="42"/>
+    </g>
+
+    <!-- the gap it came from -->
+    <rect x="608" y="300" width="150" height="150" rx="42" fill="none"
+          stroke="#ffffff" stroke-opacity="0.30" stroke-width="7" stroke-dasharray="26 22"/>
+
+    <!-- and the one being carried, lifted and turned -->
+    <g filter="url(#lift)" transform="rotate(-8 736 356)">
+      <rect x="645" y="265" width="182" height="182" rx="51" fill="url(#held)"/>
+      <rect x="645" y="265" width="182" height="182" rx="51" fill="none"
+            stroke="#ffffff" stroke-opacity="0.45" stroke-width="4"/>
+    </g>
+  </g>
+</svg>
