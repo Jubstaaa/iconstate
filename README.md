@@ -33,19 +33,28 @@ crate, and the layout engine is TypeScript in the app itself.
 
 ## Getting it
 
-Download the `.dmg` from [releases][releases], drag IconState across, then plug
-an iPhone in over USB and tap Trust on the phone.
+```bash
+curl -fsSL https://raw.githubusercontent.com/Jubstaaa/iconstate/main/scripts/install.sh | bash
+```
 
-The build is not signed with an Apple developer certificate, and recent macOS
-refuses those outright — it will say IconState is *damaged* and offer to bin it.
-It is not damaged; the download is simply quarantined. Clear the flag once:
+That downloads the latest release, puts it in `/Applications` and opens it. Then
+plug an iPhone in over USB and tap Trust on the phone.
+
+The script is [thirty lines you can read first][install]. It exists because of
+the last thing it does: the build is not signed with an Apple developer
+certificate, and recent macOS calls unsigned downloads *damaged* rather than
+asking, so the quarantine flag has to be cleared. Signing properly needs a paid
+Apple Developer membership; until there is one, this is the honest version of
+"double-click to install".
+
+Prefer to do it by hand? Take the `.dmg` from [releases][releases], drag the app
+across, then run:
 
 ```bash
 xattr -dr com.apple.quarantine /Applications/IconState.app
 ```
 
-Then it opens normally, and stays open — the flag does not come back.
-
+[install]: scripts/install.sh
 [releases]: https://github.com/Jubstaaa/iconstate/releases
 
 ## The desktop app
