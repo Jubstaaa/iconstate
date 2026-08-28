@@ -21,7 +21,7 @@ import {
 import { diffStates } from './lib/diff'
 import { assignmentsFromGenres } from './lib/genres'
 import { appsOf, keyOf } from './lib/icon-state'
-import { planWithAssignments } from './lib/plan'
+import { buildPlan, planWithAssignments } from './lib/plan'
 
 import type { Metrics } from './features/editor/editor.constants'
 import type { EditorCommands } from './features/editor/home-editor.types'
@@ -133,13 +133,30 @@ export default function App() {
                 guard(async () => {
                     if (!baseline) return
                     const apps = appsOf(baseline)
-                    const assignments = lookUp
-                        ? assignmentsFromGenres(await lookupGenres(apps.map(keyOf)))
-                        : {}
-                    dispatch({
-                        type: 'load',
-                        state: planWithAssignments(apps, limits, assignments).state,
-                    })
+                    const proposed = buildPlan(apps, limits)
+
+                    // Only apps the table has never heard of are worth asking
+                    // the store about. Asking about every app would let a store
+                    // category overrule a folder someone chose by hand.
+                    const wanted = proposed.unassigned.map(keyOf)
+                    if (!lookUp || !wanted.length) {
+                        dispatch({ type: 'load', state: proposed.state })
+                        if (wanted.length) {
+                            setStatus(`${wanted.length} apps had no rule and went to Unsorted`)
+                        }
+                        return
+                    }
+
+                    const found = assignmentsFromGenres(await lookupGenres(wanted))
+                    const settled = planWithAssignments(apps, limits, found)
+                    dispatch({ type: 'load', state: settled.state })
+
+                    const left = settled.unassigned.length
+                    setStatus(
+                        left
+                            ? `${left} apps are still unsorted — the store did not know them`
+                            : `the App Store sorted ${Object.keys(found).length} apps`
+                    )
                 }),
             [baseline, guard, limits]
         ),
