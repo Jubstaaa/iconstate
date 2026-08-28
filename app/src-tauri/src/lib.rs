@@ -96,17 +96,6 @@ async fn fetch_metrics(serial: Option<String>) -> Answer<serde_json::Value> {
 }
 
 #[tauri::command]
-async fn installed_apps(app: AppHandle, serial: Option<String>) -> Answer<serde_json::Value> {
-    let apps = device::installed_apps(serial.as_deref()).await?;
-    let count = apps.as_object().map(|map| map.len()).unwrap_or(0);
-    say(
-        &app,
-        json!({ "event": "installed-apps-read", "count": count }),
-    );
-    Ok(apps)
-}
-
-#[tauri::command]
 async fn fetch_icons(
     app: AppHandle,
     serial: Option<String>,
@@ -240,14 +229,6 @@ async fn apply_layout(
 }
 
 #[tauri::command]
-async fn list_backups() -> Answer<Vec<String>> {
-    Ok(backup::history()
-        .into_iter()
-        .map(|path| path.to_string_lossy().into_owned())
-        .collect())
-}
-
-#[tauri::command]
 async fn restore_backup(
     app: AppHandle,
     serial: Option<String>,
@@ -295,10 +276,8 @@ pub fn run() {
             read_icon_state,
             fetch_metrics,
             fetch_icons,
-            installed_apps,
             lookup_genres,
             apply_layout,
-            list_backups,
             restore_backup
         ])
         .run(tauri::generate_context!())

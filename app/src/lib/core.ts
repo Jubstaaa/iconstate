@@ -24,17 +24,11 @@ export const userRules = () => invoke<UserRules | null>('user_rules')
 
 export const saveRules = (rules: UserRules) => invoke<string>('save_rules', { rules })
 
-/** Everything installed, whether or not it is on a page. */
-export const installedApps = (serial?: string) =>
-    invoke<Record<string, Record<string, unknown>>>('installed_apps', { serial })
-
 export const lookupGenres = (bundleIds: string[], country?: string) =>
     invoke<Record<string, string[]>>('lookup_genres', { bundleIds, country })
 
 export const applyLayout = (plan: IconState, serial?: string) =>
     invoke<IconState>('apply_layout', { serial, plan })
-
-export const listBackups = () => invoke<string[]>('list_backups')
 
 export const restoreBackup = (file?: string, serial?: string) =>
     invoke<IconState>('restore_backup', { serial, file })

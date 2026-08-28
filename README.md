@@ -9,28 +9,6 @@ proposed for it, preview it, apply it in one write, roll it back if you hate it.
 > macOS arm64 only for now. USB only — SpringBoard's layout service is not
 > reachable over the network.
 
-## Where things live
-
-| Path | What it is |
-|---|---|
-| `app/src/lib/` | the layout engine: pure JSON in, JSON out, no device, fully tested |
-| `app/src/features/` | the editor — the phone frames, drag and drop, the diff sheet |
-| `app/src-tauri/src/device.rs` | lockdown + SpringBoard; thin on purpose, tested by hand |
-| `app/src-tauri/src/` | backups and the App Store lookup, next to the Tauri shell |
-| `reference/` | real-device fixtures and the working prototype this grew from |
-| `scripts/` | bundle verification and version stamping |
-
-The split is the whole architecture: CI has no phone, so everything that can be
-tested without one lives in `app/src/lib/` and never imports a Tauri command.
-
-It used to be a frozen Python CLI running as a sidecar. That worked, but it put
-46MB and a second process between the window and the phone for code that is a
-few hundred lines. The device layer is Rust now, over the [`idevice`][idevice]
-crate, and the layout engine is TypeScript in the app itself.
-
-[idevice]: https://github.com/jkcoxson/idevice
-
-
 ## Getting it
 
 ```bash
@@ -60,6 +38,28 @@ xattr -dr com.apple.quarantine /Applications/IconState.app
 
 [install]: scripts/install.sh
 [releases]: https://github.com/Jubstaaa/iconstate/releases
+
+## Where things live
+
+| Path | What it is |
+|---|---|
+| `app/src/lib/` | the layout engine: pure JSON in, JSON out, no device, fully tested |
+| `app/src/features/` | the editor — the phone frames, drag and drop, the diff sheet |
+| `app/src-tauri/src/device.rs` | lockdown + SpringBoard; thin on purpose, tested by hand |
+| `app/src-tauri/src/` | backups and the App Store lookup, next to the Tauri shell |
+| `reference/` | real-device fixtures and the working prototype this grew from |
+| `scripts/` | bundle verification and version stamping |
+
+The split is the whole architecture: CI has no phone, so everything that can be
+tested without one lives in `app/src/lib/` and never imports a Tauri command.
+
+It used to be a frozen Python CLI running as a sidecar. That worked, but it put
+46MB and a second process between the window and the phone for code that is a
+few hundred lines. The device layer is Rust now, over the [`idevice`][idevice]
+crate, and the layout engine is TypeScript in the app itself.
+
+[idevice]: https://github.com/jkcoxson/idevice
+
 
 ## The desktop app
 

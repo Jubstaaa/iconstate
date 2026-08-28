@@ -18,7 +18,7 @@ tauri-plugin-opener = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 # Pinned exactly: idevice ships breaking changes on every point release until 0.2.
-idevice = { version = "=0.1.65", features = ["usbmuxd", "springboardservices", "installation_proxy"] }
+idevice = { version = "=0.1.65", features = ["usbmuxd", "springboardservices"] }
 plist = "1.10"
 base64 = "0.22"
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync"] }
