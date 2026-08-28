@@ -162,8 +162,19 @@ naming folders, moving apps between them, editing the dock, adding an app that
 is installed but not on any page.
 
 **Does not work** — widgets (the icon state does not carry them), removing an
-app from the home screen (iOS puts it back on a new page), tinted/clear/large
-icon modes, anything over the network, Screen Time usage data.
+app from the home screen (iOS puts it back on a new page), free icon placement,
+tinted/clear/large icon modes, anything over the network, Screen Time usage data.
+
+Free placement is worth spelling out, because the format looks like it should
+support it. Since iOS 18 an icon can sit anywhere on a page with gaps around it,
+but `getIconState` never reports one: `formatVersion` 2 returns a flat list, and
+1 and 3 return a fixed grid whose trailing cells are `false` — filler, not gaps,
+and they stay `false` no matter where the icon actually sits. Writing a gap was
+tried four ways (a `false` in the flat list, and a row matrix under formatVersion
+1, 3 and 4); SpringBoard accepts every one of them and left-aligns the icons
+anyway. Formats 1 and 3 also report every folder as an empty cell, so they carry
+strictly less than format 2. The placement lives somewhere this service cannot
+see.
 
 ## Licence
 
