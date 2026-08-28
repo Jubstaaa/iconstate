@@ -1,3 +1,5 @@
+pub mod device;
+
 use std::io::Write;
 
 use serde::Serialize;
