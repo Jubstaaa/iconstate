@@ -1,14 +1,14 @@
 import { DndContext, DragOverlay, PointerSensor, pointerWithin, useSensor, useSensors } from '@dnd-kit/core'
 import { AnimatePresence } from 'motion/react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { LogicalSize, getCurrentWindow } from '@tauri-apps/api/window'
+import { LogicalSize, currentMonitor, getCurrentWindow } from '@tauri-apps/api/window'
 
 import ContextMenu from './context-menu'
 import DockRow from './dock-row'
 import { isFolderSlot } from './editor.types'
 import FolderSheet from './folder-sheet'
-import { SEPARATOR, parseDropTarget, sideOf } from './home-editor.types'
+import { SEPARATOR, bareId, parseDropTarget, sideOf } from './home-editor.types'
 import { IconsProvider } from './icons.context'
 import { ScreenProvider, geometryFor } from './screen.context'
 import HomePage from './home-page'
@@ -20,13 +20,26 @@ import type { ContextMenuState, MenuItem } from './context-menu.types'
 import type { FolderSlot, Slot, Target } from './editor.types'
 import type { Hint, HomeEditorProps } from './home-editor.types'
 
-/** Grow the window by one device so the new page has somewhere to sit. */
-const widenWindow = async (extra: number) => {
+/**
+ * Follow the row of devices with the window, up to what the display can hold —
+ * the overflow stays reachable by scrolling. The amount is measured off the
+ * scroller rather than worked out from an icon size, which is what let a single
+ * added page throw the window a thousand points wide.
+ */
+const fitWindow = async (overflow: number) => {
     const window_ = getCurrentWindow()
     const factor = await window_.scaleFactor()
     const outer = (await window_.outerSize()).toLogical(factor)
-    await window_.setSize(new LogicalSize(Math.round(outer.width + extra), Math.round(outer.height)))
+    const monitor = await currentMonitor()
+    const room = monitor ? monitor.size.toLogical(factor).width - 40 : outer.width + overflow
+
+    const width = Math.round(Math.max(360, Math.min(outer.width + overflow, room)))
+    if (width === Math.round(outer.width)) return
+    await window_.setSize(new LogicalSize(width, Math.round(outer.height)))
 }
+
+/** The px-1 breathing room either side of the row of devices. */
+const EDGES = 8
 
 export default function HomeEditor({
     state,
@@ -44,6 +57,8 @@ export default function HomeEditor({
     const [hint, setHint] = useState<Hint | null>(null)
     const [menu, setMenu] = useState<ContextMenuState | null>(null)
     const [size, setSize] = useState({ width: 0, height: 0 })
+    const scroller = useRef<HTMLDivElement>(null)
+    const drawn = useRef(0)
 
     // Press and hold to drag; a quick click stays a click, which is what lets a
     // single tap open a folder the way it does on the phone.
@@ -95,7 +110,7 @@ export default function HomeEditor({
 
     const handleDragStart = useCallback(
         ({ active }: DragStartEvent) => {
-            const id = String(active.id)
+            const id = bareId(String(active.id))
             const loose = [...layout.dock, ...layout.pages.flat()].find(slot => slot.id === id)
             const inFolder = layout.pages
                 .flat()
@@ -125,18 +140,19 @@ export default function HomeEditor({
             const target = parseDropTarget(String(over.id))
             if (!target) return
 
-            const dragged = String(active.id)
+            const dragged = bareId(String(active.id))
             const ids = selection.has(dragged) ? [...selection] : [dragged]
 
             if (target.kind === 'onto') {
-                if (target.id === dragged) return
+                const ontoId = bareId(target.id)
+                if (ontoId === dragged) return
                 const side = sideOf(active.rect.current.translated, over.rect)
-                if (side === 'onto') dispatch({ type: 'combine', ids, ontoId: target.id })
+                if (side === 'onto') dispatch({ type: 'combine', ids, ontoId })
                 else
                     dispatch({
                         type: 'move',
                         ids,
-                        target: { zone: zoneFor(target.id), anchorId: target.id, position: side },
+                        target: { zone: zoneFor(ontoId), anchorId: ontoId, position: side },
                     })
             } else {
                 const zone: Target['zone'] =
@@ -159,7 +175,7 @@ export default function HomeEditor({
     }, [dispatch, onSelectionChange, selection])
 
     const openMenu = useCallback(
-        (event: React.MouseEvent, id?: string) => {
+        (event: React.MouseEvent, id?: string, page?: number) => {
             event.preventDefault()
             event.stopPropagation()
 
@@ -191,20 +207,16 @@ export default function HomeEditor({
             }
             if (items.length) items.push(SEPARATOR)
 
-            // Adding a page blanks the screen and the cause is not found yet, so the
-            // command is held back rather than shipped broken.
             items.push({
                 label: 'Add a page',
                 disabled: pageCount >= limits.pages,
-                onPick: () => {
-                    dispatch({ type: 'add-page' })
-                    widenWindow(size.width + 44)
-                },
+                onPick: () => dispatch({ type: 'add-page' }),
             })
+            const which = page ?? pageCount - 1
             items.push({
-                label: 'Remove the last page',
-                disabled: pageCount < 2 || (layout.pages.at(-1)?.length ?? 0) > 0,
-                onPick: () => dispatch({ type: 'remove-page', page: pageCount - 1 }),
+                label: 'Remove this page',
+                disabled: pageCount < 2 || (layout.pages[which]?.length ?? 0) > 0,
+                onPick: () => dispatch({ type: 'remove-page', page: which }),
             })
             items.push({ label: 'Undo', shortcut: '⌘Z', onPick: () => dispatch({ type: 'undo' }) })
             items.push({ label: 'Redo', shortcut: '⇧⌘Z', onPick: () => dispatch({ type: 'redo' }) })
@@ -232,8 +244,34 @@ export default function HomeEditor({
 
             setMenu({ x: event.clientX, y: event.clientY, items })
         },
-        [commands, dispatch, handleGroup, layout, limits.pages, pageCount, selection, size.width]
+        [commands, dispatch, handleGroup, layout, limits.pages, pageCount, selection]
     )
+
+    // The row of devices changed width, so the window follows it and the newest
+    // page is scrolled into view.
+    useEffect(() => {
+        const node = scroller.current
+        if (!node) return
+
+        const grew = pageCount > drawn.current
+        drawn.current = pageCount
+
+        // scrollWidth never falls below clientWidth, so it can say the row has
+        // outgrown the window but never that it has room to give back. The
+        // devices' own edges say both.
+        const first = node.firstElementChild?.getBoundingClientRect()
+        const last = node.lastElementChild?.getBoundingClientRect()
+        if (!first || !last) return
+
+        const room = node.clientWidth - EDGES
+        const overflow = Math.round(last.right - first.left - room)
+
+        // Widen for a page that does not fit, give the space back when a page
+        // goes — but never claw back room the window was widened by hand.
+        if (grew && overflow > 2) void fitWindow(overflow)
+        if (!grew && overflow < -2) void fitWindow(overflow)
+        if (grew) node.scrollTo({ left: node.scrollWidth, behavior: 'smooth' })
+    }, [pageCount])
 
     useEffect(() => {
         const onKey = (event: KeyboardEvent) => {
@@ -269,17 +307,24 @@ export default function HomeEditor({
                         setHint(null)
                     }}
                 >
-                    <div className='flex h-full min-h-0 gap-5 overflow-x-auto px-1 [scrollbar-width:thin]'>
+                    <div
+                        ref={scroller}
+                        className='flex h-full min-h-0 gap-5 overflow-x-auto px-1 [scrollbar-width:thin]'
+                    >
                         {layout.pages.map((slots, index) => (
                             <PhoneFrame
                                 key={index}
                                 aspect={aspect}
-                                label={`Page ${index + 1}`}
+                                label={
+                                    slots.length
+                                        ? `Page ${index + 1}`
+                                        : `Page ${index + 1} · empty, not written`
+                                }
                                 onMeasure={index === 0 ? setSize : undefined}
                             >
                                 <div
                                     className='min-h-0 flex-1 pt-[7%]'
-                                    onContextMenu={event => openMenu(event)}
+                                    onContextMenu={event => openMenu(event, undefined, index)}
                                 >
                                     <HomePage
                                         page={index}
@@ -289,17 +334,18 @@ export default function HomeEditor({
                                         hint={hint}
                                         onSelect={handleSelect}
                                         onOpen={setOpenFolderId}
-                                        onContextMenu={openMenu}
+                                        onContextMenu={(event, slotId) => openMenu(event, slotId, index)}
                                     />
                                 </div>
-                                <div onContextMenu={event => openMenu(event)}>
+                                <div onContextMenu={event => openMenu(event, undefined, index)}>
                                     <DockRow
+                                        page={index}
                                         slots={layout.dock}
                                         limits={limits}
                                         selection={selection}
                                         hint={hint}
                                         onSelect={handleSelect}
-                                        onContextMenu={openMenu}
+                                        onContextMenu={(event, slotId) => openMenu(event, slotId, index)}
                                     />
                                 </div>
 
@@ -327,7 +373,7 @@ export default function HomeEditor({
                                                 setOpenFolderId(null)
                                             }}
                                             onClose={() => setOpenFolderId(null)}
-                                            onContextMenu={openMenu}
+                                            onContextMenu={(event, slotId) => openMenu(event, slotId, index)}
                                         />
                                     ) : null}
                                 </AnimatePresence>
