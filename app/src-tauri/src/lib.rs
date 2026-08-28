@@ -1,171 +1,162 @@
+mod backup;
+mod catalog;
 pub mod device;
 
-use std::io::Write;
+use std::path::{Path, PathBuf};
 
-use serde::Serialize;
+use serde_json::json;
 use tauri::{AppHandle, Emitter};
-use tauri_plugin_shell::process::CommandEvent;
-use tauri_plugin_shell::ShellExt;
 
 const PROGRESS_EVENT: &str = "iconstate://progress";
 
-#[derive(Debug, Serialize)]
-struct CoreFailure {
-    message: String,
-    events: Vec<serde_json::Value>,
+type Answer<T> = Result<T, String>;
+
+/// Progress is narrated to the window as it happens; the return value is only
+/// ever the finished thing.
+fn say(app: &AppHandle, event: serde_json::Value) {
+    let _ = app.emit(PROGRESS_EVENT, event);
 }
 
-impl CoreFailure {
-    fn new(message: impl Into<String>, events: Vec<serde_json::Value>) -> Self {
-        Self {
-            message: message.into(),
-            events,
-        }
+fn icon_cache() -> PathBuf {
+    let home = std::env::var("HOME").unwrap_or_else(|_| ".".into());
+    Path::new(&home).join(".iconstate").join("icons")
+}
+
+async fn connect(app: &AppHandle, serial: Option<&str>) -> Answer<serde_json::Value> {
+    say(app, json!({ "event": "connecting" }));
+    let (about, state, metrics) = device::icon_state(serial).await?;
+
+    say(
+        app,
+        json!({
+            "event": "connected",
+            "name": about.name,
+            "ios": about.ios,
+            "model": about.model,
+            "serial": about.serial,
+        }),
+    );
+
+    let pages = state.as_array().map(|pages| pages.len().saturating_sub(1));
+    say(app, json!({ "event": "icon-state-read", "pages": pages }));
+
+    let _ = metrics;
+    Ok(state)
+}
+
+#[tauri::command]
+async fn list_devices() -> Answer<Vec<device::DeviceRow>> {
+    device::devices().await
+}
+
+#[tauri::command]
+async fn read_icon_state(app: AppHandle, serial: Option<String>) -> Answer<serde_json::Value> {
+    connect(&app, serial.as_deref()).await
+}
+
+#[tauri::command]
+async fn fetch_metrics(serial: Option<String>) -> Answer<serde_json::Value> {
+    device::metrics(serial.as_deref()).await
+}
+
+#[tauri::command]
+async fn installed_apps(app: AppHandle, serial: Option<String>) -> Answer<serde_json::Value> {
+    let apps = device::installed_apps(serial.as_deref()).await?;
+    let count = apps.as_object().map(|map| map.len()).unwrap_or(0);
+    say(&app, json!({ "event": "installed-apps-read", "count": count }));
+    Ok(apps)
+}
+
+#[tauri::command]
+async fn fetch_icons(
+    app: AppHandle,
+    serial: Option<String>,
+    keys: Option<Vec<String>>,
+) -> Answer<std::collections::BTreeMap<String, String>> {
+    // The window usually knows which icons it wants; reading the layout again
+    // just to work them out would cost another trip to the phone.
+    if let Some(keys) = keys {
+        say(&app, json!({ "event": "icons-wanted", "count": keys.len() }));
+        let handle = app.clone();
+        let manifest = device::icons(serial.as_deref(), &keys, &icon_cache(), |_, done, total| {
+            say(&handle, json!({ "event": "icon", "done": done, "total": total }));
+        })
+        .await?;
+        say(&app, json!({ "event": "icons-ready" }));
+        return Ok(manifest
+            .into_iter()
+            .map(|(key, path)| (key, path.to_string_lossy().into_owned()))
+            .collect());
     }
-}
 
-async fn run_core(app: &AppHandle, args: Vec<String>) -> Result<String, CoreFailure> {
-    let command = app
-        .shell()
-        .sidecar("iconstate-core")
-        .map_err(|error| CoreFailure::new(format!("sidecar not found: {error}"), Vec::new()))?
-        .args(&args);
+    let (_, state, _) = device::icon_state(serial.as_deref()).await?;
 
-    let (mut rx, _child) = command.spawn().map_err(|error| {
-        CoreFailure::new(format!("could not start the core: {error}"), Vec::new())
-    })?;
+    let mut wanted: Vec<String> = Vec::new();
+    let mut push = |icon: &serde_json::Value| {
+        let key = icon
+            .get("bundleIdentifier")
+            .or_else(|| icon.get("displayIdentifier"))
+            .and_then(|value| value.as_str());
+        if let Some(key) = key {
+            if !wanted.iter().any(|seen| seen == key) {
+                wanted.push(key.to_owned());
+            }
+        }
+    };
 
-    let mut stdout = String::new();
-    let mut events: Vec<serde_json::Value> = Vec::new();
-
-    while let Some(event) = rx.recv().await {
-        match event {
-            CommandEvent::Stdout(chunk) => stdout.push_str(&String::from_utf8_lossy(&chunk)),
-            CommandEvent::Stderr(chunk) => {
-                for line in String::from_utf8_lossy(&chunk).lines() {
-                    let line = line.trim();
-                    if line.is_empty() {
-                        continue;
-                    }
-                    match serde_json::from_str::<serde_json::Value>(line) {
-                        Ok(value) => {
-                            let _ = app.emit(PROGRESS_EVENT, value.clone());
-                            events.push(value);
+    for page in state.as_array().into_iter().flatten() {
+        for item in page.as_array().into_iter().flatten() {
+            match item.get("iconLists") {
+                Some(lists) => {
+                    for folder_page in lists.as_array().into_iter().flatten() {
+                        for icon in folder_page.as_array().into_iter().flatten() {
+                            push(icon);
                         }
-                        Err(_) => eprintln!("core: {line}"),
                     }
                 }
+                None => push(item),
             }
-            CommandEvent::Terminated(payload) if payload.code != Some(0) => {
-                let message = events
-                    .iter()
-                    .rev()
-                    .find(|event| event.get("event").and_then(|e| e.as_str()) == Some("error"))
-                    .and_then(|event| event.get("message"))
-                    .and_then(|message| message.as_str())
-                    .map(str::to_owned)
-                    .unwrap_or_else(|| format!("core exited with {:?}", payload.code));
-                return Err(CoreFailure::new(message, events));
-            }
-            _ => {}
         }
     }
 
-    Ok(stdout)
-}
+    say(&app, json!({ "event": "icons-wanted", "count": wanted.len() }));
 
-async fn run_core_json(
-    app: &AppHandle,
-    args: Vec<String>,
-) -> Result<serde_json::Value, CoreFailure> {
-    let stdout = run_core(app, args).await?;
-    serde_json::from_str(&stdout).map_err(|error| {
-        CoreFailure::new(format!("core returned invalid JSON: {error}"), Vec::new())
+    let cache = icon_cache();
+    let handle = app.clone();
+    let manifest = device::icons(serial.as_deref(), &wanted, &cache, |_, done, total| {
+        say(&handle, json!({ "event": "icon", "done": done, "total": total }));
     })
+    .await?;
+
+    say(&app, json!({ "event": "icons-ready" }));
+
+    Ok(manifest
+        .into_iter()
+        .map(|(key, path)| (key, path.to_string_lossy().into_owned()))
+        .collect())
 }
 
 #[tauri::command]
-async fn core_version(app: AppHandle) -> Result<String, CoreFailure> {
-    Ok(run_core(&app, vec!["--version".into()])
-        .await?
-        .trim()
-        .to_owned())
-}
-
-#[tauri::command]
-async fn list_devices(app: AppHandle) -> Result<serde_json::Value, CoreFailure> {
-    run_core_json(&app, vec!["devices".into(), "--json".into()]).await
-}
-
-fn write_temp(name: &str, value: &serde_json::Value) -> Result<std::path::PathBuf, CoreFailure> {
-    let path = std::env::temp_dir().join(format!("iconstate-{name}.json"));
-    let mut file = std::fs::File::create(&path).map_err(|error| {
-        CoreFailure::new(format!("could not stage {name}: {error}"), Vec::new())
-    })?;
-    file.write_all(value.to_string().as_bytes())
-        .map_err(|error| {
-            CoreFailure::new(format!("could not stage {name}: {error}"), Vec::new())
-        })?;
-    Ok(path)
-}
-
-#[tauri::command]
-async fn read_icon_state(
+async fn lookup_genres(
     app: AppHandle,
-    serial: Option<String>,
-) -> Result<serde_json::Value, CoreFailure> {
-    let mut args = vec!["dump".into()];
-    if let Some(serial) = serial {
-        args.push("--serial".into());
-        args.push(serial);
-    }
-    run_core_json(&app, args).await
-}
-
-#[tauri::command]
-async fn plan_layout(
-    app: AppHandle,
-    serial: Option<String>,
-    assignments: Option<serde_json::Value>,
-    lookup: Option<bool>,
+    bundle_ids: Vec<String>,
     country: Option<String>,
-) -> Result<serde_json::Value, CoreFailure> {
-    let mut args = vec!["plan".to_string(), "--json".to_string()];
-    if let Some(serial) = serial {
-        args.push("--serial".into());
-        args.push(serial);
-    }
-    if lookup.unwrap_or(false) {
-        args.push("--lookup".into());
-        args.push("--country".into());
-        args.push(country.unwrap_or_else(|| "us".into()));
-    }
-    if let Some(assignments) = assignments {
-        let path = write_temp("assignments", &assignments)?;
-        args.push("--assign".into());
-        args.push(path.to_string_lossy().into_owned());
-    }
-    run_core_json(&app, args).await
-}
+) -> Answer<catalog::Genres> {
+    say(&app, json!({ "event": "looking-up", "count": bundle_ids.len() }));
 
-#[tauri::command]
-async fn diff_layout(
-    app: AppHandle,
-    serial: Option<String>,
-    plan: serde_json::Value,
-) -> Result<serde_json::Value, CoreFailure> {
-    let path = write_temp("plan", &plan)?;
-    let mut args = vec![
-        "diff".to_string(),
-        "--json".to_string(),
-        "--plan".to_string(),
-        path.to_string_lossy().into_owned(),
-    ];
-    if let Some(serial) = serial {
-        args.push("--serial".into());
-        args.push(serial);
-    }
-    run_core_json(&app, args).await
+    let handle = app.clone();
+    let found = catalog::lookup(
+        &bundle_ids,
+        country.as_deref().unwrap_or("us"),
+        |_, done, total| {
+            say(&handle, json!({ "event": "looked-up", "done": done, "total": total }));
+        },
+    )
+    .await?;
+
+    let resolved = found.values().filter(|genres| !genres.is_empty()).count();
+    say(&app, json!({ "event": "looked-up-done", "resolved": resolved }));
+    Ok(found)
 }
 
 #[tauri::command]
@@ -173,50 +164,24 @@ async fn apply_layout(
     app: AppHandle,
     serial: Option<String>,
     plan: serde_json::Value,
-) -> Result<(), CoreFailure> {
-    let path = write_temp("plan", &plan)?;
-    let mut args = vec![
-        "apply".to_string(),
-        "--yes".to_string(),
-        "--plan".to_string(),
-        path.to_string_lossy().into_owned(),
-    ];
-    if let Some(serial) = serial {
-        args.push("--serial".into());
-        args.push(serial);
-    }
-    run_core(&app, args).await.map(|_| ())
+) -> Answer<serde_json::Value> {
+    let (_, current, _) = device::icon_state(serial.as_deref()).await?;
+    let saved = backup::save_before_write(&current, serial.as_deref())?;
+    say(&app, json!({ "event": "backed-up", "file": saved.to_string_lossy() }));
+
+    say(&app, json!({ "event": "writing" }));
+    let (_, settled) = device::write_icon_state(serial.as_deref(), &plan).await?;
+    say(&app, json!({ "event": "written" }));
+
+    Ok(settled)
 }
 
 #[tauri::command]
-async fn fetch_icons(
-    app: AppHandle,
-    serial: Option<String>,
-) -> Result<serde_json::Value, CoreFailure> {
-    let mut args = vec!["icons".to_string()];
-    if let Some(serial) = serial {
-        args.push("--serial".into());
-        args.push(serial);
-    }
-    run_core_json(&app, args).await
-}
-
-#[tauri::command]
-async fn fetch_metrics(
-    app: AppHandle,
-    serial: Option<String>,
-) -> Result<serde_json::Value, CoreFailure> {
-    let mut args = vec!["metrics".to_string()];
-    if let Some(serial) = serial {
-        args.push("--serial".into());
-        args.push(serial);
-    }
-    run_core_json(&app, args).await
-}
-
-#[tauri::command]
-async fn list_backups(app: AppHandle) -> Result<serde_json::Value, CoreFailure> {
-    run_core_json(&app, vec!["backups".into(), "--json".into()]).await
+async fn list_backups() -> Answer<Vec<String>> {
+    Ok(backup::history()
+        .into_iter()
+        .map(|path| path.to_string_lossy().into_owned())
+        .collect())
 }
 
 #[tauri::command]
@@ -224,23 +189,29 @@ async fn restore_backup(
     app: AppHandle,
     serial: Option<String>,
     file: Option<String>,
-) -> Result<(), CoreFailure> {
-    let mut args = vec!["restore".to_string(), "--yes".to_string()];
-    if let Some(file) = file {
-        args.push(file);
-    }
-    if let Some(serial) = serial {
-        args.push("--serial".into());
-        args.push(serial);
-    }
-    run_core(&app, args).await.map(|_| ())
+) -> Answer<serde_json::Value> {
+    let path = match file {
+        Some(file) => PathBuf::from(file),
+        None => backup::latest().ok_or_else(|| "there is nothing to undo to".to_string())?,
+    };
+
+    say(&app, json!({ "event": "reading-file", "file": path.to_string_lossy() }));
+    let state = backup::read(&path)?;
+
+    let (_, current, _) = device::icon_state(serial.as_deref()).await?;
+    backup::mark_restore(&current, serial.as_deref())?;
+
+    say(&app, json!({ "event": "writing" }));
+    let (_, settled) = device::write_icon_state(serial.as_deref(), &state).await?;
+    say(&app, json!({ "event": "written" }));
+
+    Ok(settled)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .plugin(tauri_plugin_shell::init())
         .setup(|_app| {
             #[cfg(debug_assertions)]
             {
@@ -252,14 +223,13 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
-            core_version,
             list_devices,
             read_icon_state,
-            plan_layout,
-            diff_layout,
-            apply_layout,
-            fetch_icons,
             fetch_metrics,
+            fetch_icons,
+            installed_apps,
+            lookup_genres,
+            apply_layout,
             list_backups,
             restore_backup
         ])

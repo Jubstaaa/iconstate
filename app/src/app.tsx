@@ -9,16 +9,19 @@ import DiffReview from './features/diff-review/diff-review'
 import { notifyDone, notifyFailed, notifyIdle, notifyProgress } from './lib/notify'
 import {
     applyLayout,
-    diffLayout,
     fetchIcons,
     fetchMetrics,
     getErrorMessage,
     listDevices,
+    lookupGenres,
     onProgress,
-    planLayout,
     readIconState,
     restoreBackup,
 } from './lib/core'
+import { diffStates } from './lib/diff'
+import { assignmentsFromGenres } from './lib/genres'
+import { appsOf, keyOf } from './lib/icon-state'
+import { planWithAssignments } from './lib/plan'
 
 import type { Metrics } from './features/editor/editor.constants'
 import type { EditorCommands } from './features/editor/home-editor.types'
@@ -113,7 +116,7 @@ export default function App() {
                 setBaseline(read)
                 setMetrics(grid)
                 dispatch({ type: 'load', state: read })
-                setIcons(await fetchIcons(target))
+                setIcons(await fetchIcons(appsOf(read).map(keyOf), target))
             }),
         [guard]
     )
@@ -128,13 +131,23 @@ export default function App() {
         onPropose: useCallback(
             (lookUp: boolean) =>
                 guard(async () => {
-                    dispatch({ type: 'load', state: await planLayout(serial, { lookup: lookUp }) })
+                    if (!baseline) return
+                    const apps = appsOf(baseline)
+                    const assignments = lookUp
+                        ? assignmentsFromGenres(await lookupGenres(apps.map(keyOf)))
+                        : {}
+                    dispatch({
+                        type: 'load',
+                        state: planWithAssignments(apps, limits, assignments).state,
+                    })
                 }),
-            [guard, serial]
+            [baseline, guard, limits]
         ),
+        // The plan and what the phone last said are both here, so the review
+        // needs no trip to the device.
         onReview: useCallback(
-            () => guard(async () => setChange(await diffLayout(edited, serial))),
-            [edited, guard, serial]
+            () => setChange(baseline ? diffStates(baseline, edited) : null),
+            [baseline, edited]
         ),
         onDiscard: useCallback(() => baseline && dispatch({ type: 'load', state: baseline }), [baseline]),
         onUndoWrite: useCallback(

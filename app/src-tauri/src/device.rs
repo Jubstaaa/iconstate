@@ -8,6 +8,7 @@ use std::path::{Path, PathBuf};
 
 use base64::Engine as _;
 use idevice::provider::UsbmuxdProvider;
+use idevice::services::installation_proxy::InstallationProxyClient;
 use idevice::services::lockdown::LockdownClient;
 use idevice::services::springboardservices::SpringBoardServicesClient;
 use idevice::usbmuxd::{Connection, UsbmuxdAddr, UsbmuxdConnection};
@@ -349,4 +350,24 @@ pub async fn icons(
     }
 
     Ok(manifest)
+}
+
+/// What is installed, whether or not it is on a page. The plan needs this to
+/// notice an app the home screen has never had.
+pub async fn installed_apps(serial: Option<&str>) -> Result<serde_json::Value> {
+    let provider = provider(serial).await?;
+    let mut client = InstallationProxyClient::connect(&provider)
+        .await
+        .map_err(|error| format!("the app list would not open: {error}"))?;
+
+    let apps = client
+        .get_apps(Some("Any"), None)
+        .await
+        .map_err(|error| format!("could not read the app list: {error}"))?;
+
+    let mut out = serde_json::Map::new();
+    for (key, value) in apps {
+        out.insert(key, to_json(&value));
+    }
+    Ok(serde_json::Value::Object(out))
 }
