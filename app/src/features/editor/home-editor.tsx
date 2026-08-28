@@ -38,8 +38,9 @@ const fitWindow = async (overflow: number) => {
     await window_.setSize(new LogicalSize(width, Math.round(outer.height)))
 }
 
-/** The px-1 breathing room either side of the row of devices. */
+/** The px-1 breathing room either side of the row, and the gap-5 between. */
 const EDGES = 8
+const GAP = 20
 
 export default function HomeEditor({
     state,
@@ -256,21 +257,24 @@ export default function HomeEditor({
         const grew = pageCount > drawn.current
         drawn.current = pageCount
 
-        // scrollWidth never falls below clientWidth, so it can say the row has
-        // outgrown the window but never that it has room to give back. The
-        // devices' own edges say both.
-        const first = node.firstElementChild?.getBoundingClientRect()
-        const last = node.lastElementChild?.getBoundingClientRect()
-        if (!first || !last) return
+        // Every device is the same width, so the row is measured off the first
+        // one. A page that has just appeared has not been measured yet — asking
+        // the row itself would read the new device as nothing at all.
+        const frame = node.firstElementChild?.getBoundingClientRect().width ?? 0
+        if (!frame) return
 
-        const room = node.clientWidth - EDGES
-        const overflow = Math.round(last.right - first.left - room)
+        const width = pageCount * frame + (pageCount - 1) * GAP + EDGES
+        const overflow = Math.round(width - node.clientWidth)
 
         // Widen for a page that does not fit, give the space back when a page
-        // goes — but never claw back room the window was widened by hand.
-        if (grew && overflow > 2) void fitWindow(overflow)
-        if (!grew && overflow < -2) void fitWindow(overflow)
-        if (grew) node.scrollTo({ left: node.scrollWidth, behavior: 'smooth' })
+        // goes — but never claw back room the window was widened by hand. The
+        // scroll waits for the window, or it drags the first device off screen.
+        const settle = async () => {
+            if (grew && overflow > 2) await fitWindow(overflow)
+            if (!grew && overflow < -2) await fitWindow(overflow)
+            if (grew) node.scrollTo({ left: node.scrollWidth, behavior: 'smooth' })
+        }
+        void settle()
     }, [pageCount])
 
     useEffect(() => {

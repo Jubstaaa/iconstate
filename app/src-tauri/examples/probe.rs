@@ -24,6 +24,19 @@ async fn main() {
             .expect("icons");
             println!("{}", serde_json::to_string_pretty(&manifest).unwrap());
         }
+        "write-roundtrip" => {
+            let (_, before, _) = iconstate_lib::device::icon_state(None).await.expect("read");
+            let backup = std::env::args().nth(2).expect("give a backup path");
+            std::fs::write(&backup, serde_json::to_string_pretty(&before).unwrap()).expect("backup");
+            eprintln!("backed up to {backup}");
+
+            let (_, settled) = iconstate_lib::device::write_icon_state(None, &before)
+                .await
+                .expect("write");
+            eprintln!("wrote it back");
+
+            println!("{}", serde_json::to_string_pretty(&settled).unwrap());
+        }
         _ => {
             let (about, state, metrics) =
                 iconstate_lib::device::icon_state(None).await.expect("state");
