@@ -46,11 +46,14 @@ export const SEPARATOR: MenuItem = { label: '—', disabled: true, onPick: () =>
  */
 export const dockId = (page: number, id: string): string => `d${page}/${id}`
 
+/** Targets that cover a whole area, and so must never beat a tile under the pointer. */
+export const isWideTarget = (id: string): boolean => id.startsWith('page:') || id.startsWith('infolder:')
+
 export const bareId = (id: string): string => id.replace(/^d\d+\//, '')
 
 export const parseDropTarget = (id: string): DropTarget | null => {
     const [head, ...rest] = id.split(':')
-    if (head === 'cell') return { kind: 'cell', page: Number(rest[0]) }
+    if (head === 'cell' || head === 'page') return { kind: 'cell', page: Number(rest[0]) }
     if (head === 'dock') return { kind: 'dock' }
     if (head === 'infolder') return { kind: 'infolder', id: rest.slice(0, -1).join(':') }
     if (head === 'onto') return { kind: 'onto', id: rest.join(':') }

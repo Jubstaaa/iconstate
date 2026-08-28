@@ -8,8 +8,7 @@ import ContextMenu from './context-menu'
 import DockRow from './dock-row'
 import { isFolderSlot } from './editor.types'
 import FolderSheet from './folder-sheet'
-import { panelTarget } from './folder-sheet.types'
-import { SEPARATOR, bareId, parseDropTarget, sideOf } from './home-editor.types'
+import { SEPARATOR, bareId, isWideTarget, parseDropTarget, sideOf } from './home-editor.types'
 import { IconsProvider } from './icons.context'
 import { ScreenProvider, geometryFor } from './screen.context'
 import HomePage from './home-page'
@@ -91,17 +90,21 @@ export default function HomeEditor({
     const collisionDetection = useCallback<CollisionDetection>(
         args => {
             const hits = pointerWithin(args)
-            if (!openFolder) return hits
 
-            const panel = panelTarget(openFolder)
+            const narrow = (found: typeof hits) => {
+                const tight = found.filter(hit => !isWideTarget(String(hit.id)))
+                return tight.length ? tight : found
+            }
+
+            if (!openFolder) return narrow(hits)
+
             const held = new Set(openFolder.apps.map(app => `onto:${app.id}`))
-            const isInside = (id: string) => held.has(id) || id.startsWith(`infolder:${openFolder.id}:`)
+            const inside = hits.filter(hit => {
+                const id = String(hit.id)
+                return held.has(id) || id.startsWith(`infolder:${openFolder.id}:`)
+            })
 
-            const tiles = hits.filter(hit => hit.id !== panel && isInside(String(hit.id)))
-            if (tiles.length) return tiles
-
-            const whole = hits.filter(hit => hit.id === panel)
-            return whole.length ? whole : hits
+            return inside.length ? narrow(inside) : []
         },
         [openFolder]
     )

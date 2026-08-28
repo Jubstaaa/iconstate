@@ -115,6 +115,31 @@ async fn main() {
                 .expect("read back");
             println!("{}", serde_json::to_string(&back).unwrap());
         }
+        "blank-shapes" => {
+            // Try two other ways of saying "nothing here": an empty dictionary,
+            // and an icon record with empty identifiers. One page each, so the
+            // phone shows which (if either) took.
+            let (_, mut state, _) = iconstate_lib::device::icon_state(None).await.expect("read");
+            let pages = state.as_array_mut().expect("pages");
+
+            let empty_dict = serde_json::json!({});
+            let empty_icon = serde_json::json!({ "displayIdentifier": "", "displayName": "" });
+
+            if let Some(page) = pages.get_mut(2) {
+                page.as_array_mut().unwrap().insert(0, empty_dict);
+            }
+            if let Some(page) = pages.get_mut(3) {
+                page.as_array_mut().unwrap().insert(0, empty_icon);
+            }
+
+            match iconstate_lib::device::write_icon_state(None, &state).await {
+                Ok(_) => eprintln!("write accepted"),
+                Err(error) => eprintln!("write refused: {error}"),
+            }
+
+            let back = iconstate_lib::device::icon_state_as(None, Some("2")).await.expect("back");
+            println!("{}", serde_json::to_string(&back).unwrap());
+        }
         _ => {
             let (about, state, metrics) =
                 iconstate_lib::device::icon_state(None).await.expect("state");

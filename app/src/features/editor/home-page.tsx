@@ -1,3 +1,5 @@
+import { useDroppable } from '@dnd-kit/core'
+
 import EmptyCell from './empty-cell'
 import { useScreen } from './screen.context'
 import SlotTile from './slot-tile'
@@ -27,12 +29,14 @@ export default function HomePage({
     onContextMenu,
 }: HomePageProps) {
     const screen = useScreen()
-    // Only the next few cells need to accept a drop; rendering a droppable for
-    // every free slot on an empty page is a lot of registrations for nothing.
-    const blanks = Math.min(Math.max(0, limits.page - slots.length), limits.columns)
+    // Every free cell takes a drop, and the page behind them takes one too, so
+    // letting go anywhere on the page puts the icon down instead of nowhere.
+    const blanks = Math.max(0, limits.page - slots.length)
+    const { setNodeRef } = useDroppable({ id: `page:${page}` })
 
     return (
         <div
+            ref={setNodeRef}
             className='grid h-full content-start justify-center'
             style={{
                 gridTemplateColumns: `repeat(${limits.columns}, ${screen.icon}px)`,
