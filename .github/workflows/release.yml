@@ -19,10 +19,10 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: app/src-tauri
-      - name: Stamp the version from the tag
-        run: python3 scripts/set-version.py "${GITHUB_REF_NAME}"
       - run: bun install --frozen-lockfile
         working-directory: app
+      - name: Stamp the version from the tag
+        run: bun run scripts/set-version.ts "${GITHUB_REF_NAME}"
       - uses: tauri-apps/tauri-action@v0
         with:
           projectPath: app

@@ -1,6 +1,6 @@
 [package]
 name = "iconstate"
-version = "0.0.0"
+version = "0.1.0"
 description = "iPhone home screen editor"
 authors = ["İlker Balcılar"]
 edition = "2021"
