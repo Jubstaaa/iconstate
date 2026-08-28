@@ -1,0 +1,42 @@
+# Release notes, written from the commit messages.
+
+[changelog]
+header = ""
+# Every release says what the app is and how to open it, then what changed.
+body = """
+Rearrange an iPhone home screen from a Mac. Plug the phone in over USB, drag icons and folders with a mouse, and write it back — after a backup and a diff you have to confirm.
+
+**First launch:** this build is not signed with an Apple developer certificate. Right-click the app and choose Open, then Open again. Double-clicking only offers to move it to the bin.
+
+**Needs** macOS 12 or later, Apple silicon, and a USB cable.
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group }}
+{% for commit in commits %}
+- {{ commit.message | split(pat="\n") | first | upper_first }}\
+{% endfor %}
+{% endfor %}
+"""
+trim = true
+footer = ""
+
+[git]
+conventional_commits = true
+filter_unconventional = true
+split_commits = false
+protect_breaking_commits = true
+filter_commits = true
+topo_order = false
+sort_commits = "oldest"
+
+# Only what someone downloading the build would care about.
+commit_parsers = [
+    { message = "^feat", group = "New" },
+    { message = "^fix", group = "Fixed" },
+    { message = "^perf", group = "Faster" },
+    { message = "^refactor", group = "Changed" },
+    { message = "^docs", skip = true },
+    { message = "^test", skip = true },
+    { message = "^chore", skip = true },
+    { message = "^style", skip = true },
+    { message = "^ci", skip = true },
+]

@@ -11,7 +11,10 @@ jobs:
     permissions:
       contents: write
     steps:
+      # git-cliff writes the notes from the commit history, so it needs one.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
@@ -23,11 +26,20 @@ jobs:
         working-directory: app
       - name: Stamp the version from the tag
         run: bun run scripts/set-version.ts "${GITHUB_REF_NAME}"
+      - name: Write the notes from the commits
+        id: notes
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: cliff.toml
+          args: --latest --strip header
+        env:
+          OUTPUT: NOTES.md
       - uses: tauri-apps/tauri-action@v0
         with:
           projectPath: app
           tagName: ${{ github.ref_name }}
           releaseName: IconState ${{ github.ref_name }}
+          releaseBody: ${{ steps.notes.outputs.content }}
           releaseDraft: true
           prerelease: false
           args: --bundles app,dmg

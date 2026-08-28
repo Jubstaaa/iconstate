@@ -36,10 +36,15 @@ crate, and the layout engine is TypeScript in the app itself.
 Download the `.dmg` from [releases][releases], drag IconState across, then plug
 an iPhone in over USB and tap Trust on the phone.
 
-The build is not signed with an Apple developer certificate, so the first launch
-needs one extra step: right-click the app and choose Open, then Open again in the
-dialog. Double-clicking it will only offer to move it to the bin. macOS remembers
-the choice, so this is once per install.
+The build is not signed with an Apple developer certificate, and recent macOS
+refuses those outright — it will say IconState is *damaged* and offer to bin it.
+It is not damaged; the download is simply quarantined. Clear the flag once:
+
+```bash
+xattr -dr com.apple.quarantine /Applications/IconState.app
+```
+
+Then it opens normally, and stays open — the flag does not come back.
 
 [releases]: https://github.com/Jubstaaa/iconstate/releases
 
