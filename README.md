@@ -17,9 +17,8 @@ proposed for it, preview it, apply it in one write, roll it back if you hate it.
 | `app/src/features/` | the editor — the phone frames, drag and drop, the diff sheet |
 | `app/src-tauri/src/device.rs` | lockdown + SpringBoard; thin on purpose, tested by hand |
 | `app/src-tauri/src/` | backups and the App Store lookup, next to the Tauri shell |
-| `core/` | the original Python engine, kept for reference — nothing runs it |
 | `reference/` | real-device fixtures and the working prototype this grew from |
-| `scripts/` | bundle verification, version stamping, rule derivation |
+| `scripts/` | bundle verification and version stamping |
 
 The split is the whole architecture: CI has no phone, so everything that can be
 tested without one lives in `app/src/lib/` and never imports a Tauri command.
@@ -31,41 +30,6 @@ crate, and the layout engine is TypeScript in the app itself.
 
 [idevice]: https://github.com/jkcoxson/idevice
 
-## The CLI
-
-The app no longer runs any of this — it is the original Python engine, still
-here because it is a second implementation to check the new one against.
-
-```bash
-cd core
-uv venv --python 3.12
-uv pip install -e . --group dev
-
-.venv/bin/iconstate devices          # what is plugged in
-.venv/bin/iconstate show             # the home screen as a tree
-.venv/bin/iconstate dump -o now.json # the raw icon state
-.venv/bin/iconstate apps -o apps.json
-.venv/bin/iconstate icons              # cache every icon as a PNG
-.venv/bin/iconstate wallpaper          # save the home screen wallpaper
-.venv/bin/iconstate metrics            # the device's own grid dimensions
-
-.venv/bin/iconstate plan                 # the folder layout the rules propose
-.venv/bin/iconstate diff                 # what applying it would change
-.venv/bin/iconstate apply                # backs up, shows the diff, asks first
-.venv/bin/iconstate backups              # every layout ever written over
-.venv/bin/iconstate restore              # put the most recent one back
-```
-
-Every read-only command also accepts `-i file.json` instead of a device, so the
-whole engine can be driven offline.
-
-Nothing reaches the phone without passing `validate` against the device's own
-inventory, writing a backup, and printing the diff for confirmation. After the
-write the layout is read back and any drift from the plan is reported.
-
-Progress is written to stderr as one JSON object per line; the payload goes to
-stdout. That is what lets the Tauri shell turn a CLI run into UI events without
-a server, a port, or a lifecycle to manage.
 
 ## The desktop app
 
@@ -129,8 +93,8 @@ python3 scripts/derive-rules.py path/to/a/good-layout.json
 ```
 
 Keying on bundle identifiers rather than display names matters more than it
-looks: two apps on this phone are both called "the same name", and WhatsApp ships
-with an invisible character in its name.
+looks: a phone can carry two apps with the same display name, and WhatsApp ships
+with an invisible character in its.
 
 Apps the table does not know go into an `Unsorted` folder. Assignments are a
 plain `{"com.example.app": "Games"}` map layered on top of the offline table,
@@ -144,7 +108,7 @@ identifier is only ever asked about once.
 `app/src/lib/genres.ts` maps a store genre to a folder. The table is
 ordered from specific to generic and that order *is* the algorithm: an app lists
 several genres and the one the store calls primary is regularly the vaguer of
-them — Instagram leads with Photo & Video, a dating app with Lifestyle. Reading the
+them — Instagram leads with Photo & Video rather than Social Networking. Reading
 table in order rather than trusting the app's own ordering puts both under
 Social, which is where a person would look for them.
 

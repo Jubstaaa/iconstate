@@ -7,8 +7,8 @@
  *
  * The table runs from most specific to most generic and that order is the whole
  * algorithm. An app lists several genres and the one the store calls "primary"
- * is regularly the vaguer of them — Instagram leads with Photo & Video, a dating app
- * with Lifestyle. Reading in table order puts both where a person would expect.
+ * is regularly the vaguer of them — Instagram leads with Photo & Video rather
+ * than Social Networking. Reading in table order puts it where a person expects.
  */
 
 export const GENRE_FOLDERS: Record<string, string> = {

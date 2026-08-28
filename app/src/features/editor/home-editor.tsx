@@ -254,6 +254,7 @@ export default function HomeEditor({
 
             items.push({ label: 'Sort into folders', onPick: () => commands.onPropose(false) })
             items.push({ label: 'Sort, looking up unknown apps', onPick: () => commands.onPropose(true) })
+            items.push({ label: 'Make this layout my rules', onPick: commands.onSaveRules })
             items.push(SEPARATOR)
 
             items.push({ label: 'Read from iPhone again', onPick: commands.onReload })

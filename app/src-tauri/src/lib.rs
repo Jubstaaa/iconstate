@@ -17,6 +17,42 @@ fn say(app: &AppHandle, event: serde_json::Value) {
     let _ = app.emit(PROGRESS_EVENT, event);
 }
 
+fn rules_file() -> PathBuf {
+    let home = std::env::var("HOME").unwrap_or_else(|_| ".".into());
+    Path::new(&home).join(".iconstate").join("rules.json")
+}
+
+/// A table built from someone's own home screen. It never ships with the app and
+/// never leaves this machine.
+#[tauri::command]
+fn user_rules() -> Answer<Option<serde_json::Value>> {
+    let path = rules_file();
+    if !path.is_file() {
+        return Ok(None);
+    }
+
+    let body = std::fs::read_to_string(&path)
+        .map_err(|error| format!("could not read your rules: {error}"))?;
+    serde_json::from_str(&body)
+        .map(Some)
+        .map_err(|error| format!("your rules file is not readable: {error}"))
+}
+
+#[tauri::command]
+fn save_rules(rules: serde_json::Value) -> Answer<String> {
+    let path = rules_file();
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent)
+            .map_err(|error| format!("could not make the folder for your rules: {error}"))?;
+    }
+
+    let body = serde_json::to_string_pretty(&rules)
+        .map_err(|error| format!("could not write your rules: {error}"))?;
+    std::fs::write(&path, body).map_err(|error| format!("could not write your rules: {error}"))?;
+
+    Ok(path.to_string_lossy().into_owned())
+}
+
 fn icon_cache() -> PathBuf {
     let home = std::env::var("HOME").unwrap_or_else(|_| ".".into());
     Path::new(&home).join(".iconstate").join("icons")
@@ -254,6 +290,8 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             list_devices,
+            user_rules,
+            save_rules,
             read_icon_state,
             fetch_metrics,
             fetch_icons,

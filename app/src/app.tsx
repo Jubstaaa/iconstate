@@ -1,5 +1,6 @@
 import { getCurrentWindow } from '@tauri-apps/api/window'
-import { Toaster } from 'sonner'
+import { openUrl } from '@tauri-apps/plugin-opener'
+import { Toaster, toast } from 'sonner'
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 
 import { deviceAspect, limitsFrom } from './features/editor/editor.constants'
@@ -7,6 +8,7 @@ import { initialEditorState, makeEditorReducer, toIconState } from './features/e
 import HomeEditor from './features/editor/home-editor'
 import DiffReview from './features/diff-review/diff-review'
 import { notifyDone, notifyFailed, notifyIdle, notifyProgress } from './lib/notify'
+import { checkForUpdate } from './lib/update'
 import {
     applyLayout,
     fetchIcons,
@@ -14,16 +16,23 @@ import {
     getErrorMessage,
     listDevices,
     lookupGenres,
+    saveRules,
     onProgress,
     readIconState,
     restoreBackup,
+    userRules,
 } from './lib/core'
 import { diffStates } from './lib/diff'
 import { assignmentsFromGenres } from './lib/genres'
 import { appsOf, keyOf } from './lib/icon-state'
-import { buildPlan, planWithAssignments } from './lib/plan'
+import { buildPlan, deriveRules } from './lib/plan'
+import { FOLDER_ORDER, RULES } from './lib/rules'
 
+import { isFolder } from './lib/core.types'
+
+import type { AppIcon } from './lib/core.types'
 import type { Metrics } from './features/editor/editor.constants'
+import type { UserRules } from './lib/rules'
 import type { EditorCommands } from './features/editor/home-editor.types'
 import type { Device, DiffSummary, IconManifest, IconState, ProgressEvent } from './lib/core.types'
 
@@ -84,6 +93,7 @@ export default function App() {
         initialEditorState
     )
     const [selection, setSelection] = useState<Set<string>>(new Set())
+    const [mine, setMine] = useState<UserRules | null>(null)
     const [device, setDevice] = useState('')
     const [system, setSystem] = useState('not connected')
 
@@ -133,7 +143,15 @@ export default function App() {
                 guard(async () => {
                     if (!baseline) return
                     const apps = appsOf(baseline)
-                    const proposed = buildPlan(apps, limits)
+                    // The dock is a personal choice, so a sort keeps it as it is.
+                    const dock = baseline[0]
+                        .filter(item => !isFolder(item))
+                        .map(item => keyOf(item as AppIcon))
+                    // Anything this machine has learned from its own home screen
+                    // sits on top of the handful of rules that ship with the app.
+                    const table = { ...RULES, ...(mine?.rules ?? {}) }
+                    const order = mine?.folderOrder.length ? mine.folderOrder : FOLDER_ORDER
+                    const proposed = buildPlan(apps, limits, { dock, rules: table, order })
 
                     // Only apps the table has never heard of are worth asking
                     // the store about. Asking about every app would let a store
@@ -148,7 +166,11 @@ export default function App() {
                     }
 
                     const found = assignmentsFromGenres(await lookupGenres(wanted))
-                    const settled = planWithAssignments(apps, limits, found)
+                    const settled = buildPlan(apps, limits, {
+                        dock,
+                        order,
+                        rules: { ...table, ...found },
+                    })
                     dispatch({ type: 'load', state: settled.state })
 
                     const left = settled.unassigned.length
@@ -158,7 +180,7 @@ export default function App() {
                             : `the App Store sorted ${Object.keys(found).length} apps`
                     )
                 }),
-            [baseline, guard, limits]
+            [baseline, guard, limits, mine]
         ),
         // The plan and what the phone last said are both here, so the review
         // needs no trip to the device.
@@ -167,6 +189,18 @@ export default function App() {
             [baseline, edited]
         ),
         onDiscard: useCallback(() => baseline && dispatch({ type: 'load', state: baseline }), [baseline]),
+        onSaveRules: useCallback(
+            () =>
+                guard(async () => {
+                    const table = deriveRules(edited)
+                    await saveRules(table)
+                    setMine(table)
+                    setStatus(
+                        `${Object.keys(table.rules).length} apps remembered across ${table.folderOrder.length} folders`
+                    )
+                }),
+            [edited, guard]
+        ),
         onUndoWrite: useCallback(
             () =>
                 guard(async () => {
@@ -210,6 +244,12 @@ export default function App() {
         if (serial && !baseline) load(serial)
     }, [baseline, load, serial])
 
+    useEffect(() => {
+        userRules()
+            .then(setMine)
+            .catch(() => {})
+    }, [])
+
     // Nothing tells us when a cable goes in, so watch for one while there is no
     // device — quietly, without the spinner or a toast.
     useEffect(() => {
@@ -236,6 +276,19 @@ export default function App() {
     useEffect(() => {
         getCurrentWindow().setTitle(device ? `${device} — ${system}` : 'IconState')
     }, [device, system])
+
+    // Asked once, on the way in. A failure here is never worth a word to anyone.
+    useEffect(() => {
+        checkForUpdate()
+            .then(found => {
+                if (!found) return
+                toast(`IconState ${found.version} is out`, {
+                    duration: Infinity,
+                    action: { label: 'Get it', onClick: () => openUrl(found.url) },
+                })
+            })
+            .catch(() => {})
+    }, [])
 
     return (
         <>

@@ -2,6 +2,7 @@ import { convertFileSrc, invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
 
 import type { CoreFailure, Device, IconManifest, IconState, ProgressEvent } from './core.types'
+import type { UserRules } from './rules'
 
 export const PROGRESS_EVENT = 'iconstate://progress'
 
@@ -17,6 +18,11 @@ export const onProgress = (handler: (event: ProgressEvent) => void) =>
 export const listDevices = () => invoke<Device[]>('list_devices')
 
 export const readIconState = (serial?: string) => invoke<IconState>('read_icon_state', { serial })
+
+/** The rule table built from this machine's own home screen, if there is one. */
+export const userRules = () => invoke<UserRules | null>('user_rules')
+
+export const saveRules = (rules: UserRules) => invoke<string>('save_rules', { rules })
 
 /** Everything installed, whether or not it is on a page. */
 export const installedApps = (serial?: string) =>

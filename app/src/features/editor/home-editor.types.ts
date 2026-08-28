@@ -10,6 +10,7 @@ export interface EditorCommands {
     onPropose: (lookUp: boolean) => void
     onReview: () => void
     onDiscard: () => void
+    onSaveRules: () => void
     onUndoWrite: () => void
 }
 

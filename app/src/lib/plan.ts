@@ -1,7 +1,9 @@
+import { isFolder } from './core.types'
 import { chunk, keyOf } from './icon-state'
 import { DOCK, FOLDER_ORDER, RULES } from './rules'
 
 import type { AppIcon, FolderIcon, IconState, IconStateItem, Limits } from './core.types'
+import type { UserRules } from './rules'
 
 export const UNSORTED_FOLDER = 'Unsorted'
 
@@ -86,3 +88,27 @@ export const planWithAssignments = (
     limits: Limits,
     assignments: Record<string, string>
 ): Plan => buildPlan(apps, limits, { rules: { ...RULES, ...assignments } })
+
+/**
+ * Turn a home screen into a rule table: every folder becomes a name, and every
+ * app in it becomes a rule pointing at that name. This is how someone's own
+ * layout becomes the thing "Sort into folders" puts back.
+ */
+export const deriveRules = (state: IconState): UserRules => {
+    const rules: Record<string, string> = {}
+    const folderOrder: string[] = []
+
+    for (const page of state.slice(1)) {
+        for (const item of page) {
+            if (!isFolder(item)) continue
+            if (!folderOrder.includes(item.displayName)) folderOrder.push(item.displayName)
+            for (const app of item.iconLists.flat()) rules[keyOf(app)] = item.displayName
+        }
+    }
+
+    return {
+        dock: (state[0] ?? []).filter(item => !isFolder(item)).map(item => keyOf(item as AppIcon)),
+        folderOrder,
+        rules,
+    }
+}
