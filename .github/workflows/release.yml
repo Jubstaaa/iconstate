@@ -45,6 +45,7 @@ jobs:
           releaseBody: ${{ steps.notes.outputs.content }}
           releaseDraft: true
           prerelease: false
+          includeUpdaterJson: true
           args: --bundles app,dmg
         # To sign and notarise, add the Apple secrets to this step's env:
         # APPLE_CERTIFICATE, APPLE_CERTIFICATE_PASSWORD, APPLE_SIGNING_IDENTITY,
@@ -53,5 +54,9 @@ jobs:
         # one and fails the build trying to import it.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Signs the update package with the project's own key, which is what
+          # lets the app install an update in place. Nothing to do with Apple.
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
       - name: Check the bundle
         run: ./scripts/verify-bundle.sh

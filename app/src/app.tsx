@@ -1,5 +1,4 @@
 import { getCurrentWindow } from '@tauri-apps/api/window'
-import { openUrl } from '@tauri-apps/plugin-opener'
 import { Toaster, toast } from 'sonner'
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 
@@ -282,9 +281,22 @@ export default function App() {
         checkForUpdate()
             .then(found => {
                 if (!found) return
+
                 toast(`IconState ${found.version} is out`, {
                     duration: Infinity,
-                    action: { label: 'Get it', onClick: () => openUrl(found.url) },
+                    action: {
+                        label: 'Install',
+                        onClick: () => {
+                            const id = toast.loading('Downloading the update…')
+                            found
+                                .install(fraction =>
+                                    toast.loading(`Downloading the update — ${Math.round(fraction * 100)}%`, {
+                                        id,
+                                    })
+                                )
+                                .catch(cause => toast.error(getErrorMessage(cause), { id }))
+                        },
+                    },
                 })
             })
             .catch(() => {})

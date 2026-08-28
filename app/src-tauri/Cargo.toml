@@ -1,6 +1,6 @@
 [package]
 name = "iconstate"
-version = "0.1.1"
+version = "0.1.2"
 description = "iPhone home screen editor"
 authors = ["İlker Balcılar"]
 edition = "2021"
@@ -23,3 +23,5 @@ plist = "1.10"
 base64 = "0.22"
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync"] }
 reqwest = { version = "0.13.4", default-features = false, features = ["json", "rustls", "charset", "http2", "query"] }
+tauri-plugin-updater = "2.10.1"
+tauri-plugin-process = "2.3.1"

@@ -1,7 +1,7 @@
 {
     "$schema": "https://schema.tauri.app/config/2",
     "productName": "IconState",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "identifier": "com.ilkerbalcilar.iconstate",
     "build": {
         "beforeDevCommand": "bun run dev",
@@ -42,6 +42,13 @@
         ],
         "macOS": {
             "minimumSystemVersion": "12.0"
+        },
+        "createUpdaterArtifacts": true
+    },
+    "plugins": {
+        "updater": {
+            "endpoints": ["https://github.com/Jubstaaa/iconstate/releases/latest/download/latest.json"],
+            "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDZENDg4RjI0NTI1NUU5NEMKUldSTTZWVlNKSTlJYmRFcWgrTk9mY3EzOXFaMi9ObE9aM1pxRURqRG83cHp4ODRvTkFOK3F4c1kK"
         }
     }
 }

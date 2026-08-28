@@ -1,19 +1,36 @@
-import { getVersion } from '@tauri-apps/api/app'
+import { relaunch } from '@tauri-apps/plugin-process'
+import { check } from '@tauri-apps/plugin-updater'
 
-const LATEST_RELEASE = 'https://api.github.com/repos/Jubstaaa/iconstate/releases/latest'
-
-export interface UpdateInfo {
+export interface PendingUpdate {
     version: string
-    url: string
+    /** Fetch it, swap it in, and come back up on the new one. */
+    install: (onProgress: (fraction: number) => void) => Promise<void>
 }
 
-export const checkForUpdate = async (): Promise<UpdateInfo | null> => {
-    const [current, response] = await Promise.all([getVersion(), fetch(LATEST_RELEASE)])
-    if (!response.ok) return null
+/**
+ * Updates are signed with the project's own key and installed in place, so this
+ * does not go through the browser — and so it never picks up the quarantine flag
+ * that makes a downloaded build look damaged.
+ */
+export const checkForUpdate = async (): Promise<PendingUpdate | null> => {
+    const found = await check()
+    if (!found) return null
 
-    const release = (await response.json()) as { tag_name?: string; html_url?: string }
-    const latest = release.tag_name?.replace(/^v/, '')
-    if (!latest || !release.html_url || latest === current) return null
+    return {
+        version: found.version,
+        install: async onProgress => {
+            let total = 0
+            let done = 0
 
-    return { version: latest, url: release.html_url }
+            await found.downloadAndInstall(event => {
+                if (event.event === 'Started') total = event.data.contentLength ?? 0
+                if (event.event === 'Progress') {
+                    done += event.data.chunkLength
+                    if (total) onProgress(Math.min(done / total, 1))
+                }
+            })
+
+            await relaunch()
+        },
+    }
 }
