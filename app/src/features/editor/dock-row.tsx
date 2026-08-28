@@ -1,4 +1,5 @@
 import EmptyCell from './empty-cell'
+import { dockId } from './home-editor.types'
 import { useScreen } from './screen.context'
 import SlotTile from './slot-tile'
 
@@ -6,6 +7,7 @@ import type { Limits, Slot } from './editor.types'
 import type { Hint } from './home-editor.types'
 
 interface DockRowProps {
+    page: number
     slots: Slot[]
     limits: Limits
     selection: Set<string>
@@ -14,7 +16,15 @@ interface DockRowProps {
     onContextMenu?: (event: React.MouseEvent, id: string) => void
 }
 
-export default function DockRow({ slots, limits, selection, hint, onSelect, onContextMenu }: DockRowProps) {
+export default function DockRow({
+    page,
+    slots,
+    limits,
+    selection,
+    hint,
+    onSelect,
+    onContextMenu,
+}: DockRowProps) {
     const screen = useScreen()
     const blanks = Math.max(0, limits.dock - slots.length)
 
@@ -45,8 +55,9 @@ export default function DockRow({ slots, limits, selection, hint, onSelect, onCo
                             limits={limits}
                             selected={selection.has(slot.id)}
                             dimmed={selection.size > 0 && !selection.has(slot.id)}
-                            hint={hint?.id === slot.id ? hint.side : undefined}
+                            hint={hint?.id === dockId(page, slot.id) ? hint.side : undefined}
                             labelled={false}
+                            dragId={dockId(page, slot.id)}
                             onSelect={onSelect}
                             onContextMenu={onContextMenu}
                         />

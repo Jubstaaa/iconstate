@@ -38,6 +38,16 @@ export interface Hint {
 
 export const SEPARATOR: MenuItem = { label: '—', disabled: true, onPick: () => {} }
 
+/**
+ * Every page draws the same dock, so its tiles would register the same drag and
+ * drop ids once per page — dnd-kit keys those by id, so the last page silently
+ * took over every dock icon. Scope the dock ids by page and strip the scope back
+ * off before anything reaches the reducer.
+ */
+export const dockId = (page: number, id: string): string => `d${page}/${id}`
+
+export const bareId = (id: string): string => id.replace(/^d\d+\//, '')
+
 export const parseDropTarget = (id: string): DropTarget | null => {
     const [head, ...rest] = id.split(':')
     if (head === 'cell') return { kind: 'cell', page: Number(rest[0]) }

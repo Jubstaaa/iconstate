@@ -13,6 +13,7 @@ interface SlotTileProps {
     selected: boolean
     dimmed: boolean
     labelled?: boolean
+    dragId?: string
     hint?: 'before' | 'after' | 'onto'
     onSelect: (id: string, additive: boolean) => void
     onOpen?: (id: string) => void
@@ -25,14 +26,16 @@ export default function SlotTile({
     selected,
     dimmed,
     labelled = true,
+    dragId,
     hint,
     onSelect,
     onOpen,
     onContextMenu,
 }: SlotTileProps) {
     const screen = useScreen()
-    const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: slot.id })
-    const { setNodeRef: setDropRef } = useDroppable({ id: `onto:${slot.id}` })
+    const handle = dragId ?? slot.id
+    const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: handle })
+    const { setNodeRef: setDropRef } = useDroppable({ id: `onto:${handle}` })
 
     const ring = selected
         ? 'ring-2 ring-glow'
