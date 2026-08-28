@@ -31,6 +31,18 @@ crate, and the layout engine is TypeScript in the app itself.
 [idevice]: https://github.com/jkcoxson/idevice
 
 
+## Getting it
+
+Download the `.dmg` from [releases][releases], drag IconState across, then plug
+an iPhone in over USB and tap Trust on the phone.
+
+The build is not signed with an Apple developer certificate, so the first launch
+needs one extra step: right-click the app and choose Open, then Open again in the
+dialog. Double-clicking it will only offer to move it to the bin. macOS remembers
+the choice, so this is once per install.
+
+[releases]: https://github.com/Jubstaaa/iconstate/releases
+
 ## The desktop app
 
 The app is the point: a real iPhone home screen you can rearrange with a mouse.
