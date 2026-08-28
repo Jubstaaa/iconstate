@@ -26,16 +26,29 @@
         overflow: hidden;
     }
 
+    /* Nothing here is a document, and a stray highlight reads as a web page. */
+    * {
+        -webkit-user-select: none;
+        user-select: none;
+        cursor: default;
+    }
+
+    img {
+        -webkit-user-drag: none;
+    }
+
+    input {
+        -webkit-user-select: text;
+        user-select: text;
+        cursor: text;
+    }
+
     #root {
         display: flex;
         flex-direction: column;
         height: 100%;
         padding: 10px;
         background: var(--color-ink);
-    }
-
-    ::selection {
-        background: color-mix(in oklab, var(--color-glow) 45%, transparent);
     }
 
     button {
