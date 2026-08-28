@@ -6,7 +6,11 @@ header = ""
 body = """
 Rearrange an iPhone home screen from a Mac. Plug the phone in over USB, drag icons and folders with a mouse, and write it back — after a backup and a diff you have to confirm.
 
-**First launch:** this build is not signed with an Apple developer certificate. Right-click the app and choose Open, then Open again. Double-clicking only offers to move it to the bin.
+**Install it with one line.** The build is unsigned, and recent macOS calls unsigned downloads *damaged* rather than asking, so the quarantine flag has to be cleared:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Jubstaaa/iconstate/main/scripts/install.sh | bash
+```
 
 **Needs** macOS 12 or later, Apple silicon, and a USB cable.
 {% for group, commits in commits | group_by(attribute="group") %}

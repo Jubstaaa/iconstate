@@ -26,14 +26,17 @@ jobs:
         working-directory: app
       - name: Stamp the version from the tag
         run: bun run scripts/set-version.ts "${GITHUB_REF_NAME}"
+      # Not git-cliff-action: its runner script uses GNU stat and silently
+      # produces nothing on macOS.
       - name: Write the notes from the commits
         id: notes
-        uses: orhun/git-cliff-action@v4
-        with:
-          config: cliff.toml
-          args: --latest --strip header
-        env:
-          OUTPUT: NOTES.md
+        run: |
+          brew install git-cliff
+          {
+            echo 'content<<CLIFF_NOTES_EOF'
+            git cliff --config cliff.toml --latest --strip header
+            echo CLIFF_NOTES_EOF
+          } >> "$GITHUB_OUTPUT"
       - uses: tauri-apps/tauri-action@v0
         with:
           projectPath: app
