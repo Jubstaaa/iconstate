@@ -43,9 +43,13 @@ plug an iPhone in over USB and tap Trust on the phone.
 The script is [thirty lines you can read first][install]. It exists because of
 the last thing it does: the build is not signed with an Apple developer
 certificate, and recent macOS calls unsigned downloads *damaged* rather than
-asking, so the quarantine flag has to be cleared. Signing properly needs a paid
-Apple Developer membership; until there is one, this is the honest version of
-"double-click to install".
+asking, so the quarantine flag has to be cleared.
+
+Signing properly needs a paid Apple Developer membership, which costs $99 a year
+— exactly $99 more than this project has ever had. Until then, this is the honest
+version of "double-click to install". There is a sponsor button at the top of
+this page. I am not saying the two facts are related. I am saying one of them is
+$99.
 
 Prefer to do it by hand? Take the `.dmg` from [releases][releases], drag the app
 across, then run:
@@ -171,6 +175,16 @@ tried four ways (a `false` in the flat list, and a row matrix under formatVersio
 anyway. Formats 1 and 3 also report every folder as an empty cell, so they carry
 strictly less than format 2. The placement lives somewhere this service cannot
 see.
+
+## Sponsoring
+
+[GitHub Sponsors][sponsor] · [Buy me a coffee][coffee]
+
+Coffee keeps the thing being written. Ninety-nine dollars' worth of coffee gets
+it signed, and then nobody has to run `xattr` again.
+
+[sponsor]: https://github.com/sponsors/Jubstaaa
+[coffee]: https://buymeacoffee.com/jubstaa
 
 ## Licence
 
