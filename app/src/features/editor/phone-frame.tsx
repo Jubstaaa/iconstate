@@ -38,7 +38,11 @@ export default function PhoneFrame({ aspect, onMeasure, children }: PhoneFramePr
             <span className={`${SIDE} -right-[2px] top-[22%] h-[9%]`} />
 
             <div className='size-full rounded-[54px] bg-[#0b0d11] p-[11px] shadow-[0_6px_16px_-8px_rgba(0,0,0,0.7),inset_0_0_2px_1px_rgba(255,255,255,0.22),0_0_0_1px_rgba(255,255,255,0.08)]'>
-                <div ref={screen} className='relative size-full overflow-hidden rounded-[44px] bg-ink'>
+                <div
+                    ref={screen}
+                    data-probe='screen'
+                    className='relative size-full overflow-hidden rounded-[44px] bg-ink'
+                >
                     <img
                         src={wallpaper}
                         alt=''

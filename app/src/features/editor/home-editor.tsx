@@ -187,8 +187,8 @@ export default function HomeEditor({
             // Adding a page blanks the screen and the cause is not found yet, so the
             // command is held back rather than shipped broken.
             items.push({
-                label: 'Add a page (being fixed)',
-                disabled: true,
+                label: 'Add a page',
+                disabled: pageCount >= limits.pages,
                 onPick: () => dispatch({ type: 'add-page' }),
             })
             items.push({
