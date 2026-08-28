@@ -277,11 +277,22 @@ pub async fn write_icon_state(
     serial: Option<&str>,
     state: &serde_json::Value,
 ) -> Result<(DeviceInfo, serde_json::Value)> {
+    write_icon_state_as(serial, state, None).await
+}
+
+pub async fn write_icon_state_as(
+    serial: Option<&str>,
+    state: &serde_json::Value,
+    format: Option<&str>,
+) -> Result<(DeviceInfo, serde_json::Value)> {
     let provider = provider(serial).await?;
     let about = info(&provider).await?;
 
     let mut request = command("setIconState");
     request.insert("iconState".into(), to_plist(state));
+    if let Some(format) = format {
+        request.insert("formatVersion".into(), plist::Value::String(format.into()));
+    }
     tell(&mut springboard(&provider).await?, request, "the write").await?;
 
     let settled = read_state(&mut springboard(&provider).await?).await?;
