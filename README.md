@@ -14,6 +14,14 @@ The icons are the phone's own PNGs and the grid is the size SpringBoard reports
 — every page is drawn as its own device, side by side, and you drag between
 them.
 
+- **Drag and drop** icons, folders and the dock, across pages, with undo
+- **Sort into folders** for you, from a built-in table for Apple's apps and, if
+  you ask, the App Store's own category for everything else
+- **Make this layout my rules** remembers your folders, so the next sort files
+  new apps where you would have
+- **Review changes** shows every move before anything is written, a backup is
+  taken first, and **Undo last write to iPhone** puts the old layout back
+
 > macOS arm64 only for now. USB only — SpringBoard's layout service is not
 > reachable over the network. No jailbreak: this speaks the same lockdown
 > service Finder uses to back your phone up.
@@ -38,6 +46,9 @@ version of "double-click to install". There is a sponsor button at the top of
 this page. I am not saying the two facts are related. I am saying one of them is
 $99.
 
+After that the app updates itself: when a new release is out it says so and
+installs it in place.
+
 Prefer to do it by hand? Take the `.dmg` from [releases][releases], drag the app
 across, then run:
 
@@ -47,28 +58,6 @@ xattr -dr com.apple.quarantine /Applications/IconState.app
 
 [install]: scripts/install.sh
 [releases]: https://github.com/Jubstaaa/iconstate/releases
-
-## Where things live
-
-| Path | What it is |
-|---|---|
-| `app/src/lib/` | the layout engine: pure JSON in, JSON out, no device, fully tested |
-| `app/src/features/` | the editor — the phone frames, drag and drop, the diff sheet |
-| `app/src-tauri/src/device.rs` | lockdown + SpringBoard; thin on purpose, tested by hand |
-| `app/src-tauri/src/` | backups and the App Store lookup, next to the Tauri shell |
-| `reference/` | real-device fixtures and the working prototype this grew from |
-| `scripts/` | bundle verification and version stamping |
-
-The split is the whole architecture: CI has no phone, so everything that can be
-tested without one lives in `app/src/lib/` and never imports a Tauri command.
-
-It used to be a frozen Python CLI running as a sidecar. That worked, but it put
-46MB and a second process between the window and the phone for code that is a
-few hundred lines. The device layer is Rust now, over the [`idevice`][idevice]
-crate, and the layout engine is TypeScript in the app itself.
-
-[idevice]: https://github.com/jkcoxson/idevice
-
 
 ## The desktop app
 
@@ -113,8 +102,8 @@ snapping, so the swipe, the momentum and the settle are the browser's own. An
 earlier version animated the transition by hand and it never felt right; the fix
 was to delete it rather than tune it.
 
-Nothing is written until Review changes, which shows the same diff the CLI
-prints.
+Nothing is written until Review changes, which lists every app that moves and
+where to.
 
 ```bash
 cd app && bun install && bun run tauri dev
@@ -124,12 +113,11 @@ One binary, nothing to stage beside it.
 
 ## How apps get sorted
 
-`app/src/lib/rules.ts` maps bundle identifiers to folder names. It is generated,
-not hand-edited:
-
-```bash
-python3 scripts/derive-rules.py path/to/a/good-layout.json
-```
+`app/src/lib/rules.ts` maps bundle identifiers to folder names. It ships with
+Apple's own apps only: they are on every iPhone, and which ones a person has says
+nothing about them. Arrange a home screen the way you like it, pick **Make this
+layout my rules** from the right-click menu, and your folders are written to
+`~/.iconstate/rules.json` and used for every sort after that.
 
 Keying on bundle identifiers rather than display names matters more than it
 looks: a phone can carry two apps with the same display name, and WhatsApp ships
@@ -150,6 +138,27 @@ several genres and the one the store calls primary is regularly the vaguer of
 them — Instagram leads with Photo & Video rather than Social Networking. Reading
 table in order rather than trusting the app's own ordering puts both under
 Social, which is where a person would look for them.
+
+## Where things live
+
+| Path | What it is |
+|---|---|
+| `app/src/lib/` | the layout engine: pure JSON in, JSON out, no device, fully tested |
+| `app/src/features/` | the editor — the phone frames, drag and drop, the diff sheet |
+| `app/src-tauri/src/device.rs` | lockdown + SpringBoard; thin on purpose, tested by hand |
+| `app/src-tauri/src/` | backups and the App Store lookup, next to the Tauri shell |
+| `reference/` | real-device fixtures and the working prototype this grew from |
+| `scripts/` | bundle verification and version stamping |
+
+The split is the whole architecture: CI has no phone, so everything that can be
+tested without one lives in `app/src/lib/` and never imports a Tauri command.
+
+It used to be a frozen Python CLI running as a sidecar. That worked, but it put
+46MB and a second process between the window and the phone for code that is a
+few hundred lines. The device layer is Rust now, over the [`idevice`][idevice]
+crate, and the layout engine is TypeScript in the app itself.
+
+[idevice]: https://github.com/jkcoxson/idevice
 
 ## Tests
 
