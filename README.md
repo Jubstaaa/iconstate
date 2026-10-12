@@ -8,7 +8,7 @@ sorts your apps into folders for you.
 Plug the phone in over USB, read the whole layout, get a folder structure
 proposed for it, preview it, apply it in one write, roll it back if you hate it.
 
-<img src="docs/home-screen.png" width="380" alt="IconState showing an iPhone home screen, folders and dock, ready to rearrange">
+<img src="docs/social-preview.png" alt="IconState: rearrange your iPhone home screen from your Mac. Drag icons and folders, sort apps into folders, write it back.">
 
 The icons are the phone's own PNGs and the grid is the size SpringBoard reports
 — every page is drawn as its own device, side by side, and you drag between
