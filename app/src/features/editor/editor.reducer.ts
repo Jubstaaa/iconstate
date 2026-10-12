@@ -1,4 +1,5 @@
 import { isFolder } from '../../lib/core.types'
+import { nameOf } from '../../lib/icon-state'
 import { isFolderSlot } from './editor.types'
 
 import type { AppIcon, IconState } from '../../lib/core.types'
@@ -186,7 +187,7 @@ const combine = (layout: Layout, ids: string[], ontoId: string): Layout => {
     const folder: FolderSlot = {
         id: nextId('folder'),
         kind: 'folder',
-        name: members[0]?.app.displayName ?? 'Folder',
+        name: members[0] ? nameOf(members[0].app) : 'Folder',
         apps: members,
     }
 

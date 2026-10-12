@@ -1,5 +1,5 @@
 import { isFolder } from './core.types'
-import { appsOf, foldersOf, keyOf } from './icon-state'
+import { appsOf, foldersOf, keyOf, nameOf } from './icon-state'
 
 import type { AppIcon, DiffSummary, IconState, Move } from './core.types'
 
@@ -25,7 +25,7 @@ const locations = (state: IconState): Map<string, string> => {
 
 const byKey = (state: IconState): Map<string, AppIcon> => new Map(appsOf(state).map(app => [keyOf(app), app]))
 
-const named = (app: AppIcon) => ({ key: keyOf(app), displayName: app.displayName })
+const named = (app: AppIcon) => ({ key: keyOf(app), displayName: nameOf(app) })
 
 const byName = (left: { displayName: string }, right: { displayName: string }) =>
     left.displayName.localeCompare(right.displayName)
@@ -52,7 +52,7 @@ export const diffStates = (before: IconState, after: IconState): DiffSummary => 
         const before_ = wasAt.get(key) ?? ''
         const after_ = isAt.get(key) ?? ''
         if (before_ !== after_) {
-            moves.push({ key, displayName: app.displayName, before: before_, after: after_ })
+            moves.push({ key, displayName: nameOf(app), before: before_, after: after_ })
         }
     }
     moves.sort((left, right) => left.after.localeCompare(right.after) || byName(left, right))

@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { LogicalSize, currentMonitor, getCurrentWindow } from '@tauri-apps/api/window'
 
+import { nameOf } from '../../lib/icon-state'
+
 import ContextMenu from './context-menu'
 import DockRow from './dock-row'
 import { isFolderSlot } from './editor.types'
@@ -231,7 +233,7 @@ export default function HomeEditor({
             if (slot && !isFolderSlot(slot) && chosen.length === 1) {
                 items.push({
                     label: 'Put in a new folder',
-                    onPick: () => dispatch({ type: 'group', ids: chosen, name: slot.app.displayName }),
+                    onPick: () => dispatch({ type: 'group', ids: chosen, name: nameOf(slot.app) }),
                 })
             }
             if (items.length) items.push(SEPARATOR)
