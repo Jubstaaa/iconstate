@@ -32,6 +32,7 @@ export default class CrashBoundary extends Component<CrashBoundaryProps, CrashBo
             <div className='grid h-full place-items-center p-6'>
                 <div className='max-w-full space-y-3 overflow-auto'>
                     <p className='text-[13px] font-semibold text-alarm'>Something in the editor crashed</p>
+                    <p className='text-[12px] text-chalk'>{error.message}</p>
                     <pre className='text-[11px] whitespace-pre-wrap text-chalk'>
                         {String(error?.stack ?? error)}
                     </pre>
