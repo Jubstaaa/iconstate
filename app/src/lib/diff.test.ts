@@ -16,6 +16,16 @@ const folder = (name: string, ...pages: FolderIcon['iconLists']): FolderIcon => 
 const FIXTURES = ['iconstate-original.json', 'state-c3.json', 'state-cur2.json', 'state-final2.json']
 
 describe('diffing', () => {
+    it('names an app the device sent without a display name by its identifier', () => {
+        const nameless = {
+            bundleIdentifier: 'com.example.nameless',
+            displayIdentifier: 'com.example.nameless',
+        }
+        const change = diffStates([[]], [[], [nameless, app('com.example.named', 'Named')]] as IconState)
+
+        expect(change.addedApps.map(added => added.displayName)).toEqual(['com.example.nameless', 'Named'])
+    })
+
     it.each(FIXTURES)('reports no change between %s and itself', name => {
         const state = load(name)
         expect(diffStates(state, state).empty).toBe(true)

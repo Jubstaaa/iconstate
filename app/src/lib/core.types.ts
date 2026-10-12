@@ -2,7 +2,7 @@ export interface AppIcon {
     bundleIdentifier?: string
     bundleVersion?: string
     displayIdentifier: string
-    displayName: string
+    displayName?: string
     iconModDate?: string
 }
 

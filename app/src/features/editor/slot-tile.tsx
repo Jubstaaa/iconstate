@@ -1,6 +1,8 @@
 import { useDraggable, useDroppable } from '@dnd-kit/core'
 import { motion } from 'motion/react'
 
+import { nameOf } from '../../lib/icon-state'
+
 import AppGlyph from './app-glyph'
 import { isFolderSlot } from './editor.types'
 import { useScreen } from './screen.context'
@@ -101,7 +103,7 @@ export default function SlotTile({
                     className='truncate text-center text-[11px] leading-none font-normal text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]'
                     style={{ maxWidth: screen.icon * 1.35 }}
                 >
-                    {isFolderSlot(slot) ? slot.name : slot.app.displayName}
+                    {isFolderSlot(slot) ? slot.name : nameOf(slot.app)}
                 </span>
             ) : null}
         </motion.div>

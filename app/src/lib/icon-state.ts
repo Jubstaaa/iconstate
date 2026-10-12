@@ -9,6 +9,9 @@ import type { AppIcon, FolderIcon, IconState, IconStateItem } from './core.types
  */
 export const keyOf = (app: AppIcon): string => app.bundleIdentifier ?? app.displayIdentifier
 
+/** iOS 27 sends some icons without a display name; the identifier is the next best label. */
+export const nameOf = (app: AppIcon): string => app.displayName ?? keyOf(app)
+
 export const appsIn = (item: IconStateItem): AppIcon[] => (isFolder(item) ? item.iconLists.flat() : [item])
 
 export const itemsOf = (state: IconState): IconStateItem[] => state.flat()

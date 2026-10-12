@@ -1,5 +1,7 @@
 import { useState } from 'react'
 
+import { nameOf } from '../../lib/icon-state'
+
 import { useIcon } from './icons.context'
 
 import type { CSSProperties } from 'react'
@@ -21,7 +23,7 @@ export default function AppGlyph({ app, className = '', style }: AppGlyphProps) 
                 className={`grid place-items-center rounded-[23%] bg-white/15 text-[9px] font-semibold text-white/70 ${className}`}
                 style={style}
             >
-                {app.displayName.slice(0, 2)}
+                {nameOf(app).slice(0, 2)}
             </span>
         )
     }
