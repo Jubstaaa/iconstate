@@ -8,6 +8,8 @@ sorts your apps into folders for you.
 Plug the phone in over USB, read the whole layout, get a folder structure
 proposed for it, preview it, apply it in one write, roll it back if you hate it.
 
+<a href="https://alternativeto.net/software/iconstate/about/"><img src="https://alternativeto.net/static/badges/badge-compact-color.svg" alt="IconState on AlternativeTo" width="160"></a>
+
 <img src="docs/social-preview.png" alt="IconState: rearrange your iPhone home screen from your Mac. Drag icons and folders, sort apps into folders, write it back.">
 
 The icons are the phone's own PNGs and the grid is the size SpringBoard reports
