@@ -91,12 +91,11 @@ pub fn keys(state: &Value) -> Vec<String> {
     found
 }
 
-pub fn same_apps(left: &Value, right: &Value) -> bool {
-    let mut left = keys(left);
-    let mut right = keys(right);
-    left.sort();
-    right.sort();
-    left == right
+/// Whether every app that was written is still on the home screen. More is fine:
+/// iOS puts apps that only lived in the App Library back on a new page.
+pub fn keeps_every_app(written: &Value, settled: &Value) -> bool {
+    let settled: BTreeSet<String> = keys(settled).into_iter().collect();
+    keys(written).iter().all(|key| settled.contains(key))
 }
 
 /// A plan passes when it places every installed app exactly once and fits the grid.
@@ -198,7 +197,7 @@ fn check_folders(report: &mut Report, plan: &Value, limits: &Limits) {
 mod tests {
     use serde_json::{json, Value};
 
-    use super::{check, keys, same_apps, Limits};
+    use super::{check, keeps_every_app, keys, Limits};
 
     fn fixture() -> Value {
         let path = concat!(
@@ -257,10 +256,12 @@ mod tests {
     }
 
     #[test]
-    fn order_does_not_matter_to_the_read_back() {
+    fn the_read_back_only_minds_lost_apps() {
         let written = json!([[app("a")], [app("b"), app("c")]]);
-        let settled = json!([[app("a")], [app("c")], [app("b")]]);
-        assert!(same_apps(&written, &settled));
-        assert!(!same_apps(&written, &json!([[app("a")], [app("b")]])));
+        let reordered = json!([[app("a")], [app("c")], [app("b")]]);
+        let library_apps_returned = json!([[app("a")], [app("b"), app("c")], [app("d")]]);
+        assert!(keeps_every_app(&written, &reordered));
+        assert!(keeps_every_app(&written, &library_apps_returned));
+        assert!(!keeps_every_app(&written, &json!([[app("a")], [app("b")]])));
     }
 }

@@ -89,8 +89,11 @@ pub fn history() -> Vec<PathBuf> {
         })
         .collect();
 
-    found.sort();
-    found.reverse();
+    // By the time each was written, not by name: a backup saved or renamed by
+    // hand has no timestamp in front and would otherwise sort first.
+    found.sort_by_key(|path| {
+        std::cmp::Reverse(path.metadata().and_then(|meta| meta.modified()).ok())
+    });
     found
 }
 

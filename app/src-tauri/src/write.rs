@@ -34,7 +34,7 @@ pub async fn apply(
 
     say(json!({ "event": "writing" }));
     let (_, settled) = device::write_icon_state(serial, layout).await?;
-    if plan::same_apps(layout, &settled) {
+    if plan::keeps_every_app(layout, &settled) {
         say(json!({ "event": "written" }));
         return Ok(Applied {
             backup: saved,
@@ -44,7 +44,7 @@ pub async fn apply(
 
     say(json!({ "event": "rolling-back" }));
     let (_, restored) = device::write_icon_state(serial, current).await?;
-    let outcome = if plan::same_apps(current, &restored) {
+    let outcome = if plan::keeps_every_app(current, &restored) {
         "the previous layout is back"
     } else {
         "putting the previous layout back did not take either"
