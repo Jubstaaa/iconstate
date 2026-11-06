@@ -1,6 +1,8 @@
 mod backup;
 mod catalog;
+pub mod cli;
 pub mod device;
+mod plan;
 
 use std::path::{Path, PathBuf};
 

@@ -37,7 +37,7 @@ curl -fsSL https://raw.githubusercontent.com/Jubstaaa/iconstate/main/scripts/ins
 That downloads the latest release, puts it in `/Applications` and opens it. Then
 plug an iPhone in over USB and tap Trust on the phone.
 
-The script is [thirty lines you can read first][install]. It exists because of
+The script is [forty lines you can read first][install]. It exists because of
 the last thing it does: the build is not signed with an Apple developer
 certificate, and recent macOS calls unsigned downloads *damaged* rather than
 asking, so the quarantine flag has to be cleared.
@@ -112,6 +112,34 @@ cd app && bun install && bun run tauri dev
 ```
 
 One binary, nothing to stage beside it.
+
+## From the command line
+
+The same binary runs without the window when it is given a command. Every
+command prints JSON, so a script or an agent can do what the editor does:
+
+```bash
+iconstate snapshot --output now.json   # save the layout
+# edit now.json — or have something edit it for you
+iconstate check now.json               # every app placed once, fits the grid
+iconstate apply now.json               # back up, write, read back
+iconstate restore                      # put the layout before the last write back
+```
+
+`devices` and `backups` list what they say; `--device UDID` picks a phone when
+more than one is plugged in. Exit status is 0 when it worked, 1 when something
+failed and 2 when a plan was refused.
+
+`apply` will not write a plan that drops an app, places one twice, names one
+that is not installed or overflows the grid the phone reports. SpringBoard
+answers a write with nothing, so after writing it reads the layout back; if an
+app went missing on the way, the backup goes straight back on.
+
+The install script links the binary to `iconstate` on your `PATH`. By hand:
+
+```bash
+ln -s /Applications/IconState.app/Contents/MacOS/iconstate /usr/local/bin/iconstate
+```
 
 ## How apps get sorted
 
