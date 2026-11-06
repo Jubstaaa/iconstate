@@ -37,7 +37,7 @@ curl -fsSL https://raw.githubusercontent.com/Jubstaaa/iconstate/main/scripts/ins
 That downloads the latest release, puts it in `/Applications` and opens it. Then
 plug an iPhone in over USB and tap Trust on the phone.
 
-The script is [forty lines you can read first][install]. It exists because of
+The script is [fifty lines you can read first][install]. It exists because of
 the last thing it does: the build is not signed with an Apple developer
 certificate, and recent macOS calls unsigned downloads *damaged* rather than
 asking, so the quarantine flag has to be cleared.
