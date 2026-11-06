@@ -4,7 +4,7 @@
 //! has no TypeScript to call, so the ones that can lose an app or get a write
 //! refused are repeated here.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use serde::Serialize;
 use serde_json::Value;
@@ -102,49 +102,58 @@ pub fn same_apps(left: &Value, right: &Value) -> bool {
 /// A plan passes when it places every installed app exactly once and fits the grid.
 pub fn check(plan: &Value, inventory: &Value, limits: &Limits) -> Report {
     let mut report = Report::default();
-
     if !plan.is_array() {
         report.issues.push("the plan is not a list of pages".into());
         return report;
     }
 
+    check_placement(&mut report, plan, inventory);
+    check_pages(&mut report, plan, limits);
+    check_folders(&mut report, plan, limits);
+
+    report.ok = report.issues.is_empty();
+    report
+}
+
+fn check_placement(report: &mut Report, plan: &Value, inventory: &Value) {
     let mut placed: BTreeMap<String, usize> = BTreeMap::new();
     for key in keys(plan) {
         *placed.entry(key).or_default() += 1;
     }
-    let installed: BTreeMap<String, usize> =
-        keys(inventory).into_iter().map(|key| (key, 1)).collect();
+    let installed: BTreeSet<String> = keys(inventory).into_iter().collect();
 
     for (key, count) in &placed {
         if *count > 1 {
             report.duplicated.push(key.clone());
             report.issues.push(format!("{key} is placed {count} times"));
         }
-        if !installed.contains_key(key) {
+        if !installed.contains(key) {
             report.unknown.push(key.clone());
             report.issues.push(format!(
                 "{key} is in the plan but not installed on the phone"
             ));
         }
     }
-    for key in installed.keys() {
-        if !placed.contains_key(key) {
-            report.missing.push(key.clone());
-            report
-                .issues
-                .push(format!("{key} is on the phone but not in the plan"));
-        }
+    for key in installed.iter().filter(|key| !placed.contains_key(*key)) {
+        report.missing.push(key.clone());
+        report
+            .issues
+            .push(format!("{key} is on the phone but not in the plan"));
     }
+}
 
+fn overflow(report: &mut Report, what: String, holds: usize, takes: usize) {
+    if holds > takes {
+        report.issues.push(format!(
+            "{what} holds {holds} items, the phone takes {takes}"
+        ));
+    }
+}
+
+fn check_pages(report: &mut Report, plan: &Value, limits: &Limits) {
     let mut pages = pages_of(plan);
     if let Some(dock) = pages.next() {
-        if dock.len() > limits.dock {
-            report.issues.push(format!(
-                "the dock holds {} items, the phone takes {}",
-                dock.len(),
-                limits.dock
-            ));
-        }
+        overflow(report, "the dock".into(), dock.len(), limits.dock);
     }
 
     let pages: Vec<&Vec<Value>> = pages.collect();
@@ -156,16 +165,16 @@ pub fn check(plan: &Value, inventory: &Value, limits: &Limits) -> Report {
         ));
     }
     for (index, page) in pages.iter().enumerate() {
-        if page.len() > limits.page {
-            report.issues.push(format!(
-                "page {} holds {} items, the phone takes {}",
-                index + 1,
-                page.len(),
-                limits.page
-            ));
-        }
+        overflow(
+            report,
+            format!("page {}", index + 1),
+            page.len(),
+            limits.page,
+        );
     }
+}
 
+fn check_folders(report: &mut Report, plan: &Value, limits: &Limits) {
     for folder in pages_of(plan).flatten().filter(|item| is_folder(item)) {
         let name = folder
             .get("displayName")
@@ -175,19 +184,14 @@ pub fn check(plan: &Value, inventory: &Value, limits: &Limits) -> Report {
             report.issues.push(format!("folder '{name}' is empty"));
         }
         for (index, page) in folder_pages(folder).enumerate() {
-            if page.len() > limits.folder_page {
-                report.issues.push(format!(
-                    "folder '{name}' page {} holds {} items, the phone takes {}",
-                    index + 1,
-                    page.len(),
-                    limits.folder_page
-                ));
-            }
+            overflow(
+                report,
+                format!("folder '{name}' page {}", index + 1),
+                page.len(),
+                limits.folder_page,
+            );
         }
     }
-
-    report.ok = report.issues.is_empty();
-    report
 }
 
 #[cfg(test)]

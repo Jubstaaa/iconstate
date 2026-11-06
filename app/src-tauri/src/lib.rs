@@ -3,6 +3,7 @@ mod catalog;
 pub mod cli;
 pub mod device;
 mod plan;
+mod write;
 
 use std::path::{Path, PathBuf};
 
@@ -127,33 +128,9 @@ async fn fetch_icons(
 
     let (_, state, _) = device::icon_state(serial.as_deref()).await?;
 
-    let mut wanted: Vec<String> = Vec::new();
-    let mut push = |icon: &serde_json::Value| {
-        let key = icon
-            .get("bundleIdentifier")
-            .or_else(|| icon.get("displayIdentifier"))
-            .and_then(|value| value.as_str());
-        if let Some(key) = key {
-            if !wanted.iter().any(|seen| seen == key) {
-                wanted.push(key.to_owned());
-            }
-        }
-    };
-
-    for page in state.as_array().into_iter().flatten() {
-        for item in page.as_array().into_iter().flatten() {
-            match item.get("iconLists") {
-                Some(lists) => {
-                    for folder_page in lists.as_array().into_iter().flatten() {
-                        for icon in folder_page.as_array().into_iter().flatten() {
-                            push(icon);
-                        }
-                    }
-                }
-                None => push(item),
-            }
-        }
-    }
+    let mut wanted = plan::keys(&state);
+    let mut seen = std::collections::HashSet::new();
+    wanted.retain(|key| seen.insert(key.clone()));
 
     say(
         &app,
@@ -217,17 +194,9 @@ async fn apply_layout(
     plan: serde_json::Value,
 ) -> Answer<serde_json::Value> {
     let (_, current, _) = device::icon_state(serial.as_deref()).await?;
-    let saved = backup::save_before_write(&current, serial.as_deref())?;
-    say(
-        &app,
-        json!({ "event": "backed-up", "file": saved.to_string_lossy() }),
-    );
-
-    say(&app, json!({ "event": "writing" }));
-    let (_, settled) = device::write_icon_state(serial.as_deref(), &plan).await?;
-    say(&app, json!({ "event": "written" }));
-
-    Ok(settled)
+    let applied =
+        write::apply(serial.as_deref(), &current, &plan, |event| say(&app, event)).await?;
+    Ok(applied.settled)
 }
 
 #[tauri::command]
@@ -236,25 +205,11 @@ async fn restore_backup(
     serial: Option<String>,
     file: Option<String>,
 ) -> Answer<serde_json::Value> {
-    let path = match file {
-        Some(file) => PathBuf::from(file),
-        None => backup::latest().ok_or_else(|| "there is nothing to undo to".to_string())?,
-    };
-
-    say(
-        &app,
-        json!({ "event": "reading-file", "file": path.to_string_lossy() }),
-    );
-    let state = backup::read(&path)?;
-
-    let (_, current, _) = device::icon_state(serial.as_deref()).await?;
-    backup::mark_restore(&current, serial.as_deref())?;
-
-    say(&app, json!({ "event": "writing" }));
-    let (_, settled) = device::write_icon_state(serial.as_deref(), &state).await?;
-    say(&app, json!({ "event": "written" }));
-
-    Ok(settled)
+    let restored = write::restore(serial.as_deref(), file.map(PathBuf::from), |event| {
+        say(&app, event)
+    })
+    .await?;
+    Ok(restored.settled)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

@@ -5,7 +5,7 @@ use std::path::PathBuf;
 
 use serde_json::{json, Value};
 
-use crate::{backup, device, plan};
+use crate::{backup, device, plan, write};
 
 const USAGE: &str = "\
 usage: iconstate <command> [--device UDID]
@@ -151,9 +151,6 @@ async fn check(serial: Option<&str>, file: &str) -> Outcome {
     Ok((json!(report), code))
 }
 
-/// SpringBoard answers a write with nothing, so the only proof it took is the
-/// layout read back afterwards. If an app went missing on the way, the backup
-/// goes straight back on.
 async fn apply(serial: Option<&str>, file: &str) -> Outcome {
     let layout = read_json(file)?;
     let (about, current, metrics) = device::icon_state(serial).await?;
@@ -163,48 +160,27 @@ async fn apply(serial: Option<&str>, file: &str) -> Outcome {
         return Ok((json!({ "applied": false, "report": report }), REFUSED));
     }
 
-    let saved = backup::save_before_write(&current, serial)?;
-    let (_, settled) = device::write_icon_state(serial, &layout).await?;
-    if plan::same_apps(&layout, &settled) {
-        return Ok((
-            json!({ "applied": true, "device": about, "backup": saved }),
-            0,
-        ));
-    }
-
-    let (_, restored) = device::write_icon_state(serial, &current).await?;
+    let applied = write::apply(serial, &current, &layout, quiet).await?;
     Ok((
-        json!({
-            "applied": false,
-            "error": "the phone did not keep every app in the plan",
-            "rolled_back": plan::same_apps(&current, &restored),
-            "backup": saved,
-        }),
-        FAILED,
+        json!({ "applied": true, "device": about, "backup": applied.backup }),
+        0,
     ))
 }
 
 async fn restore(serial: Option<&str>, file: Option<PathBuf>) -> Outcome {
-    let path = match file {
-        Some(file) => file,
-        None => backup::latest().ok_or_else(|| "there is nothing to undo to".to_string())?,
-    };
-    let state = backup::read(&path)?;
-
-    let (about, current, _) = device::icon_state(serial).await?;
-    let replaced = backup::mark_restore(&current, serial)?;
-    let (_, settled) = device::write_icon_state(serial, &state).await?;
-
+    let restored = write::restore(serial, file, quiet).await?;
     Ok((
         json!({
-            "restored": path,
-            "device": about,
-            "apps": plan::keys(&settled).len(),
-            "replaced_layout_saved_to": replaced,
+            "restored": restored.from,
+            "apps": plan::keys(&restored.settled).len(),
+            "replaced_layout_saved_to": restored.replaced,
         }),
         0,
     ))
 }
+
+/// Progress is for the window; the command line prints only the outcome.
+fn quiet(_: Value) {}
 
 #[cfg(test)]
 mod tests {
