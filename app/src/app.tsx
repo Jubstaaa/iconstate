@@ -64,6 +64,8 @@ const describe = (event: ProgressEvent): string => {
             return 'Writing to your iPhone'
         case 'written':
             return 'Written to your iPhone'
+        case 'rolling-back':
+            return 'The iPhone dropped an app — putting the old layout back'
         case 'reading-file':
             return 'Reading the saved layout'
         case 'saved':

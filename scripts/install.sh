@@ -39,6 +39,15 @@ echo "Installing to ${TARGET}…"
 cp -R "$MOUNT/$APP" /Applications/
 xattr -dr com.apple.quarantine "$TARGET"
 
+# The app doubles as a command line tool; link it where the shell will find it.
+for BIN in /opt/homebrew/bin /usr/local/bin; do
+    if [ -d "$BIN" ] && [ -w "$BIN" ]; then
+        ln -sf "$TARGET/Contents/MacOS/iconstate" "$BIN/iconstate"
+        echo "Linked the command line tool to $BIN/iconstate."
+        break
+    fi
+done
+
 echo
 echo "Installed. Plug an iPhone in over USB, tap Trust on it, and open IconState."
 open "$TARGET"
