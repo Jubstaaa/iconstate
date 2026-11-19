@@ -1745,6 +1745,7 @@ name = "iconstate"
 version = "0.1.2"
 dependencies = [
  "base64 0.23.1",
+ "dirs",
  "idevice",
  "plist",
  "reqwest",
@@ -1756,6 +1757,7 @@ dependencies = [
  "tauri-plugin-process",
  "tauri-plugin-updater",
  "tempfile",
+ "time",
  "tokio",
 ]
 

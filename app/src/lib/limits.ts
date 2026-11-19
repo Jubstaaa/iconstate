@@ -1,4 +1,8 @@
-import type { Limits } from './editor.types'
+/**
+ * The grid SpringBoard reports, turned into what the editor and the planner
+ * need. `app/src-tauri/src/plan.rs` falls back to the same defaults.
+ */
+import type { Limits } from './core.types'
 
 /** 31 points clear at each edge of a 393 point screen, per Apple's UI kit. */
 const EDGE_SHARE = 31 / 393

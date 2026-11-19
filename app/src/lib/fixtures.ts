@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
-import { DEFAULT_LIMITS } from '../features/editor/editor.constants'
+import { DEFAULT_LIMITS } from './limits'
 
 import type { AppIcon, IconState, Limits } from './core.types'
 

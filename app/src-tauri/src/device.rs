@@ -251,6 +251,14 @@ async fn read_metrics(client: &mut SpringBoardServicesClient) -> Result<serde_js
     Ok(to_json(&metrics))
 }
 
+/// The layout alone; the window asks for the grid separately and in parallel.
+pub async fn layout(serial: Option<&str>) -> Result<(DeviceInfo, serde_json::Value)> {
+    let provider = provider(serial).await?;
+    let about = info(&provider).await?;
+    let state = read_state(&mut springboard(&provider).await?).await?;
+    Ok((about, state))
+}
+
 /// The layout and the device's own grid, over one connection.
 pub async fn icon_state(
     serial: Option<&str>,
