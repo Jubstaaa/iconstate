@@ -18,8 +18,8 @@ describe('planning', () => {
             folder.iconLists.flat().map(app => [keyOf(app), folder.displayName] as const)
         )
         for (const [key, folder] of placed) {
-            if (key.startsWith('com.apple.')) expect(folder).toBe(RULES[key] ?? UNSORTED_FOLDER)
-            else expect(folder).toBe(UNSORTED_FOLDER)
+            const expected = key.startsWith('com.apple.') ? (RULES[key] ?? UNSORTED_FOLDER) : UNSORTED_FOLDER
+            expect(folder, key).toBe(expected)
         }
 
         expect(validate(plan.state, LIMITS, current).ok).toBe(true)

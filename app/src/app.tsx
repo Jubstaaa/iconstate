@@ -150,7 +150,7 @@ export default function App() {
                         .map(item => keyOf(item as AppIcon))
                     // Anything this machine has learned from its own home screen
                     // sits on top of the handful of rules that ship with the app.
-                    const table = { ...RULES, ...(mine?.rules ?? {}) }
+                    const table = { ...RULES, ...mine?.rules }
                     const order = mine?.folderOrder.length ? mine.folderOrder : FOLDER_ORDER
                     const proposed = buildPlan(apps, limits, { dock, rules: table, order })
 
@@ -241,8 +241,10 @@ export default function App() {
         }
     }, [])
 
+    // Reading the phone is the external system this effect follows.
     useEffect(() => {
-        if (serial && !baseline) load(serial)
+        // oxlint-disable-next-line react/set-state-in-effect
+        if (serial && !baseline) void load(serial)
     }, [baseline, load, serial])
 
     useEffect(() => {
