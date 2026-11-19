@@ -177,8 +177,8 @@ Social, which is where a person would look for them.
 | `app/src/features/` | the editor — the phone frames, drag and drop, the diff sheet |
 | `app/src-tauri/src/device.rs` | lockdown + SpringBoard; thin on purpose, tested by hand |
 | `app/src-tauri/src/` | backups and the App Store lookup, next to the Tauri shell |
-| `reference/` | real-device fixtures and the working prototype this grew from |
-| `scripts/` | bundle verification and version stamping |
+| `reference/` | real-device fixtures the tests run against |
+| `scripts/` | the install script, bundle verification and version stamping |
 
 The split is the whole architecture: CI has no phone, so everything that can be
 tested without one lives in `app/src/lib/` and never imports a Tauri command.
@@ -193,8 +193,12 @@ crate, and the layout engine is TypeScript in the app itself.
 ## Tests
 
 ```bash
-cd app && bun run lint    # types, formatting and the tests
+cd app && bun run check          # lint, types, formatting and the tests
+cd app/src-tauri && cargo test   # the backup, command line and plan checks
 ```
+
+CI runs both on every pull request, along with clippy, `rustfmt` and a
+dependency audit for each side.
 
 The load-bearing ones run the real fixtures in `reference/fixtures/` through the
 planner and assert that planning is idempotent, that every app is placed exactly

@@ -9,6 +9,9 @@ concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   dmg:
     name: macOS arm64 dmg

@@ -1,6 +1,6 @@
 import { useDroppable } from '@dnd-kit/core'
 import { motion } from 'motion/react'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 
 import EmptyCell from './empty-cell'
 import { panelTarget } from './folder-sheet.types'
@@ -22,6 +22,7 @@ export default function FolderSheet({
     onContextMenu,
 }: FolderSheetProps) {
     const [name, setName] = useState(folder.name)
+    const [shown, setShown] = useState({ id: folder.id, name: folder.name })
     const [page, setPage] = useState(0)
     const strip = useRef<HTMLDivElement>(null)
     const screen = useScreen()
@@ -30,7 +31,12 @@ export default function FolderSheet({
     // the end of it rather than falling through to the page behind.
     const { setNodeRef: setPanelRef } = useDroppable({ id: panelTarget(folder) })
 
-    useEffect(() => setName(folder.name), [folder.id, folder.name])
+    // Another folder, or a rename from outside the sheet, replaces whatever is
+    // half-typed here.
+    if (folder.id !== shown.id || folder.name !== shown.name) {
+        setShown({ id: folder.id, name: folder.name })
+        setName(folder.name)
+    }
 
     // One 3x3 grid per page, side by side behind a native scroller — the same
     // shape as the home screen.
