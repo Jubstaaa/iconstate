@@ -33,15 +33,17 @@ export default function ContextMenu({ menu, onClose }: ContextMenuProps) {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.12, ease: [0.32, 0.72, 0, 1] }}
             style={{ left: at.x, top: at.y }}
+            role='menu'
             onPointerDown={event => event.stopPropagation()}
             className='fixed z-40 min-w-52 origin-top-left rounded-xl border border-white/10 bg-[#1c1f26]/95 p-1 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.8)] backdrop-blur-xl'
         >
             {menu.items.map((item, index) =>
                 item.label === '—' ? (
-                    <span key={`sep-${index}`} className='my-1 block h-px bg-white/10' />
+                    <span key={`sep-${index}`} role='separator' className='my-1 block h-px bg-white/10' />
                 ) : (
                     <button
                         key={item.label}
+                        role='menuitem'
                         disabled={item.disabled}
                         onClick={() => {
                             item.onPick()

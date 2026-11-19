@@ -3,9 +3,14 @@ import type { DiffReviewProps } from './diff-review.types'
 export default function DiffReview({ busy, change, onApply, onCancel }: DiffReviewProps) {
     return (
         <div className='fixed inset-0 z-30 grid place-items-center bg-black/70 p-8 backdrop-blur-sm'>
-            <section className='flex max-h-full w-full max-w-2xl flex-col gap-3 rounded-2xl bg-panel p-5 ring-1 ring-hairline'>
+            <section
+                role='dialog'
+                aria-modal='true'
+                aria-labelledby='diff-review-title'
+                className='flex max-h-full w-full max-w-2xl flex-col gap-3 rounded-2xl bg-panel p-5 ring-1 ring-hairline'
+            >
                 <header className='flex items-baseline justify-between gap-4'>
-                    <h2 className='text-sm font-semibold'>
+                    <h2 id='diff-review-title' className='text-sm font-semibold'>
                         {change.empty
                             ? 'Nothing to write — the device already matches'
                             : `${change.touched} icons will move`}
