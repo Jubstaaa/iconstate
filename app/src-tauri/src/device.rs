@@ -300,6 +300,13 @@ pub async fn write_icon_state_as(
     Ok((about, settled))
 }
 
+/// Where an app's icon is cached. Keys arrive from the window, so one that is
+/// not a plain file name — and could write outside the cache — gets no file.
+fn icon_file(directory: &Path, key: &str) -> Option<PathBuf> {
+    let plain = !key.is_empty() && !key.contains(['/', '\\', '\0']);
+    plain.then(|| directory.join(format!("{key}.png")))
+}
+
 /// Pull each app's icon into the cache directory, skipping what is already there.
 pub async fn icons(
     serial: Option<&str>,
@@ -314,7 +321,9 @@ pub async fn icons(
     let mut missing = Vec::new();
 
     for key in wanted {
-        let path = directory.join(format!("{key}.png"));
+        let Some(path) = icon_file(directory, key) else {
+            continue;
+        };
         if path.is_file() {
             manifest.insert(key.clone(), path);
         } else {
@@ -339,8 +348,7 @@ pub async fn icons(
                 .and_then(|map| map.get("pngData"))
                 .and_then(plist::Value::as_data);
 
-            if let Some(png) = png {
-                let path = directory.join(format!("{key}.png"));
+            if let Some((png, path)) = png.zip(icon_file(directory, key)) {
                 if std::fs::write(&path, png).is_ok() {
                     manifest.insert(key.clone(), path);
                 }
@@ -350,4 +358,23 @@ pub async fn icons(
     }
 
     Ok(manifest)
+}
+
+#[cfg(test)]
+mod tests {
+    use std::path::Path;
+
+    use super::icon_file;
+
+    #[test]
+    fn an_icon_is_cached_only_under_a_plain_file_name() {
+        let cache = Path::new("/cache");
+        assert_eq!(
+            icon_file(cache, "com.apple.mobilesafari"),
+            Some(cache.join("com.apple.mobilesafari.png"))
+        );
+        assert_eq!(icon_file(cache, "../../Library/LaunchAgents/x"), None);
+        assert_eq!(icon_file(cache, "a/b"), None);
+        assert_eq!(icon_file(cache, ""), None);
+    }
 }
