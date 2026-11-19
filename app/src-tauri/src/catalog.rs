@@ -8,6 +8,8 @@
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
+use crate::paths;
+
 pub type Result<T> = std::result::Result<T, String>;
 
 pub type Genres = BTreeMap<String, Vec<String>>;
@@ -16,8 +18,7 @@ const ENDPOINT: &str = "https://itunes.apple.com/lookup";
 const USER_AGENT: &str = "iconstate (+https://github.com/Jubstaaa/iconstate)";
 
 fn cache_file() -> PathBuf {
-    let home = std::env::var("HOME").unwrap_or_else(|_| ".".into());
-    Path::new(&home).join(".iconstate").join("genres.json")
+    paths::data_dir().join("genres.json")
 }
 
 fn load(path: &Path) -> Genres {

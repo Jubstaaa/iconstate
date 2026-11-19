@@ -1,7 +1,7 @@
 import { dequal } from 'dequal'
 
 import { isFolder } from '../../lib/core.types'
-import { nameOf } from '../../lib/icon-state'
+import { chunk, keyOf, nameOf } from '../../lib/icon-state'
 import { isFolderSlot } from './editor.types'
 
 import type { AppIcon, IconState } from '../../lib/core.types'
@@ -21,7 +21,7 @@ let counter = 0
 const nextId = (prefix: string) => `${prefix}:${(counter += 1)}`
 
 const appSlot = (app: AppIcon): AppSlot => ({
-    id: app.bundleIdentifier ?? app.displayIdentifier,
+    id: keyOf(app),
     kind: 'app',
     app,
 })
@@ -41,12 +41,6 @@ export const toLayout = (state: IconState): Layout => {
 
     const [dock = [], ...pages] = state
     return { dock: read(dock), pages: pages.length ? pages.map(read) : [[]] }
-}
-
-const chunk = <T>(items: T[], size: number): T[][] => {
-    const out: T[][] = []
-    for (let start = 0; start < items.length; start += size) out.push(items.slice(start, start + size))
-    return out.length ? out : [[]]
 }
 
 export const toIconState = (layout: Layout, limits: Limits): IconState => {

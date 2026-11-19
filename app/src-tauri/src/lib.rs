@@ -2,10 +2,11 @@ mod backup;
 mod catalog;
 pub mod cli;
 pub mod device;
+mod paths;
 mod plan;
 mod write;
 
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use serde_json::json;
 use tauri::{AppHandle, Emitter};
@@ -21,8 +22,7 @@ fn say(app: &AppHandle, event: serde_json::Value) {
 }
 
 fn rules_file() -> PathBuf {
-    let home = std::env::var("HOME").unwrap_or_else(|_| ".".into());
-    Path::new(&home).join(".iconstate").join("rules.json")
+    paths::data_dir().join("rules.json")
 }
 
 /// A table built from someone's own home screen. It never ships with the app and
@@ -57,13 +57,12 @@ fn save_rules(rules: serde_json::Value) -> Answer<String> {
 }
 
 fn icon_cache() -> PathBuf {
-    let home = std::env::var("HOME").unwrap_or_else(|_| ".".into());
-    Path::new(&home).join(".iconstate").join("icons")
+    paths::data_dir().join("icons")
 }
 
 async fn connect(app: &AppHandle, serial: Option<&str>) -> Answer<serde_json::Value> {
     say(app, json!({ "event": "connecting" }));
-    let (about, state, metrics) = device::icon_state(serial).await?;
+    let (about, state) = device::layout(serial).await?;
 
     say(
         app,
@@ -79,7 +78,6 @@ async fn connect(app: &AppHandle, serial: Option<&str>) -> Answer<serde_json::Va
     let pages = state.as_array().map(|pages| pages.len().saturating_sub(1));
     say(app, json!({ "event": "icon-state-read", "pages": pages }));
 
-    let _ = metrics;
     Ok(state)
 }
 
@@ -106,47 +104,34 @@ async fn fetch_icons(
 ) -> Answer<std::collections::BTreeMap<String, String>> {
     // The window usually knows which icons it wants; reading the layout again
     // just to work them out would cost another trip to the phone.
-    if let Some(keys) = keys {
-        say(
-            &app,
-            json!({ "event": "icons-wanted", "count": keys.len() }),
-        );
-        let handle = app.clone();
-        let manifest = device::icons(serial.as_deref(), &keys, &icon_cache(), |_, done, total| {
-            say(
-                &handle,
-                json!({ "event": "icon", "done": done, "total": total }),
-            );
-        })
-        .await?;
-        say(&app, json!({ "event": "icons-ready" }));
-        return Ok(manifest
-            .into_iter()
-            .map(|(key, path)| (key, path.to_string_lossy().into_owned()))
-            .collect());
-    }
-
-    let (_, state, _) = device::icon_state(serial.as_deref()).await?;
-
-    let mut wanted = plan::keys(&state);
-    let mut seen = std::collections::HashSet::new();
-    wanted.retain(|key| seen.insert(key.clone()));
+    let wanted = match keys {
+        Some(keys) => keys,
+        None => {
+            let (_, state, _) = device::icon_state(serial.as_deref()).await?;
+            let mut wanted = plan::keys(&state);
+            let mut seen = std::collections::HashSet::new();
+            wanted.retain(|key| seen.insert(key.clone()));
+            wanted
+        }
+    };
 
     say(
         &app,
         json!({ "event": "icons-wanted", "count": wanted.len() }),
     );
-
-    let cache = icon_cache();
     let handle = app.clone();
-    let manifest = device::icons(serial.as_deref(), &wanted, &cache, |_, done, total| {
-        say(
-            &handle,
-            json!({ "event": "icon", "done": done, "total": total }),
-        );
-    })
+    let manifest = device::icons(
+        serial.as_deref(),
+        &wanted,
+        &icon_cache(),
+        |_, done, total| {
+            say(
+                &handle,
+                json!({ "event": "icon", "done": done, "total": total }),
+            );
+        },
+    )
     .await?;
-
     say(&app, json!({ "event": "icons-ready" }));
 
     Ok(manifest

@@ -2,7 +2,6 @@ import { getCurrentWindow } from '@tauri-apps/api/window'
 import { Toaster, toast } from 'sonner'
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 
-import { deviceAspect, limitsFrom } from './features/editor/editor.constants'
 import {
     hasEdits,
     initialEditorState,
@@ -27,6 +26,7 @@ import {
     userRules,
 } from './lib/core'
 import { diffStates } from './lib/diff'
+import { deviceAspect, limitsFrom } from './lib/limits'
 import { assignmentsFromGenres } from './lib/genres'
 import { appsOf, keyOf } from './lib/icon-state'
 import { buildPlan, deriveRules } from './lib/plan'
@@ -35,7 +35,7 @@ import { FOLDER_ORDER, RULES } from './lib/rules'
 import { isFolder } from './lib/core.types'
 
 import type { AppIcon } from './lib/core.types'
-import type { Metrics } from './features/editor/editor.constants'
+import type { Metrics } from './lib/limits'
 import type { UserRules } from './lib/rules'
 import type { EditorCommands } from './features/editor/home-editor.types'
 import type { Device, DiffSummary, IconManifest, IconState, ProgressEvent } from './lib/core.types'

@@ -10,7 +10,7 @@ import ContextMenu from './context-menu'
 import DockRow from './dock-row'
 import { isFolderSlot } from './editor.types'
 import FolderSheet from './folder-sheet'
-import { SEPARATOR, bareId, isWideTarget, parseDropTarget, sideOf } from './home-editor.types'
+import { bareId, isWideTarget, parseDropTarget, sideOf } from './drop-target'
 import { IconsProvider } from './icons.context'
 import { ScreenProvider, geometryFor } from './screen.context'
 import HomePage from './home-page'
@@ -39,6 +39,8 @@ const fitWindow = async (overflow: number) => {
     if (width === Math.round(outer.width)) return
     await window_.setSize(new LogicalSize(width, Math.round(outer.height)))
 }
+
+const SEPARATOR: MenuItem = { label: '—', disabled: true, onPick: () => {} }
 
 /** The px-1 breathing room either side of the row, and the gap-5 between. */
 const EDGES = 8

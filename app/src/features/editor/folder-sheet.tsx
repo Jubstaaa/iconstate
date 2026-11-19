@@ -2,8 +2,10 @@ import { useDroppable } from '@dnd-kit/core'
 import { motion } from 'motion/react'
 import { useCallback, useMemo, useRef, useState } from 'react'
 
+import { chunk } from '../../lib/icon-state'
+
 import EmptyCell from './empty-cell'
-import { panelTarget } from './folder-sheet.types'
+import { panelTarget } from './drop-target'
 import PageDots from './page-dots'
 import { useScreen } from './screen.context'
 import SlotTile from './slot-tile'
@@ -40,13 +42,7 @@ export default function FolderSheet({
 
     // One 3x3 grid per page, side by side behind a native scroller — the same
     // shape as the home screen.
-    const pages = useMemo(() => {
-        const out: (typeof folder.apps)[] = []
-        for (let start = 0; start < folder.apps.length; start += limits.folderPage) {
-            out.push(folder.apps.slice(start, start + limits.folderPage))
-        }
-        return out.length ? out : [[]]
-    }, [folder.apps, limits.folderPage])
+    const pages = useMemo(() => chunk(folder.apps, limits.folderPage), [folder.apps, limits.folderPage])
 
     const go = useCallback((next: number) => {
         const node = strip.current

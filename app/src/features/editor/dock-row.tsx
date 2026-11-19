@@ -1,5 +1,5 @@
 import EmptyCell from './empty-cell'
-import { dockId } from './home-editor.types'
+import { dockId } from './drop-target'
 import { useScreen } from './screen.context'
 import SlotTile from './slot-tile'
 
