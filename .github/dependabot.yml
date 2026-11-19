@@ -1,0 +1,17 @@
+version: 2
+updates:
+  - package-ecosystem: bun
+    directory: /app
+    schedule:
+      interval: weekly
+  - package-ecosystem: cargo
+    directory: /app/src-tauri
+    schedule:
+      interval: weekly
+    groups:
+      tauri:
+        patterns: [tauri, "tauri-*"]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
