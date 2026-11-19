@@ -4,14 +4,26 @@ updates:
     directory: /app
     schedule:
       interval: weekly
+    # Wait a week before proposing a new release: compromised versions are
+    # usually caught and pulled within days.
+    cooldown:
+      default-days: 7
   - package-ecosystem: cargo
     directory: /app/src-tauri
     schedule:
       interval: weekly
+    # Wait a week before proposing a new release: compromised versions are
+    # usually caught and pulled within days.
+    cooldown:
+      default-days: 7
     groups:
       tauri:
-        patterns: [tauri, "tauri-*"]
+        patterns: ["tauri", "tauri-*"]
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
+    # Wait a week before proposing a new release: compromised versions are
+    # usually caught and pulled within days.
+    cooldown:
+      default-days: 7
