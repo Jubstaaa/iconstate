@@ -114,6 +114,20 @@ pub fn check(plan: &Value, inventory: &Value, limits: &Limits) -> Report {
     report
 }
 
+/// The window's way in: a plan that fails the check never reaches the phone.
+/// The command line reports the same check as JSON instead, so it calls
+/// `check` itself.
+pub fn ensure_valid(plan: &Value, inventory: &Value, limits: &Limits) -> Result<(), String> {
+    let report = check(plan, inventory, limits);
+    if report.ok {
+        return Ok(());
+    }
+    Err(format!(
+        "the layout was not written: {}. Read from iPhone again and retry.",
+        report.issues.join("; ")
+    ))
+}
+
 fn check_placement(report: &mut Report, plan: &Value, inventory: &Value) {
     let mut placed: BTreeMap<String, usize> = BTreeMap::new();
     for key in keys(plan) {
@@ -197,7 +211,7 @@ fn check_folders(report: &mut Report, plan: &Value, limits: &Limits) {
 mod tests {
     use serde_json::{json, Value};
 
-    use super::{check, keeps_every_app, keys, Limits};
+    use super::{check, ensure_valid, keeps_every_app, keys, Limits};
 
     fn fixture() -> Value {
         let path = concat!(
@@ -263,5 +277,15 @@ mod tests {
         assert!(keeps_every_app(&written, &reordered));
         assert!(keeps_every_app(&written, &library_apps_returned));
         assert!(!keeps_every_app(&written, &json!([[app("a")], [app("b")]])));
+    }
+
+    #[test]
+    fn the_window_cannot_write_a_plan_that_loses_an_app() {
+        let phone = json!([[app("a")], [app("b"), app("c")]]);
+        let refused = ensure_valid(&json!([[app("a")], [app("b")]]), &phone, &limits());
+        assert!(refused
+            .unwrap_err()
+            .contains("c is on the phone but not in the plan"));
+        assert!(ensure_valid(&phone, &phone, &limits()).is_ok());
     }
 }

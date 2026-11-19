@@ -3,7 +3,12 @@ import { Toaster, toast } from 'sonner'
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 
 import { deviceAspect, limitsFrom } from './features/editor/editor.constants'
-import { initialEditorState, makeEditorReducer, toIconState } from './features/editor/editor.reducer'
+import {
+    hasEdits,
+    initialEditorState,
+    makeEditorReducer,
+    toIconState,
+} from './features/editor/editor.reducer'
 import HomeEditor from './features/editor/home-editor'
 import DiffReview from './features/diff-review/diff-review'
 import { notifyDone, notifyFailed, notifyIdle, notifyProgress } from './lib/notify'
@@ -101,10 +106,7 @@ export default function App() {
     const serial = devices[0]?.serial
     const aspect = useMemo(() => deviceAspect(metrics), [metrics])
     const edited = useMemo(() => toIconState(state.layout, limits), [state.layout, limits])
-    const dirty = useMemo(
-        () => (baseline ? JSON.stringify(edited) !== JSON.stringify(baseline) : false),
-        [baseline, edited]
-    )
+    const dirty = useMemo(() => (baseline ? hasEdits(baseline, edited) : false), [baseline, edited])
 
     const guard = useCallback(async (work: () => Promise<void>) => {
         setBusy(true)
@@ -248,9 +250,10 @@ export default function App() {
     }, [baseline, load, serial])
 
     useEffect(() => {
+        // A rules file that cannot be read would otherwise sort without it, silently.
         userRules()
             .then(setMine)
-            .catch(() => {})
+            .catch(cause => notifyFailed(`Your saved rules could not be read: ${getErrorMessage(cause)}`))
     }, [])
 
     // Nothing tells us when a cable goes in, so watch for one while there is no

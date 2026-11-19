@@ -193,7 +193,8 @@ async fn apply_layout(
     serial: Option<String>,
     plan: serde_json::Value,
 ) -> Answer<serde_json::Value> {
-    let (_, current, _) = device::icon_state(serial.as_deref()).await?;
+    let (_, current, metrics) = device::icon_state(serial.as_deref()).await?;
+    plan::ensure_valid(&plan, &current, &plan::Limits::from_metrics(&metrics))?;
     let applied =
         write::apply(serial.as_deref(), &current, &plan, |event| say(&app, event)).await?;
     Ok(applied.settled)

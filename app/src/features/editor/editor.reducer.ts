@@ -1,3 +1,5 @@
+import { dequal } from 'dequal'
+
 import { isFolder } from '../../lib/core.types'
 import { nameOf } from '../../lib/icon-state'
 import { isFolderSlot } from './editor.types'
@@ -306,3 +308,10 @@ export const makeEditorReducer =
             }
         }
     }
+
+/**
+ * Compared by value, not as text: the phone's folders arrive with their keys in
+ * a different order than the editor writes them, so a string comparison saw an
+ * edit in every layout that had a folder.
+ */
+export const hasEdits = (baseline: IconState, edited: IconState): boolean => !dequal(baseline, edited)
