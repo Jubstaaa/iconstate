@@ -18,10 +18,6 @@ updates:
         patterns: ["vite", "@vitejs/*"]
       tauri:
         patterns: ["@tauri-apps/*"]
-    ignore:
-      # Must match the Node.js major the code runs on, not the newest one.
-      - dependency-name: "@types/node"
-        update-types: ["version-update:semver-major"]
   - package-ecosystem: cargo
     directory: /app/src-tauri
     schedule:
