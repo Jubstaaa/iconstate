@@ -8,6 +8,16 @@ updates:
     # usually caught and pulled within days.
     cooldown:
       default-days: 7
+    groups:
+      # react and react-dom refuse to run at different versions.
+      react:
+        patterns: ["react", "react-dom", "@types/react", "@types/react-dom"]
+      tailwind:
+        patterns: ["tailwindcss", "@tailwindcss/*"]
+      vite:
+        patterns: ["vite", "@vitejs/*"]
+      tauri:
+        patterns: ["@tauri-apps/*"]
   - package-ecosystem: cargo
     directory: /app/src-tauri
     schedule:
