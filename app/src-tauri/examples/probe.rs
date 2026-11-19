@@ -1,5 +1,5 @@
-//! Read the phone through the Rust device layer and print what it says, so the
-//! answer can be diffed against the Python core's.
+//! Read the phone through the Rust device layer and print what it says. This is
+//! how the format findings in the README were measured; it needs a phone.
 
 #[tokio::main]
 async fn main() {
