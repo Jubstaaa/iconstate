@@ -15,11 +15,11 @@ jobs:
       - id: metadata
         uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
       # Only explicit patch and minor updates of packages merge on their own, once
-      # the required check passes. Majors, unknown update types, GitHub Actions and
-      # the Docker base image wait for a human: those run inside the deploy, next
-      # to its secrets.
+      # the required check passes. Majors, unknown update types and GitHub Actions
+      # wait for a human: actions run in the release job, next to the updater
+      # signing key.
       # Merges made with GITHUB_TOKEN start no workflows, so these ship with the
-      # next deploy.
+      # next tagged release.
       - if: >-
             (steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
              steps.metadata.outputs.update-type == 'version-update:semver-minor') &&
