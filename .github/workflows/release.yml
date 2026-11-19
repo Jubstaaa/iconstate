@@ -12,7 +12,7 @@ jobs:
       contents: write
     steps:
       # git-cliff writes the notes from the commit history, so it needs one.
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
@@ -39,7 +39,7 @@ jobs:
             git cliff --config cliff.toml --latest --strip header
             echo CLIFF_NOTES_EOF
           } >> "$GITHUB_OUTPUT"
-      - uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5 # v0.6.2
+      - uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f # v1.0.0
         with:
           projectPath: app
           tagName: ${{ github.ref_name }}
