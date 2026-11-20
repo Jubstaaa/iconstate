@@ -1,8 +1,8 @@
 name: build
 
+# A tagged release builds and publishes the dmg; this is for an ad-hoc
+# build of main on demand, since macOS minutes cost ten times Linux ones.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 concurrency:

@@ -1,9 +1,9 @@
 name: test
 
+# Only pull requests: main accepts nothing else, and the ruleset requires the
+# branch to be up to date, so a run on the merge push would repeat this one.
 on:
   pull_request:
-  push:
-    branches: [main]
 
 concurrency:
   group: test-${{ github.ref }}
