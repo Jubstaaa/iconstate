@@ -11,14 +11,13 @@ jobs:
     permissions:
       contents: write
     steps:
-      # git-cliff writes the notes from the commit history, so it needs one.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version-file: app/package.json
-      - uses: dtolnay/rust-toolchain@df2a88e9fe4098bad09cb42c3dec7187f15861fc # master
+      - uses: dtolnay/rust-toolchain@df2a88e9fe4098bad09cb42c3dec7187f15861fc
         with:
           toolchain: stable
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
@@ -28,8 +27,6 @@ jobs:
         working-directory: app
       - name: Stamp the version from the tag
         run: bun run scripts/set-version.ts "${GITHUB_REF_NAME}"
-      # Not git-cliff-action: its runner script uses GNU stat and silently
-      # produces nothing on macOS.
       - name: Write the notes from the commits
         id: notes
         run: |
@@ -49,15 +46,8 @@ jobs:
           prerelease: false
           includeUpdaterJson: true
           args: --bundles app,dmg
-        # To sign and notarise, add the Apple secrets to this step's env:
-        # APPLE_CERTIFICATE, APPLE_CERTIFICATE_PASSWORD, APPLE_SIGNING_IDENTITY,
-        # APPLE_ID, APPLE_PASSWORD, APPLE_TEAM_ID. They cannot sit here empty
-        # waiting for the day — Tauri reads an empty APPLE_CERTIFICATE as a real
-        # one and fails the build trying to import it.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Signs the update package with the project's own key, which is what
-          # lets the app install an update in place. Nothing to do with Apple.
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
       - name: Check the bundle
