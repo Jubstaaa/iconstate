@@ -10,7 +10,7 @@ jobs:
     doctor:
         permissions:
             contents: read
-        uses: Jubstaaa/deploy-actions/.github/workflows/doctor.yml@a32b5001ae0415eb9c79815a2ee6b2437ab6e52a # v2.2.0
+        uses: Jubstaaa/deploy-actions/.github/workflows/doctor.yml@fc838276e9a31bd2d7726ad0d2b1f6df8e62b1a8 # v2.4.0
     title:
         permissions: {}
-        uses: Jubstaaa/deploy-actions/.github/workflows/pr-title.yml@a32b5001ae0415eb9c79815a2ee6b2437ab6e52a # v2.2.0
+        uses: Jubstaaa/deploy-actions/.github/workflows/pr-title.yml@fc838276e9a31bd2d7726ad0d2b1f6df8e62b1a8 # v2.4.0
