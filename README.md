@@ -1,5 +1,3 @@
-<img src="docs/icon.png" width="96" align="right" alt="">
-
 # IconState
 
 The iPhone home screen editor Apple removed from iTunes, brought back — and it
@@ -7,6 +5,8 @@ sorts your apps into folders for you.
 
 Plug the phone in over USB, read the whole layout, get a folder structure
 proposed for it, preview it, apply it in one write, roll it back if you hate it.
+
+<img src="docs/icon.png" width="96" align="right" alt="">
 
 <a href="https://alternativeto.net/software/iconstate/about/"><img src="https://alternativeto.net/static/badges/badge-compact-color.svg" alt="IconState on AlternativeTo" width="160"></a>
 
@@ -16,6 +16,8 @@ The icons are the phone's own PNGs and the grid is the size SpringBoard reports
 — every page is drawn as its own device, side by side, and you drag between
 them.
 
+## Features
+
 - **Drag and drop** icons, folders and the dock, across pages, with undo
 - **Sort into folders** for you, from a built-in table for Apple's apps and, if
   you ask, the App Store's own category for everything else
@@ -24,11 +26,11 @@ them.
 - **Review changes** shows every move before anything is written, a backup is
   taken first, and **Undo last write to iPhone** puts the old layout back
 
+## Getting started
+
 > macOS arm64 only for now. USB only — SpringBoard's layout service is not
 > reachable over the network. No jailbreak: this speaks the same lockdown
 > service Finder uses to back your phone up.
-
-## Getting it
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Jubstaaa/iconstate/main/scripts/install.sh | bash
@@ -61,7 +63,9 @@ xattr -dr com.apple.quarantine /Applications/IconState.app
 [install]: scripts/install.sh
 [releases]: https://github.com/Jubstaaa/iconstate/releases
 
-## The desktop app
+## Usage
+
+### The desktop app
 
 The app is the point: a real iPhone home screen you can rearrange with a mouse.
 The icons are the device's own PNGs and the grid is the size SpringBoard says it
@@ -113,7 +117,7 @@ cd app && bun install && bun run tauri dev
 
 One binary, nothing to stage beside it.
 
-## From the command line
+### From the command line
 
 The same binary runs without the window when it is given a command. Every
 command prints JSON, so a script or an agent can do what the editor does:
@@ -141,7 +145,7 @@ The install script links the binary to `iconstate` on your `PATH`. By hand:
 ln -s /Applications/IconState.app/Contents/MacOS/iconstate /usr/local/bin/iconstate
 ```
 
-## How apps get sorted
+### How apps get sorted
 
 `app/src/lib/rules.ts` maps bundle identifiers to folder names. It ships with
 Apple's own apps only: they are on every iPhone, and which ones a person has says
@@ -169,42 +173,6 @@ them — Instagram leads with Photo & Video rather than Social Networking. Readi
 table in order rather than trusting the app's own ordering puts both under
 Social, which is where a person would look for them.
 
-## Where things live
-
-| Path | What it is |
-|---|---|
-| `app/src/lib/` | the layout engine: pure JSON in, JSON out, no device, fully tested |
-| `app/src/features/` | the editor — the phone frames, drag and drop, the diff sheet |
-| `app/src-tauri/src/device.rs` | lockdown + SpringBoard; thin on purpose, tested by hand |
-| `app/src-tauri/src/` | backups and the App Store lookup, next to the Tauri shell |
-| `reference/` | real-device fixtures the tests run against |
-| `scripts/` | the install script, bundle verification and version stamping |
-
-The split is the whole architecture: CI has no phone, so everything that can be
-tested without one lives in `app/src/lib/` and never imports a Tauri command.
-
-It used to be a frozen Python CLI running as a sidecar. That worked, but it put
-46MB and a second process between the window and the phone for code that is a
-few hundred lines. The device layer is Rust now, over the [`idevice`][idevice]
-crate, and the layout engine is TypeScript in the app itself.
-
-[idevice]: https://github.com/jkcoxson/idevice
-
-## Tests
-
-```bash
-cd app && bun run check          # lint, types, formatting and the tests
-cd app/src-tauri && cargo test   # the backup, command line and plan checks
-```
-
-CI runs both on every pull request, along with clippy, `rustfmt` and a
-dependency audit for each side.
-
-The load-bearing ones run the real fixtures in `reference/fixtures/` through the
-planner and assert that planning is idempotent, that every app is placed exactly
-once, and that a state does not differ from itself. If those ever fail, nothing
-may be written to a phone.
-
 ## What the device will and will not do
 
 Measured on a real iPhone, not guessed:
@@ -228,6 +196,44 @@ anyway. Formats 1 and 3 also report every folder as an empty cell, so they carry
 strictly less than format 2. The placement lives somewhere this service cannot
 see.
 
+## Development
+
+### Where things live
+
+| Path | What it is |
+|---|---|
+| `app/src/lib/` | the layout engine: pure JSON in, JSON out, no device, fully tested |
+| `app/src/features/` | the editor — the phone frames, drag and drop, the diff sheet |
+| `app/src-tauri/src/device.rs` | lockdown + SpringBoard; thin on purpose, tested by hand |
+| `app/src-tauri/src/` | backups and the App Store lookup, next to the Tauri shell |
+| `reference/` | real-device fixtures the tests run against |
+| `scripts/` | the install script, bundle verification and version stamping |
+
+The split is the whole architecture: CI has no phone, so everything that can be
+tested without one lives in `app/src/lib/` and never imports a Tauri command.
+
+It used to be a frozen Python CLI running as a sidecar. That worked, but it put
+46MB and a second process between the window and the phone for code that is a
+few hundred lines. The device layer is Rust now, over the [`idevice`][idevice]
+crate, and the layout engine is TypeScript in the app itself.
+
+[idevice]: https://github.com/jkcoxson/idevice
+
+### Tests
+
+```bash
+cd app && bun run check          # lint, types, formatting and the tests
+cd app/src-tauri && cargo test   # the backup, command line and plan checks
+```
+
+CI runs both on every pull request, along with clippy, `rustfmt` and a
+dependency audit for each side.
+
+The load-bearing ones run the real fixtures in `reference/fixtures/` through the
+planner and assert that planning is idempotent, that every app is placed exactly
+once, and that a state does not differ from itself. If those ever fail, nothing
+may be written to a phone.
+
 ## Sponsoring
 
 [GitHub Sponsors][sponsor] · [Buy me a coffee][coffee]
@@ -238,6 +244,6 @@ it signed, and then nobody has to run `xattr` again.
 [sponsor]: https://github.com/sponsors/Jubstaaa
 [coffee]: https://buymeacoffee.com/jubstaa
 
-## Licence
+## License
 
 MIT
