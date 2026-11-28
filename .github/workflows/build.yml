@@ -1,7 +1,5 @@
 name: build
 
-# A tagged release builds and publishes the dmg; this is for an ad-hoc
-# build of main on demand, since macOS minutes cost ten times Linux ones.
 on:
   workflow_dispatch:
 
@@ -21,7 +19,7 @@ jobs:
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version-file: app/package.json
-      - uses: dtolnay/rust-toolchain@df2a88e9fe4098bad09cb42c3dec7187f15861fc # master
+      - uses: dtolnay/rust-toolchain@df2a88e9fe4098bad09cb42c3dec7187f15861fc
         with:
           toolchain: stable
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
@@ -32,9 +30,6 @@ jobs:
       - name: Build the app
         run: bun run tauri build --bundles app,dmg
         working-directory: app
-        # The config asks for updater artifacts, and Tauri refuses to build them
-        # against a public key with no private one — so this job needs the key
-        # too, not just the release job.
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
