@@ -3,14 +3,5 @@
     "extends": [
         "github>Jubstaaa/configs",
         "github>Jubstaaa/configs:cooldown"
-    ],
-    "packageRules": [
-        {
-            "matchPackageNames": [
-                "vite",
-                "@vitejs/**"
-            ],
-            "groupName": "vite"
-        }
     ]
 }
